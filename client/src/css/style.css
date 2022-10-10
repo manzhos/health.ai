@@ -3,6 +3,14 @@ body {
   padding: 0;
   background-color: #282c34;
 }
+
+.copyright {
+  position:absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-48%);
+}
+
 .login {
   position: absolute;
   box-shadow: 0px 10px 30px black;
