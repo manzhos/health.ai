@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -13,11 +14,13 @@ import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 
+import AuthSocial from '../sections/auth/AuthSocial';
 import Copyright from "../components/Copyright"
 
 const theme = createTheme()
 
 export default function Login() {
+  const navigate  = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -25,6 +28,7 @@ export default function Login() {
       email: data.get('email'),
       password: data.get('password'),
     });
+    navigate('/dashboard/user')
   };
 
   return (
@@ -98,6 +102,7 @@ export default function Login() {
                     </Link>
                   </Grid>
                 </Grid>
+                <AuthSocial />
               </Box>
             </Box>
           </div>
