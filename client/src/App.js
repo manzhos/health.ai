@@ -1,19 +1,20 @@
-import React from 'react';
-// import axios from 'axios';
+// routes
+import Router from './routes';
+// theme
+import ThemeProvider from './theme';
 import './css/style.css';
-import { useRoutes } from './routes';
-import { BrowserRouter } from 'react-router-dom';
+// components
+import ScrollToTop from './components/ScrollToTop';
+import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
 
-function App() {
-  const routes = useRoutes(false);
+// ----------------------------------------------------------------------
 
+export default function App() {
   return (
-    <BrowserRouter>
-      <div className="App">
-        {routes}
-      </div>
-    </BrowserRouter>
+    <ThemeProvider>
+      <ScrollToTop />
+      <BaseOptionChartStyle />
+      <Router />
+    </ThemeProvider>
   );
 }
-
-export default App;
