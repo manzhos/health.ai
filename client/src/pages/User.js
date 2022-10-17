@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { filter } from 'lodash';
-// import { sentenceCase } from 'change-case';
+import { sentenceCase } from 'change-case';
 import { useState, useCallback, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 // material
@@ -34,7 +34,7 @@ import { useHttp } from '../hooks/http.hook'
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
+  { id: 'email', label: 'Email', alignRight: false },
   { id: 'role', label: 'Role', alignRight: false },
   { id: 'promo', label: 'Ready for promo', alignRight: false },
   { id: 'status', label: '', alignRight: false },
@@ -177,7 +177,7 @@ export default function User() {
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                     // const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                    const { id, firstname, lastname, usertype_id, ts, email, promo } = row;
+                    const { id, firstname, lastname, usertype, email, promo } = row;
                     const isItemSelected = selected.indexOf(firstname) !== -1;
 
                     return (
@@ -196,12 +196,12 @@ export default function User() {
                           <Stack direction="row" alignItems="center" spacing={2}>
                             {/* <Avatar alt={firstname} src={avatarUrl} /> */}
                             <Typography variant="subtitle2" noWrap>
-                              {firstname}&nbsp;{lastname}
+                              {sentenceCase(firstname)}&nbsp;{sentenceCase(lastname)}
                             </Typography>
                           </Stack>
                         </TableCell>
                         <TableCell align="left">{email}</TableCell>
-                        <TableCell align="left">{usertype_id}</TableCell>
+                        <TableCell align="left">{sentenceCase(usertype)}</TableCell>
                         <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
                         {/* <TableCell align="left">
                           <Label variant="ghost" color={(status === 'banned' && 'error') || 'success'}>
