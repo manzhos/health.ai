@@ -80,6 +80,7 @@ export default function User() {
   const [filterName, setFilterName] = useState('')
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [userList, setUserList] = useState([])
+  const {loading, request} = useHttp()
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
@@ -87,8 +88,6 @@ export default function User() {
     setOrderBy(property)
   };
 
-  // const {loading, request} = useHttp()
-  const {request} = useHttp()
   const getUsers = useCallback(async () => {
     try {
       const res = await request('http://localhost:3300/api/users', 'GET', null, {
@@ -96,13 +95,9 @@ export default function User() {
       })
       setUserList(res)
     } catch (e) { console.log('error:', e)}
-  }, [request])
+  }, [loadind, request])
 
   useEffect(() => {getUsers()}, [getUsers])
-
-  // if (loading) {
-  //   return <Loader/>
-  // }
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -147,105 +142,108 @@ export default function User() {
 
   const isUserNotFound = filteredUsers.length === 0;
 
-  return (
-    <Page title="User">
-      <Container>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <Typography variant="h4" gutterBottom>
-            Users
-          </Typography>
-          <Button variant="contained" component={RouterLink} to="#" startIcon={<Iconify icon="eva:plus-fill" />}>
-            New User
-          </Button>
-        </Stack>
-
-        <Card>
-          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-
-          <Scrollbar>
-            <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <UserListHead
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={userList.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  onSelectAllClick={handleSelectAllClick}
-                />
-                <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    // const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                    const { id, firstname, lastname, usertype, email, promo } = row;
-                    const isItemSelected = selected.indexOf(firstname) !== -1;
-
-                    return (
-                      <TableRow
-                        hover
-                        key={id}
-                        tabIndex={-1}
-                        role="checkbox"
-                        selected={isItemSelected}
-                        aria-checked={isItemSelected}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
-                        </TableCell>
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack direction="row" alignItems="center" spacing={2}>
-                            {/* <Avatar alt={firstname} src={avatarUrl} /> */}
-                            <Typography variant="subtitle2" noWrap>
-                              {sentenceCase(firstname)}&nbsp;{sentenceCase(lastname)}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-                        <TableCell align="left">{email}</TableCell>
-                        <TableCell align="left">{sentenceCase(usertype)}</TableCell>
-                        <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
-                        {/* <TableCell align="left">
-                          <Label variant="ghost" color={(status === 'banned' && 'error') || 'success'}>
-                            {sentenceCase(status)}
-                          </Label>
-                        </TableCell> */}
-
-                        <TableCell align="right">
-                          <UserMoreMenu />
+  if (loading) return <Loader/>
+  else {
+    return (
+      <Page title="User">
+        <Container>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+            <Typography variant="h4" gutterBottom>
+              Users
+            </Typography>
+            <Button variant="contained" component={RouterLink} to="#" startIcon={<Iconify icon="eva:plus-fill" />}>
+              New User
+            </Button>
+          </Stack>
+  
+          <Card>
+            <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+  
+            <Scrollbar>
+              <TableContainer sx={{ minWidth: 800 }}>
+                <Table>
+                  <UserListHead
+                    order={order}
+                    orderBy={orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={userList.length}
+                    numSelected={selected.length}
+                    onRequestSort={handleRequestSort}
+                    onSelectAllClick={handleSelectAllClick}
+                  />
+                  <TableBody>
+                    {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                      // const { id, name, role, status, company, avatarUrl, isVerified } = row;
+                      const { id, firstname, lastname, usertype, email, promo } = row;
+                      const isItemSelected = selected.indexOf(firstname) !== -1;
+  
+                      return (
+                        <TableRow
+                          hover
+                          key={id}
+                          tabIndex={-1}
+                          role="checkbox"
+                          selected={isItemSelected}
+                          aria-checked={isItemSelected}
+                        >
+                          <TableCell padding="checkbox">
+                            <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
+                          </TableCell>
+                          <TableCell component="th" scope="row" padding="none">
+                            <Stack direction="row" alignItems="center" spacing={2}>
+                              {/* <Avatar alt={firstname} src={avatarUrl} /> */}
+                              <Typography variant="subtitle2" noWrap>
+                                {sentenceCase(firstname)}&nbsp;{sentenceCase(lastname)}
+                              </Typography>
+                            </Stack>
+                          </TableCell>
+                          <TableCell align="left">{email}</TableCell>
+                          <TableCell align="left">{sentenceCase(usertype)}</TableCell>
+                          <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
+                          {/* <TableCell align="left">
+                            <Label variant="ghost" color={(status === 'banned' && 'error') || 'success'}>
+                              {sentenceCase(status)}
+                            </Label>
+                          </TableCell> */}
+  
+                          <TableCell align="right">
+                            <UserMoreMenu />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {emptyRows > 0 && (
+                      <TableRow style={{ height: 53 * emptyRows }}>
+                        <TableCell colSpan={6} />
+                      </TableRow>
+                    )}
+                  </TableBody>
+  
+                  {isUserNotFound && (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <SearchNotFound searchQuery={filterName} />
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={6} />
-                    </TableRow>
+                    </TableBody>
                   )}
-                </TableBody>
-
-                {isUserNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <SearchNotFound searchQuery={filterName} />
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </Table>
-            </TableContainer>
-          </Scrollbar>
-
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={userList.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </Card>
-      </Container>
-    </Page>
-  );
+                </Table>
+              </TableContainer>
+            </Scrollbar>
+  
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={userList.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Card>
+        </Container>
+      </Page>
+    )
+  }
 }

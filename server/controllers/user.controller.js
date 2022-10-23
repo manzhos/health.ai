@@ -10,16 +10,18 @@ class UserController {
     res.send(newUser.rows[0])
   }
   async getUsers(req, res){
-    console.log('get all users:');
+    // console.log('get all users:');
     const sql = `
       SELECT 
         u.id AS id,
         u.firstname AS firstname,
         u.lastname AS lastname,
         u.email AS email,
+--        u.ts,
         ut.usertype AS usertype
       FROM users u 
       JOIN user_types ut ON ut.id = u.usertype_id
+      ORDER BY firstname, lastname 
     `
     // console.log('SQL:', sql);
     const users = await DB.query(sql)
@@ -41,6 +43,24 @@ class UserController {
   }
   async deleteUser(req, res){
     console.log('delete user by ID')
+  }
+
+  async getDoctors(req, res){
+    const sql = `
+      SELECT 
+        u.id AS id,
+        u.firstname AS firstname,
+        u.lastname AS lastname,
+        u.email AS email,
+--        u.ts,
+        ut.usertype AS usertype
+      FROM users u 
+      JOIN user_types ut ON ut.id = u.usertype_id
+      WHERE ut.id = 2
+      ORDER BY firstname, lastname 
+    `
+    const doctors = await DB.query(sql)
+    res.send(doctors.rows)    
   }
 }
 

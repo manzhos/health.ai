@@ -13,7 +13,7 @@ const SORT_BY_OPTIONS = [
   { value: 'priceAsc', label: 'Price: Low-High' }
 ];
 
-export default function ShopProductSort() {
+export default function ShopProcedureSort() {
   const [open, setOpen] = useState(null);
 
   const handleOpen = (event) => {

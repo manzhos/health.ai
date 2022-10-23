@@ -52,3 +52,21 @@ body {
   margin: 5vh 0px 0px;
   transform: translateX(-105px);
 }
+
+.time-btn{
+  margin: 5px 10px;
+  width: 80px;
+}
+
+.hidden {
+  display: none;
+}
+
+.inlineCal {
+  display: inline-flex;
+  max-width: 400px
+}
+
+.tt_title {
+  min-width: 300px;
+}

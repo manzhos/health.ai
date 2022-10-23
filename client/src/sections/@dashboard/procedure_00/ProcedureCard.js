@@ -11,7 +11,7 @@ import { ColorPreview } from '../../../components/color-utils';
 
 // ----------------------------------------------------------------------
 
-const ProductImgStyle = styled('img')({
+const ProcedureImgStyle = styled('img')({
   top: 0,
   width: '100%',
   height: '100%',
@@ -21,12 +21,12 @@ const ProductImgStyle = styled('img')({
 
 // ----------------------------------------------------------------------
 
-ShopProductCard.propTypes = {
-  product: PropTypes.object,
+ShopProcedureCard.propTypes = {
+  procedure: PropTypes.object,
 };
 
-export default function ShopProductCard({ product }) {
-  const { name, cover, price, colors, status, priceSale } = product;
+export default function ShopProcedureCard({ procedure }) {
+  const { name, cover, price, colors, status, priceSale } = procedure;
 
   return (
     <Card>
@@ -46,7 +46,7 @@ export default function ShopProductCard({ product }) {
             {status}
           </Label>
         )}
-        <ProductImgStyle alt={name} src={cover} />
+        <ProcedureImgStyle alt={name} src={cover} />
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>

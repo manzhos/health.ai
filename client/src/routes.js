@@ -8,8 +8,9 @@ import User from './pages/User';
 import Login from './pages/Login';
 import NotFound from './pages/Page404';
 import Register from './pages/Register';
-import Products from './pages/Products';
+import Procedure from './pages/Procedure';
 import DashboardApp from './pages/DashboardApp';
+import TimeTable from './pages/TimeTable';
 
 // ----------------------------------------------------------------------
 
@@ -21,9 +22,18 @@ export default function Router() {
       children: [
         { path: 'app', element: <DashboardApp /> },
         { path: 'user', element: <User /> },
-        { path: 'products', element: <Products /> },
+        { path: 'procedure', element: <Procedure /> },
         { path: 'blog', element: <Blog /> },
+        { path: 'timetable', element: <TimeTable /> },
       ],
+    },
+    {
+      path: 'procedure',
+      element: <Procedure />
+    },
+    {
+      path: 'timetable',
+      element: <TimeTable />
     },
     {
       path: 'login',

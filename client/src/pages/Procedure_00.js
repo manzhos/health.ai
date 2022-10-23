@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { Container, Stack, Typography } from '@mui/material';
 // components
 import Page from '../components/Page';
-import { ProductSort, ProductList, ProductCartWidget, ProductFilterSidebar } from '../sections/@dashboard/products';
+import { ProcedureSort, ProcedureList, ProcedureCartWidget, ProcedureFilterSidebar } from '../sections/@dashboard/procedure_00';
 // mock
-import PRODUCTS from '../_mock/products';
+import PROCEDURES from '../_mock/procedure';
 
 // ----------------------------------------------------------------------
 
@@ -21,25 +21,25 @@ export default function EcommerceShop() {
   };
 
   return (
-    <Page title="Dashboard: Products">
+    <Page title="Dashboard: Procedures">
       <Container>
         <Typography variant="h4" sx={{ mb: 5 }}>
-          Products
+          Procedures
         </Typography>
 
         <Stack direction="row" flexWrap="wrap-reverse" alignItems="center" justifyContent="flex-end" sx={{ mb: 5 }}>
           <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-            <ProductFilterSidebar
+            <ProcedureFilterSidebar
               isOpenFilter={openFilter}
               onOpenFilter={handleOpenFilter}
               onCloseFilter={handleCloseFilter}
             />
-            <ProductSort />
+            <ProcedureSort />
           </Stack>
         </Stack>
 
-        <ProductList products={PRODUCTS} />
-        <ProductCartWidget />
+        <ProcedureList procedures={PROCEDURES} />
+        <ProcedureCartWidget />
       </Container>
     </Page>
   );
