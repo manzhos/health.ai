@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext } from 'react'
+// import { useNavigate } from 'react-router-dom'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -15,19 +15,22 @@ import Container from '@mui/material/Container'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 
 import { useHttp } from '../hooks/http.hook'
+import { AuthContext } from '../context/AuthContext'
 import AuthSocial from '../sections/auth/AuthSocial'
 import Copyright from "../components/Copyright"
 
 const theme = createTheme();
 
 export default function SignUp() {
-  const navigate  = useNavigate();
+  // const navigate  = useNavigate();
   // const {loading, request, error, clearError} = useHttp()
   const {request} = useHttp()
+  const auth = useContext(AuthContext)
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    console.log('data', data);
+    // console.log('data', data);
     if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
       try {
         const res = await request('http://localhost:3300/api/user', 'POST', {
@@ -37,23 +40,42 @@ export default function SignUp() {
           password:   data.get('password'),
           promo:      data.get('allowExtraEmails'),
         })
-        // auth.login(data.token, data.userId)
-        console.log('res:', res)
-        navigate('/dashboard/user')
+        auth.login(res.token, res.userId)
+        localStorage.setItem("jwt", res.token)
+        // navigate('/dashboard/user')
+        Redirect(3)
       } catch (e) {console.log('error:', e)} 
       // eslint-disable-next-line
     } else alert('You need to fill fields.')
-  };
+  }
+
+  function Redirect(route) {
+    // redirect to external URL
+    switch (route){
+      case 1:
+        window.top.location = `http://localhost:3000/admin/app`
+        break
+      case 2:
+        window.top.location = `http://localhost:3000/doctor/procedure`
+        break
+      case 3:
+        window.top.location = `http://localhost:3000/user/timetable`
+        break
+      default:
+        console.log(`Sorry, we are out of ${route}.`)
+    }
+    return null
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <div className='authpage'>
-        <div className='logo-block'>
+        {/* <div className='logo-block'>
           <div className='logo-container'>
             <img width={45} src="../static/healthai_white.svg" alt="health.ai"/>
             <h1 style={{margin:"0 0 0 20px"}}>Health.AI</h1>
           </div>
-        </div>
+        </div> */}
         <Container component="main" maxWidth="sm">
           <div className="login-modal">
             <CssBaseline />

@@ -11,11 +11,11 @@ import account from '../../_mock/account';
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
-  {
-    label: 'Home',
-    icon: 'eva:home-fill',
-    linkTo: '/',
-  },
+  // {
+  //   label: 'Home',
+  //   icon: 'eva:home-fill',
+  //   linkTo: '/',
+  // },
   {
     label: 'Profile',
     icon: 'eva:person-fill',
@@ -31,17 +31,21 @@ const MENU_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
-  const anchorRef = useRef(null);
+  const anchorRef = useRef(null)
 
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState(null)
 
   const handleOpen = (event) => {
-    setOpen(event.currentTarget);
-  };
+    setOpen(event.currentTarget)
+  }
 
   const handleClose = () => {
-    setOpen(null);
-  };
+    localStorage.setItem("jwt", '')
+    const jwt = localStorage.getItem("jwt")
+    console.log('jwt:', jwt)
+    window.top.location = `https://stunning-you.com`
+    // setOpen(null);
+  }
 
   return (
     <>

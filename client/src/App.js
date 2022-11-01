@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 // routes
 import Router from './routes';
 // theme

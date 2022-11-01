@@ -9,7 +9,7 @@ import CheckIcon from '@mui/icons-material/Check';
 
 const Calendar = ({onDateChange}) => {
   const [value, setValue] = useState(new Date());
-  const [highlightedDays, setHighlightedDays] = useState([]); //1, 7, 14
+  const [highlightedDays, setHighlightedDays] = useState([]); // 1, 7, 14
 
   useEffect(() => {
     const allWithClass = Array.from(

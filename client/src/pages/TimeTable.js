@@ -89,7 +89,7 @@ export default function TimeTable(){
       'date'          : date, 
       'time'          : time,
     }
-    console.log('data', data);
+    // console.log('data', data);
     // if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
     // if(data){
     //   try {
@@ -141,7 +141,7 @@ export default function TimeTable(){
   }
 
   function takeDate() {
-    console.log('date:', date);
+    // console.log('date:', date);
     if(date && date !== '') return date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear()
     return '__/__/____'
   }

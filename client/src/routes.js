@@ -1,9 +1,10 @@
 import { Navigate, useRoutes } from 'react-router-dom';
 // layouts
-import DashboardLayout from './layouts/dashboard';
+import DashboardLayoutAdmin from './layouts/dashboardAdmin';
+import DashboardLayoutUser from './layouts/dashboardUser';
+import DashboardLayoutDoctor from './layouts/dashboardDoctor';
 import LogoOnlyLayout from './layouts/LogoOnlyLayout';
 //
-import Blog from './pages/Blog';
 import User from './pages/User';
 import Login from './pages/Login';
 import NotFound from './pages/Page404';
@@ -17,13 +18,32 @@ import TimeTable from './pages/TimeTable';
 export default function Router() {
   return useRoutes([
     {
-      path: '/dashboard',
-      element: <DashboardLayout />,
+      path: '/admin',
+      element: <DashboardLayoutAdmin />,
       children: [
         { path: 'app', element: <DashboardApp /> },
         { path: 'user', element: <User /> },
         { path: 'procedure', element: <Procedure /> },
-        { path: 'blog', element: <Blog /> },
+        // { path: 'blog', element: <Blog /> },
+        { path: 'timetable', element: <TimeTable /> },
+      ],
+    },
+    {
+      path: '/user',
+      element: <DashboardLayoutUser />,
+      children: [
+        // { path: 'app', element: <DashboardAppAdmin /> },
+        { path: 'user', element: <User /> },
+        { path: 'procedure', element: <Procedure /> },
+        { path: 'timetable', element: <TimeTable /> },
+      ],
+    },
+    {
+      path: '/doctor',
+      element: <DashboardLayoutDoctor />,
+      children: [
+        { path: 'user', element: <User /> },
+        { path: 'procedure', element: <Procedure /> },
         { path: 'timetable', element: <TimeTable /> },
       ],
     },
@@ -47,7 +67,7 @@ export default function Router() {
       path: '/',
       element: <LogoOnlyLayout />,
       children: [
-        { path: '/', element: <Navigate to="/dashboard/app" /> },
+        { path: '/', element: <Navigate to="/admin/app" /> },
         { path: '404', element: <NotFound /> },
         { path: '*', element: <Navigate to="/404" /> },
       ],

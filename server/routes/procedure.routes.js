@@ -8,4 +8,6 @@ router.get('/procedure/:id', procedureController.getProcedure)
 router.put('/procedure', procedureController.updateProcedure)
 router.delete('/procedure/:id', procedureController.deleteProcedure)
 
+router.get('/proceduretypes', procedureController.getProcedureTypes)
+
 module.exports = router 
