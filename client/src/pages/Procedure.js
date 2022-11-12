@@ -36,13 +36,14 @@ import Iconify from '../components/Iconify';
 import SearchNotFound from '../components/SearchNotFound';
 import { ProcedureListHead, ProcedureListToolbar, ProcedureMoreMenu } from '../sections/@dashboard/procedure';
 import { useHttp } from '../hooks/http.hook'
+import { API_URL } from '../config'
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Procedure', alignRight: false },
   { id: 'proceduretype', label: 'Type', alignRight: false },
-  { id: 'time', label: 'Time for procedure', alignRight: false },
+  { id: 'duration', label: 'Duration', alignRight: false },
   { id: 'promo', label: 'Cost', alignRight: false },
   { id: 'status', label: '', alignRight: false },
   { id: '' },
@@ -171,15 +172,15 @@ export default function Procedure() {
     const data = new FormData(event.currentTarget)
     // console.log('data:', 
     //   '\n', data.get('procedure'),
-    //   '\n', data.get('time'),
+    //   '\n', data.get('duration'),
     //   '\n', data.get('cost'),
     //   '\n', data.get('proceduretype_id'),
     // )
-    if(data.get('procedure') && data.get('time') && data.get('cost') && data.get('proceduretype_id')){
+    if(data.get('procedure') && data.get('duration') && data.get('cost') && data.get('proceduretype_id')){
       try {
-        const res = await request('http://localhost:3300/api/procedure', 'POST', {
+        const res = await request(`${API_URL}api/procedure`, 'POST', {
           procedure:        data.get('procedure'),
-          time:             data.get('time'),
+          duration:         data.get('duration'),
           cost:             data.get('cost'),
           proceduretype_id: data.get('proceduretype_id'),
         })
@@ -238,9 +239,9 @@ export default function Procedure() {
                         <TextField
                           required
                           fullWidth
-                          id="time"
+                          id="duration"
                           label="How much time is needed? (In minutes)"
-                          name="time"
+                          name="duration"
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -304,7 +305,7 @@ export default function Procedure() {
                 />
                 <TableBody>
                   {filteredProcedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, procedure, time, cost, proceduretype } = row;
+                    const { id, procedure, duration, cost, proceduretype } = row;
                     const isItemSelected = selected.indexOf(procedure) !== -1;
 
                     return (
@@ -328,7 +329,7 @@ export default function Procedure() {
                           </Stack>
                         </TableCell>
                         <TableCell align="left">{sentenceCase(proceduretype)}</TableCell>
-                        <TableCell align="left">{time}</TableCell>
+                        <TableCell align="left">{duration}</TableCell>
                         <TableCell align="left">{cost}</TableCell>
                         <TableCell align="right">
                           <ProcedureMoreMenu />

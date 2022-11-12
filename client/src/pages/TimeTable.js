@@ -151,13 +151,13 @@ export default function TimeTable(){
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Procedure
+            Time Table
           </Typography>
-          <Button variant="contained" component={RouterLink} onClick={handleRecord} startIcon={<Iconify icon="eva:plus-fill" />} >
+          {/* <Button variant="contained" component={RouterLink} onClick={handleRecord} startIcon={<Iconify icon="eva:plus-fill" />} >
             Book
-          </Button>
+          </Button> */}
         </Stack>
-        <Grid container spacing={2} mb={5}>
+        {/* <Grid container spacing={2} mb={5}>
           <Grid item xs={12} sm={4}>
             <FormControl>
               <InputLabel id="doctor-select">Doctor</InputLabel>
@@ -203,7 +203,7 @@ export default function TimeTable(){
               Date: <strong>{takeDate()}</strong>&nbsp;&nbsp;&nbsp;&nbsp;Time: <strong>{time}</strong>
             </Box>            
           </Grid>
-        </Grid>
+        </Grid> */}
 
         <Card>
           <Scrollbar style={{textAlign:"center"}}>

@@ -31,11 +31,11 @@ const SearchStyle = styled(OutlinedInput)(({ theme }) => ({
 
 ProcedureListToolbar.propTypes = {
   numSelected: PropTypes.number,
-  filterName: PropTypes.string,
-  onFilterName: PropTypes.func,
+  filterProcedure: PropTypes.string,
+  onFilterProcedure: PropTypes.func,
 };
 
-export default function ProcedureListToolbar({ numSelected, filterName, onFilterName }) {
+export default function ProcedureListToolbar({ numSelected, filterProcedure, onFilterProcedure }) {
   return (
     <RootStyle
       sx={{
@@ -51,8 +51,8 @@ export default function ProcedureListToolbar({ numSelected, filterName, onFilter
         </Typography>
       ) : (
         <SearchStyle
-          value={filterName}
-          onChange={onFilterName}
+          value={filterProcedure}
+          onChange={onFilterProcedure}
           placeholder="Search procedure..."
           startAdornment={
             <InputAdornment position="start">

@@ -2,11 +2,11 @@ const DB = require('../db')
 
 class ProcedureController {
   async createProcedure(req, res){
-    const {procedure, proceduretype_id, time, cost} = req.body
-    const sql = 'INSERT INTO procedures (procedure, proceduretype_id, time, cost, ts) VALUES ($1, $2, $3, $4, $5) RETURNING *'
+    const {procedure, proceduretype_id, duration, cost} = req.body
+    const sql = 'INSERT INTO procedures (procedure, proceduretype_id, duration, cost, ts) VALUES ($1, $2, $3, $4, $5) RETURNING *'
     const ts = new Date()
-    // console.log(procedure, proceduretype_id, time, cost, ts)    
-    const newProcedure = await DB.query(sql, [procedure, proceduretype_id, time, cost, ts])
+    // console.log(procedure, proceduretype_id, duration, cost, ts)    
+    const newProcedure = await DB.query(sql, [procedure, proceduretype_id, duration, cost, ts])
     // console.log('newProcedure:', newProcedure)
     res.send(newProcedure.rows[0])
   }
@@ -16,7 +16,7 @@ class ProcedureController {
       SELECT 
         p.id AS id,
         p.procedure AS procedure,
-        p.time AS time,
+        p.duration AS duration,
         p.cost AS cost,
         pt.proceduretype AS proceduretype
       FROM procedures p
@@ -52,6 +52,49 @@ class ProcedureController {
     // console.log('procedure types:', proceduretypes.rows)
     res.send(proceduretypes.rows)    
   }
+
+  async getUserProcedures(req, res){
+    const user_id = req.params.user_id
+    // console.log('get Procedures for user:', user_id)
+    const sql = `
+      SELECT 
+        tt.id,
+        p.procedure,
+        tt.duration,
+        date,
+        time,
+        cost
+      FROM timetable tt
+      JOIN procedures p ON p.id = tt.procedure_id
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      WHERE tt.user_id = $1
+      ;`
+    const proceduretypes = await DB.query(sql, [user_id])
+    // console.log('procedures:', proceduretypes.rows)
+    res.send(proceduretypes.rows)    
+  }
+
+  async getDoctorProcedures(req, res){
+    const doctor_id = req.params.doctor_id
+    // console.log('get Procedures for user:', doctor_id)
+    const sql = `
+      SELECT 
+        tt.id,
+        p.procedure,
+        tt.duration,
+        date,
+        time,
+        cost
+      FROM timetable tt
+      JOIN procedures p ON p.id = tt.procedure_id
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      WHERE tt.doctor_id = $1
+      ;`
+    const proceduretypes = await DB.query(sql, [doctor_id])
+    // console.log('procedures:', proceduretypes.rows)
+    res.send(proceduretypes.rows)    
+  }
+
 }
 
 module.exports = new ProcedureController()

@@ -2,12 +2,15 @@ const DB = require('../db')
 
 class TimeTableController {
   async createRecord(req, res){
+    // console.log('Create Procedure:', req.body)
     const {procedure_id, user_id, date, time} = req.body
-    const sql = 'INSERT INTO timetable (procedure_id, user_id, date, time, ts) VALUES ($1, $2, $3, $4, $5) RETURNING *'
+    const duration = await DB.query('SELECT duration FROM procedures WHERE id=$1',[procedure_id])
+    const sql = 'INSERT INTO timetable (procedure_id, user_id, date, time, ts, duration) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
     let ts = new Date()
-    const newProcedure = await DB.query(sql,[procedure_id, user_id, date, time, ts])
+    const newProcedure = await DB.query(sql,[procedure_id, user_id, date, time, ts, duration.rows[0].duration])
     res.send(newProcedure.rows[0])
   }
+
   async getRecords(req, res){
     // console.log('get all records:');
     const sql = `
@@ -27,6 +30,7 @@ class TimeTableController {
     // console.log(records.rows)
     res.send(records.rows)
   }
+
   async getRecord(req, res){
     console.log('get records by ID:')
     const id = req.params.id
@@ -35,6 +39,7 @@ class TimeTableController {
     console.log(`record #${id}:`, record.rows[0])
     res.send(record.rows[0])
   }
+  
   async updateRecord(req, res){
     const id = req.params.id
     const sql =``
