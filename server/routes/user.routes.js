@@ -13,4 +13,6 @@ router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)
 router.get('/roles', userController.getRoles)
 
+router.get('/clients_by_doctor/:id', userController.getClientsByDoctor)
+
 module.exports = router 

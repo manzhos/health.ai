@@ -189,6 +189,25 @@ class UserController {
     res.send(doctors.rows)    
   }
 
+  async getClientsByDoctor(req, res){
+    const id = req.params.id
+    // console.log(`filter clients for doctor ${id}`)
+    const sql = `
+      SELECT DISTINCT 
+        u.id AS id,
+        u.firstname AS firstname,
+        u.lastname AS lastname,
+        u.email AS email,
+        u.avatar AS avatar
+      FROM users u 
+      JOIN timetable tt ON u.id = tt.user_id
+      WHERE u.usertype_id = 3 AND tt.doctor_id = $1
+      ORDER BY firstname, lastname;`
+    const clients = await DB.query(sql,[id])
+    // console.log('clients.rows', clients.rows)
+    res.send(clients.rows)    
+  }
+
   async getClients(req, res){
     const sql = `
       SELECT 

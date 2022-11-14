@@ -6,6 +6,7 @@ import DashboardLayoutDoctor from './layouts/dashboardDoctor'
 import LogoOnlyLayout from './layouts/LogoOnlyLayout'
 //
 import User from './pages/User'
+import UserForDoctor from './pages/UserForDoctor'
 import Login from './pages/Login'
 import NotFound from './pages/Page404'
 import Register from './pages/Register'
@@ -46,7 +47,7 @@ export default function Router() {
       path: '/doctor',
       element: <DashboardLayoutDoctor />,
       children: [
-        { path: 'user', element: <User /> },
+        { path: 'user', element: <UserForDoctor /> },
         { path: 'procedure', element: <Procedure /> },
         { path: 'timetable', element: <TimeTableDoctor /> },
         { path: 'note', element: <Note /> },

@@ -10,8 +10,9 @@ class NoteController {
     const {title, note, client_id, doctor_id, procedure_id} = req.body
     const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
     let ts = new Date()
-    console.log('try to save: ', title, note, client_id, doctor_id, procedure_id, ts)
-    const newNote = await DB.query(sql,[title, note, client_id, doctor_id, procedure_id, ts])
+    // console.log('try to save: ', title, note, client_id, doctor_id, procedure_id, ts)
+    const newNote = await DB.query(sql,[title ? title : '', note, client_id, doctor_id, procedure_id, ts])
+    // console.log('newNote:', newNote.rows)
     res.send(newNote.rows[0]);
   }
 

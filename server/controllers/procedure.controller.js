@@ -80,6 +80,11 @@ class ProcedureController {
     const sql = `
       SELECT 
         tt.id,
+        tt.procedure_id AS procedure_id,
+        tt.user_id AS client_id,
+        uc.firstname AS client_firstname,
+        uc.lastname AS client_lastname,
+        tt.doctor_id AS doctor_id,
         p.procedure,
         tt.duration,
         date,
@@ -88,6 +93,7 @@ class ProcedureController {
       FROM timetable tt
       JOIN procedures p ON p.id = tt.procedure_id
       JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      JOIN users uc ON uc.id = tt.user_id
       WHERE tt.doctor_id = $1
       ;`
     const proceduretypes = await DB.query(sql, [doctor_id])

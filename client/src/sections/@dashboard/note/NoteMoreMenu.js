@@ -27,7 +27,7 @@ import { API_URL } from '../../../config'
 // ----------------------------------------------------------------------
 
 export default function NoteMoreMenu({id, note, procedureList, clientList, doctorList, onChange}) {
-  console.log('Note:', note)
+  // console.log('Note:', note)
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const jwt = localStorage.getItem("jwt")

@@ -17,7 +17,7 @@ const Page = forwardRef(({ children, title = '', meta, ...other }, ref) => (
       {children}
     </Box>
   </>
-));
+))
 
 Page.propTypes = {
   children: PropTypes.node.isRequired,
