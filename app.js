@@ -5,6 +5,10 @@ const fileUpload = require('express-fileupload')
 const app               = express()
 require('dotenv').config()
 
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+
 const PORT = process.env.PORT || 3300
 
 app.use(cors());
@@ -25,6 +29,33 @@ app.use(express.static('files'))
 
 app.get('/', (req, res)=>{res.send('hello, man')});
 
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static('client/build'))
+}
 if(process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'))
 }
