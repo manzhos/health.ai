@@ -1,17 +1,22 @@
-import { Navigate, useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes } from 'react-router-dom'
 // layouts
-import DashboardLayoutAdmin from './layouts/dashboardAdmin';
-import DashboardLayoutUser from './layouts/dashboardUser';
-import DashboardLayoutDoctor from './layouts/dashboardDoctor';
-import LogoOnlyLayout from './layouts/LogoOnlyLayout';
+import DashboardLayoutAdmin from './layouts/dashboardAdmin'
+import DashboardLayoutUser from './layouts/dashboardUser'
+import DashboardLayoutDoctor from './layouts/dashboardDoctor'
+import LogoOnlyLayout from './layouts/LogoOnlyLayout'
 //
-import User from './pages/User';
-import Login from './pages/Login';
-import NotFound from './pages/Page404';
-import Register from './pages/Register';
-import Procedure from './pages/Procedure';
-import DashboardApp from './pages/DashboardApp';
-import TimeTable from './pages/TimeTable';
+import User from './pages/User'
+import UserForDoctor from './pages/UserForDoctor'
+import Login from './pages/Login'
+import NotFound from './pages/Page404'
+import Register from './pages/Register'
+import Procedure from './pages/Procedure'
+import DashboardApp from './pages/DashboardApp'
+import TimeTable from './pages/TimeTable'
+import TimeTableUser from './pages/TimeTableUser'
+import TimeTableDoctor from './pages/TimeTableDoctor'
+import TimeTableOutside from './pages/TimeTableOutside'
+import Note from './pages/Note'
 
 // ----------------------------------------------------------------------
 
@@ -35,16 +40,17 @@ export default function Router() {
         // { path: 'app', element: <DashboardAppAdmin /> },
         { path: 'user', element: <User /> },
         { path: 'procedure', element: <Procedure /> },
-        { path: 'timetable', element: <TimeTable /> },
+        { path: 'timetable', element: <TimeTableUser /> },
       ],
     },
     {
       path: '/doctor',
       element: <DashboardLayoutDoctor />,
       children: [
-        { path: 'user', element: <User /> },
+        { path: 'user', element: <UserForDoctor /> },
         { path: 'procedure', element: <Procedure /> },
-        { path: 'timetable', element: <TimeTable /> },
+        { path: 'timetable', element: <TimeTableDoctor /> },
+        { path: 'note', element: <Note /> },
       ],
     },
     {
@@ -53,7 +59,7 @@ export default function Router() {
     },
     {
       path: 'timetable',
-      element: <TimeTable />
+      element: <TimeTableOutside />
     },
     {
       path: 'login',

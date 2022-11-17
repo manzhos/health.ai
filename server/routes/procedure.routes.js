@@ -10,4 +10,7 @@ router.delete('/procedure/:id', procedureController.deleteProcedure)
 
 router.get('/proceduretypes', procedureController.getProcedureTypes)
 
+router.get('/procedures/:user_id', procedureController.getUserProcedures)
+router.get('/doc_procedures/:doctor_id', procedureController.getDoctorProcedures)
+
 module.exports = router 

@@ -4,8 +4,9 @@ import { Box, Link, Typography, Avatar } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { sentenceCase } from 'change-case';
 import { useHttp } from '../hooks/http.hook'
+import { API_URL } from '../config'
 // mock
-import account from '../_mock/account';
+// import account from '../_mock/account';
 
 const AccountStyle = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -18,36 +19,42 @@ const AccountStyle = styled('div')(({ theme }) => ({
 export const UserBage = () => {
   const { request } = useHttp()
   const [currentUser, setCurrentUser] = useState({firstname:'', lastname:'', email:''})
-
+  
   const jwt = localStorage.getItem("jwt")
   function parseJwt (token) {
     var base64Url = token.split('.')[1]
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
     }).join(''))
     return JSON.parse(jsonPayload)
   };
   const pJWT = parseJwt(jwt)
   const userId = pJWT.userId
-
+  
   const getUser = useCallback(async () => {
     try {
-      const res = await request(`http://localhost:3300/api/user/${userId}`, 'GET', null, {
+      const res = await request(`${API_URL}api/user/${userId}`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
       setCurrentUser(res)
     } catch (e) { console.log('error:', e)}
   }, [jwt, request])
-
+  
   useEffect(() => {getUser()}, [getUser]) 
   // console.log('currentUser:', currentUser)
+  
+  const avatar = () => {
+    if(currentUser.avatar) return API_URL + 'avatars/' + currentUser.avatar
+    return API_URL + 'blank-avatar.svg'
+  }
+  // const avatar = API_URL + 'blank-avatar.svg'
 
   return(
     <Box sx={{ mb: 5, mx: 2.5 }}>
       <Link underline="none" component={RouterLink} to="#">
         <AccountStyle>
-          <Avatar src={account.photoURL} alt="photoURL" />
+          <Avatar src={avatar()} alt="photoURL" />
           <Box sx={{ ml: 2 }}>
             <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
               {sentenceCase(currentUser.firstname)}&nbsp;{sentenceCase(currentUser.lastname)}

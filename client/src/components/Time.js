@@ -35,7 +35,6 @@ export default function Time({onTimeChange, slots}) {
             })}
           </div>
         </div>
-        <div style={{height:"30px"}}>&nbsp;</div>
     </Container>
   )
 }

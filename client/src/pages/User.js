@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import React, { useState, useCallback, useEffect, useContext } from 'react';
@@ -39,9 +38,7 @@ import { UserListHead, UserListToolbar, UserMoreMenu } from '../sections/@dashbo
 import { Loader } from '../components/Loader';
 import { useHttp } from '../hooks/http.hook'
 import { AuthContext } from '../context/AuthContext'
-// mock
-// import userList from '../_mock/user';
-
+import {API_URL} from '../config'
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -50,7 +47,7 @@ const TABLE_HEAD = [
   { id: 'role', label: 'Role', alignRight: false },
   { id: 'promo', label: 'Ready for promo', alignRight: false },
   { id: 'status', label: '', alignRight: false },
-  { id: '' },
+  // { id: '' },
 ];
 
 // ----------------------------------------------------------------------
@@ -97,8 +94,11 @@ export default function User() {
   const [userList, setUserList] = useState([])
   const [roleList, setRoleList] = useState([])
   const [role, setRole] = useState(3)
+  const [newAvatar, setNewAvatar] = useState()
+  const [avatarURL, setAvatarURL] = useState()
+  // const [update, setUpdate] = useState(false)
   const {loading, request} = useHttp()
-  const navigate  = useNavigate();
+  const navigate  = useNavigate()
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc'
@@ -108,7 +108,7 @@ export default function User() {
   
   const getUsers = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/users', 'GET', null, {
+      const res = await request(`${API_URL}api/users`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
       setUserList(res)
@@ -118,7 +118,7 @@ export default function User() {
 
   const getRole = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/roles', 'GET', null, {
+      const res = await request(`${API_URL}api/roles`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
       setRoleList(res);
@@ -129,9 +129,9 @@ export default function User() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = userList.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
+      const newSelecteds = userList.map((n) => n.name)
+      setSelected(newSelecteds)
+      return
     }
     setSelected([]);
   };
@@ -179,19 +179,27 @@ export default function User() {
     //   '\n', data.get('email'),
     //   '\n', data.get('password'),
     //   '\n', data.get('usertype_id'),
-    //   '\n', data.get('allowExtraEmails')
+    //   '\n', data.get('allowExtraEmails'),
+    //   '\n', data.get('avatar')
     // )
     if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
       try {
-        const res = await request('http://localhost:3300/api/user', 'POST', {
-          firstname:  data.get('firstName'),
-          lastname:   data.get('lastName'),
-          email:      data.get('email'),
-          password:   data.get('password'),
-          usertype_id:data.get('usertype_id'),
-          promo:      data.get('allowExtraEmails'),
+        const formData = new FormData()
+        formData.append('firstname', data.get('firstName'))
+        formData.append('lastname',   data.get('lastName'))
+        formData.append('email',      data.get('email'))
+        formData.append('password',   data.get('password'))
+        formData.append('usertype_id',data.get('usertype_id'))
+        formData.append('promo',      data.get('allowExtraEmails'))
+        formData.append('avatar',     data.get('avatar'))
+
+        const res = await fetch(`${API_URL}api/user`, {
+          method: 'POST', 
+          body: formData,
         })
         setOpen(false)
+        setAvatarURL(false)
+        handleUpdate()
         navigate('/admin/user')
       } catch (e) {console.log('error:', e)} 
     } else alert('You need to fill fields.')
@@ -206,6 +214,23 @@ export default function User() {
   const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+
+  const avatar = API_URL + 'blank-avatar.svg'
+
+  useEffect(()=>{
+    if(!newAvatar) return
+    setAvatarURL(URL.createObjectURL(newAvatar))
+  }, [newAvatar])
+
+  const onAvatarChange = (e) => {
+    // console.log('E:', e)
+    setNewAvatar(e.target.files[0]);
+    // console.log('new avatar:', newAvatar);
+  }
+
+  const handleUpdate = (update) => {
+    getUsers()    
+  }
 
   if (loading) return <Loader/>
   else {
@@ -246,72 +271,83 @@ export default function User() {
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
                       <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            autoComplete="given-name"
-                            name="firstName"
-                            required
-                            fullWidth
-                            id="firstName"
-                            label="First Name"
-                            autoFocus
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            fullWidth
-                            id="lastName"
-                            label="Last Name"
-                            name="lastName"
-                            autoComplete="family-name"
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            autoComplete="email"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            id="password"
-                            autoComplete="new-password"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <FormControl sx={{ width: 1 }}>
-                            <InputLabel id="role-select">Role</InputLabel>
-                            <Select
-                              labelId="role-select"
-                              id="role-select"
-                              name="usertype_id"
-                              value={role}
-                              label="Role"
-                              onChange={handleChangeRole} 
-                            >
-                              {roleList.map((item, key)=>{
-                                return(
-                                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.usertype)}</MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Grid>                          
-                        <Grid item xs={12}>
-                          <FormControlLabel
-                            control={<Checkbox name="allowExtraEmails" value="allowExtraEmails" color="primary" />}
-                            label="Set for receive inspiration, marketing promotions and updates via email."
-                          />
+                        <Grid container item xs={12} sm={2} direction="column" justifyContent="flex-start" alignItems="center">
+                          <img src={avatarURL || avatar} className='avatar' alt="" />
+                          <label htmlFor="avatar">
+                            <input id="avatar" name="avatar" type="file" accept='image/*' onChange={onAvatarChange} style={{ display: "none" }}/>
+                            <Button variant="outlined" component="span">
+                              Set Photo
+                            </Button>
+                          </label>
+                        </Grid>  
+                        <Grid container spacing={2} item xs={12} sm={10}>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              autoComplete="given-name"
+                              name="firstName"
+                              required
+                              fullWidth
+                              id="firstName"
+                              label="First Name"
+                              autoFocus
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              fullWidth
+                              id="lastName"
+                              label="Last Name"
+                              name="lastName"
+                              autoComplete="family-name"
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <TextField
+                              required
+                              fullWidth
+                              id="email"
+                              label="Email Address"
+                              name="email"
+                              autoComplete="email"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              fullWidth
+                              name="password"
+                              label="Password"
+                              type="password"
+                              id="password"
+                              autoComplete="new-password"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl sx={{ width: 1 }}>
+                              <InputLabel id="role-select">Role</InputLabel>
+                              <Select
+                                labelId="role-select"
+                                id="role-select"
+                                name="usertype_id"
+                                value={role}
+                                label="Role"
+                                onChange={handleChangeRole} 
+                              >
+                                {roleList.map((item, key)=>{
+                                  return(
+                                    <MenuItem key={item.id} value={item.id}>{sentenceCase(item.usertype)}</MenuItem>
+                                  )
+                                })}
+                              </Select>
+                            </FormControl>
+                          </Grid>                          
+                          <Grid item xs={12}>
+                            <FormControlLabel
+                              control={<Checkbox name="allowExtraEmails" value="allowExtraEmails" color="primary" />}
+                              label="Set for receive inspiration, marketing promotions and updates via email."
+                            />
+                          </Grid>
                         </Grid>
                       </Grid>
                       <Button
@@ -371,11 +407,11 @@ export default function User() {
                             </Stack>
                           </TableCell>
                           <TableCell align="left">{email}</TableCell>
-                          <TableCell align="left">{sentenceCase(usertype)}</TableCell>
+                          <TableCell align="left">{usertype}</TableCell>
                           <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
-                          <TableCell align="left">{id}</TableCell>
+                          {/* <TableCell align="left">{id}</TableCell> */}
                           <TableCell align="right">
-                            <UserMoreMenu id={id} user={row} roleList={roleList} />
+                            <UserMoreMenu id={id} user={row} roleList={roleList} onChange={handleUpdate} />
                           </TableCell>
                         </TableRow>
                       );

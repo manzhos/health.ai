@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -16,6 +16,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 
 import AuthSocial from '../sections/auth/AuthSocial'
 import Copyright from '../components/Copyright'
+import { API_URL } from '../config'
 
 import { useHttp } from '../hooks/http.hook'
 import { AuthContext } from '../context/AuthContext'
@@ -24,7 +25,7 @@ const theme = createTheme()
 
 export default function Login() {
   const {request} = useHttp()
-  // const navigate  = useNavigate()
+  const navigate  = useNavigate()
   const auth = useContext(AuthContext)
 
   const handleSubmit = async (event) => {
@@ -32,7 +33,7 @@ export default function Login() {
     const data = new FormData(event.currentTarget)
     if(data.get('email') && data.get('password')){
       try {
-        const res = await request('http://localhost:3300/api/login', 'POST', {
+        const res = await request(`${API_URL}api/login`, 'POST', {
           email:      data.get('email'),
           password:   data.get('password'),
           remember:   data.get('remember'),
@@ -52,13 +53,16 @@ export default function Login() {
     // redirect to external URL
     switch (route){
       case 1:
-        window.top.location = `http://localhost:3000/admin/app`
+        // window.top.location = `${URL}admin/app`
+        navigate('/admin/app')
         break
       case 2:
-        window.top.location = `http://localhost:3000/doctor/procedure`
+        // window.top.location = `${URL}doctor/procedure`
+        navigate('/doctor/procedure')
         break
       case 3:
-        window.top.location = `http://localhost:3000/user/timetable`
+        // window.top.location = `${URL}user/timetable`
+        navigate('/user/timetable')
         break
       default:
         console.log(`Sorry, we are out of ${route}.`)
@@ -69,12 +73,12 @@ export default function Login() {
   return (
     <ThemeProvider theme={theme}>
       <div className='authpage'>
-        {/* <div className='logo-block'>
+        <div className='logo-block'>
           <div className='logo-container'>
             <img width={45} src="../static/healthai_white.svg" alt="health.ai"/>
             <h1 style={{margin:"0 0 0 20px"}}>Health.AI</h1>
           </div>
-        </div> */}
+        </div>
         <Container component="main" maxWidth="sm">
           <div className="login-modal">
             <CssBaseline />

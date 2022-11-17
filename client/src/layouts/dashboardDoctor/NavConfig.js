@@ -13,18 +13,23 @@ const navConfig = [
   // },
   {
     title: 'user',
-    path: '/dashboard/user',
+    path: '/doctor/user',
     icon: getIcon('eva:people-fill'),
   },
   {
     title: 'procedure',
-    path: '/dashboard/procedure',
+    path: '/doctor/procedure',
     icon: getIcon('eva:shopping-bag-fill'),
   },
   {
     title: 'timetable',
-    path: '/dashboard/timetable',
+    path: '/doctor/timetable',
     icon: getIcon('eva:calendar-fill'),
+  },
+  {
+    title: 'note',
+    path: '/doctor/note',
+    icon: getIcon('material-symbols:note-alt-rounded'),
   },
 ];
 

@@ -3,5 +3,8 @@
 /node_modules/
 /client/node_modules/
 /server
+<<<<<<< HEAD
 /server/node_modules/
+=======
+>>>>>>> m/scheme_calendar-login
 /_source
