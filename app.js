@@ -27,38 +27,7 @@ app.use('/api', require('./routes/timetable.routes'))
 app.use('/api', require('./routes/note.routes'))
 app.use(express.static('files'))
 
-app.get('/', (req, res)=>{res.send('hello, man')});
-
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
+// app.get('/', (req, res)=>{res.send('hello, man')});
 
 // start server
 async function start() {
