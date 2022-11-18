@@ -186,7 +186,7 @@ export default function TimeTable(){
   // }
   const humanDate = (d) => {
     d = new Date(d)
-    return d.getDate() + ' ' + MONTH[Number(d.getMonth())] + ' ' + d.getFullYear() + ' ' + d.getHours() + ':' + (d.getMinutes() == '0' ? '00' : d.getMinutes())
+    return d.getDate() + ' ' + MONTH[Number(d.getMonth())] + ' ' + d.getFullYear() + ' ' + d.getHours() + ':' + (d.getMinutes() === '0' ? '00' : d.getMinutes())
   }
   const [open, setOpen] = useState(false)
   // const handleOpen = () => setOpen(true)
