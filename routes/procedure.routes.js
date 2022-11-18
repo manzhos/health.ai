@@ -5,7 +5,7 @@ const router = Router()
 router.post('/procedure', procedureController.createProcedure)
 router.get('/procedures', procedureController.getProcedures)
 router.get('/procedure/:id', procedureController.getProcedure)
-router.put('/procedure', procedureController.updateProcedure)
+router.patch('/procedure/:id', procedureController.updateProcedure)
 router.delete('/procedure/:id', procedureController.deleteProcedure)
 
 router.get('/proceduretypes', procedureController.getProcedureTypes)

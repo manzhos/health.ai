@@ -18,6 +18,7 @@ class ProcedureController {
         p.procedure AS procedure,
         p.duration AS duration,
         p.cost AS cost,
+        pt.id AS proceduretype_id,
         pt.proceduretype AS proceduretype
       FROM procedures p
       JOIN procedure_types pt ON pt.id = p.proceduretype_id
@@ -38,11 +39,27 @@ class ProcedureController {
   }
   async updateProcedure(req, res){
     const id = req.params.id
-    const sql =``
-
+    // save to DB
+    const {procedure, proceduretype_id, duration, cost} = req.body
+    console.log(id, procedure, proceduretype_id, duration, cost);
+    const sql =`
+      UPDATE procedures SET
+        procedure        = $2,
+        duration         = $3,
+        cost             = $4,
+        proceduretype_id = $5
+      WHERE id = $1;`
+    await DB.query(sql, [id, procedure, duration, cost, proceduretype_id])
+    console.log(`procudure #${id} was updates`)
+    res.send(true) 
   }
   async deleteProcedure(req, res){
-    console.log('delete Procedure by ID')
+    // console.log('delete Procedure by ID')
+    const id = req.params.id
+    const sql = `DELETE FROM procedures WHERE id = $1 RETURNING procedure;`  
+    const procDeleted = await DB.query(sql, [id])
+    // console.log(`procedure #${id}: ${procDeleted} with SQL: ${sql}`)
+    res.send(procDeleted)      
   }
 
   async getProcedureTypes(req, res){

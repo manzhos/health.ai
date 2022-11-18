@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -17,12 +17,13 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { useHttp } from '../hooks/http.hook'
 import { AuthContext } from '../context/AuthContext'
 import AuthSocial from '../sections/auth/AuthSocial'
-import Copyright from "../components/Copyright"
+import Copyright from '../components/Copyright'
+import { API_URL } from '../config'
 
 const theme = createTheme();
 
 export default function SignUp() {
-  // const navigate  = useNavigate();
+  const navigate  = useNavigate();
   // const {loading, request, error, clearError} = useHttp()
   const {request} = useHttp()
   const auth = useContext(AuthContext)
@@ -33,7 +34,7 @@ export default function SignUp() {
     // console.log('data', data);
     if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
       try {
-        const res = await request('http://localhost:3300/api/user', 'POST', {
+        const res = await request(`${API_URL}api/user`, 'POST', {
           firstname:  data.get('firstName'),
           lastname:   data.get('lastName'),
           email:      data.get('email'),
@@ -53,13 +54,13 @@ export default function SignUp() {
     // redirect to external URL
     switch (route){
       case 1:
-        window.top.location = `http://localhost:3000/admin/app`
+        navigate('/admin/app')
         break
       case 2:
-        window.top.location = `http://localhost:3000/doctor/procedure`
+        navigate('/doctor/procedure')
         break
       case 3:
-        window.top.location = `http://localhost:3000/user/timetable`
+        navigate('/user/timetable')
         break
       default:
         console.log(`Sorry, we are out of ${route}.`)
@@ -67,15 +68,19 @@ export default function SignUp() {
     return null
   }
 
+  const loginLink = () => {
+    navigate('/login')
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <div className='authpage'>
-        {/* <div className='logo-block'>
+        <div className='logo-block'>
           <div className='logo-container'>
             <img width={45} src="../static/healthai_white.svg" alt="health.ai"/>
             <h1 style={{margin:"0 0 0 20px"}}>Health.AI</h1>
           </div>
-        </div> */}
+        </div>
         <Container component="main" maxWidth="sm">
           <div className="login-modal">
             <CssBaseline />
@@ -154,8 +159,8 @@ export default function SignUp() {
                 </Button>
                 <Grid container justifyContent="flex-end">
                   <Grid item>
-                    <Link href="/login" variant="body2">
-                      Already have an account? Sign in
+                    <Link href="#" variant="body2" onClick={loginLink}>
+                      {"Already have an account? Sign in"}
                     </Link>
                   </Grid>
                 </Grid>

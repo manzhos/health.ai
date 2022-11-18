@@ -27,12 +27,6 @@ import { API_URL } from '../../../config'
 // ----------------------------------------------------------------------
 
 export default function UserMoreMenu({id, user, roleList, onChange}) {
-  switch (user.usertype){
-    case 'administrator': user.usertype_id = 1; break
-    case 'doctor':        user.usertype_id = 2; break
-    case 'client':        user.usertype_id = 3; break
-    default:              user.usertype_id = 3; break
-  }
   // console.log('User:', user)
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -125,7 +119,6 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
           <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
-        {/* <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}> */}
         <MenuItem sx={{ color: 'text.secondary' }} onClick={handleOpen}>
           <ListItemIcon>
             <Iconify icon="eva:edit-fill" width={24} height={24} />
@@ -142,10 +135,6 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
       >
         <Container component="main" maxWidth="md" disableGutters>
           <div className="login-modal">
-            {/* <div className='logo-container'>
-              <img width={45} src="../static/healthai.svg" alt="health.ai"/>
-              <h1 style={{margin:"0 0 0 20px"}}>Health.AI</h1>
-            </div> */}
             <Box
               sx={{
                 // marginTop: 8,

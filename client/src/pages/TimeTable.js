@@ -1,35 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 // material
 import {
   Card,
-  Table,
-  Box,
-  Grid,
+  // Table,
+  // Box,
+  // Grid,
   Stack,
   // Avatar,
-  Button,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
-  Checkbox,
-  TableRow,
-  TableBody,
-  TableCell,
+  // Button,
+  // FormControl,
+  // Select,
+  // MenuItem,
+  // InputLabel,
+  // Checkbox,
+  // TableRow,
+  // TableBody,
+  // TableCell,
   Container,
   Typography,
-  TableContainer,
-  TablePagination,
+  // TableContainer,
+  // TablePagination,
 } from '@mui/material';
 // components
 import Page from '../components/Page';
-import Iconify from '../components/Iconify';
+// import Iconify from '../components/Iconify';
 import Scrollbar from '../components/Scrollbar';
 import Calendar from '../components/Calendar'
 import Time from '../components/Time'
 import { useHttp } from '../hooks/http.hook'
-import { getDate } from 'date-fns';
+// import { getDate } from 'date-fns';
+import { API_URL } from '../config'
 
 export default function TimeTable(){
   const {request} = useHttp()
@@ -38,12 +38,12 @@ export default function TimeTable(){
   const [time, setTime] = useState('__:__')
   const [doctorList, setDoctorList] = useState([])
   const [procedureList, setProcedureList] = useState([])
-  const [doctor, setDoctor] = useState('')
-  const [procedure, setProcedure] = useState('')
+  // const [doctor, setDoctor] = useState('')
+  // const [procedure, setProcedure] = useState('')
 
   const getDoctors = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/doctors', 'GET', null, {
+      const res = await request(`${API_URL}api/doctors`, 'GET', null, {
         // Authorization: `Bearer ${token}`
       })
       setDoctorList(res);
@@ -51,7 +51,7 @@ export default function TimeTable(){
   }, [request])
   const getProcedures = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/procedures', 'GET', null, {
+      const res = await request(`${API_URL}api/procedures`, 'GET', null, {
         // Authorization: `Bearer ${token}`
       })
       setProcedureList(res);
@@ -80,32 +80,32 @@ export default function TimeTable(){
   }
 
   // send data
-  const handleRecord = async (event) => {
-    event.preventDefault()
-    // const data = new FormData(event.currentTarget)
-    const data = {
-      'procedure_id'  : 1, 
-      'user_id'       : 2, 
-      'date'          : date, 
-      'time'          : time,
-    }
-    // console.log('data', data);
-    // if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
-    // if(data){
-    //   try {
-    //     const res = await request('http://localhost:3300/api/timetable', 'POST', {
-    //       procedure_id: data.procedure_id,
-    //       user_id:      data.user_id,
-    //       date:         data.date,
-    //       time:         data.time,
-    //     })
-    //     // auth.login(data.token, data.userId)
-    //     console.log('res:', res)
-    //     navigate('/dashboard/timetable')
-    //   } catch (e) {console.log('error:', e)} 
-    //   // eslint-disable-next-line
-    // } else alert('You need to fill fields.')
-  }
+  // const handleRecord = async (event) => {
+  //   event.preventDefault()
+  //   // const data = new FormData(event.currentTarget)
+  //   const data = {
+  //     'procedure_id'  : 1, 
+  //     'user_id'       : 2, 
+  //     'date'          : date, 
+  //     'time'          : time,
+  //   }
+  //   // console.log('data', data);
+  //   // if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
+  //   // if(data){
+  //   //   try {
+  //   //     const res = await request(`${API_URL}api/timetable`, 'POST', {
+  //   //       procedure_id: data.procedure_id,
+  //   //       user_id:      data.user_id,
+  //   //       date:         data.date,
+  //   //       time:         data.time,
+  //   //     })
+  //   //     // auth.login(data.token, data.userId)
+  //   //     console.log('res:', res)
+  //   //     navigate('/dashboard/timetable')
+  //   //   } catch (e) {console.log('error:', e)} 
+  //   //   // eslint-disable-next-line
+  //   // } else alert('You need to fill fields.')
+  // }
 
   const handleDateChange = (dateValue) => {
     setDate(dateValue)
@@ -114,37 +114,37 @@ export default function TimeTable(){
     setTime(timeValue)
   }
 
-  const handleChangeDoctor = (event) => {
-    event.preventDefault();
-    setDoctor(event.target.value)
-  }
+  // const handleChangeDoctor = (event) => {
+  //   event.preventDefault();
+  //   setDoctor(event.target.value)
+  // }
 
-  const handleChangeProcedure = (event) => {
-    event.preventDefault();
-    setProcedure(event.target.value)
-  }
+  // const handleChangeProcedure = (event) => {
+  //   event.preventDefault();
+  //   setProcedure(event.target.value)
+  // }
 
-  function doctorName() {
-    if(doctorList && doctor !==''){
-      for(let i=0; i<doctorList.length; i++)
-        if(doctorList[i].id === doctor) return doctorList[i].firstname + ' ' + doctorList[i].lastname
-    }
-    return 'Any'
-  }
+  // function doctorName() {
+  //   if(doctorList && doctor !==''){
+  //     for(let i=0; i<doctorList.length; i++)
+  //       if(doctorList[i].id === doctor) return doctorList[i].firstname + ' ' + doctorList[i].lastname
+  //   }
+  //   return 'Any'
+  // }
 
-  function procedureTitle() {
-    if(procedureList && procedure !==''){
-      for(let i=0; i<procedureList.length; i++)
-        if(procedureList[i].id === procedure) return procedureList[i].procedure
-    }
-    return 'Choose please'
-  }
+  // function procedureTitle() {
+  //   if(procedureList && procedure !==''){
+  //     for(let i=0; i<procedureList.length; i++)
+  //       if(procedureList[i].id === procedure) return procedureList[i].procedure
+  //   }
+  //   return 'Choose please'
+  // }
 
-  function takeDate() {
-    // console.log('date:', date);
-    if(date && date !== '') return date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear()
-    return '__/__/____'
-  }
+  // function takeDate() {
+  //   // console.log('date:', date);
+  //   if(date && date !== '') return date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear()
+  //   return '__/__/____'
+  // }
 
   return(
     <Page title="Booking">

@@ -1,7 +1,7 @@
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+// import { Link as RouterLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 // material
 import {
@@ -383,7 +383,7 @@ export default function User() {
                   <TableBody>
                     {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                       // const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                      const { id, firstname, lastname, usertype, email, promo } = row;
+                      const { id, firstname, lastname, usertype, usertype_id, email, promo } = row;
                       const isItemSelected = selected.indexOf(firstname) !== -1;
   
                       return (

@@ -70,6 +70,10 @@ export default function Login() {
     return null
   }
 
+  const registrationLink = () => {
+    navigate('/register')
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <div className='authpage'>
@@ -136,7 +140,7 @@ export default function Login() {
                     </Link>
                   </Grid>
                   <Grid item>
-                    <Link href="/register" variant="body2">
+                    <Link href="#" variant="body2" onClick={registrationLink}>
                       {"Don't have an account? Sign Up"}
                     </Link>
                   </Grid>

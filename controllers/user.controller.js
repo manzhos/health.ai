@@ -88,6 +88,7 @@ class UserController {
           u.lastname AS lastname,
           u.email AS email,
   --        u.ts,
+          u.usertype_id AS usertype_id,
           ut.usertype AS usertype,
           u.avatar AS avatar
         FROM users u 

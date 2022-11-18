@@ -96,7 +96,7 @@ export default function Procedure() {
 
   const getProcedures = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/procedures', 'GET', null, {
+      const res = await request(`${API_URL}api/procedures`, 'GET', null, {
         // Authorization: `Bearer ${token}`
       })
       setProcedureList(res)
@@ -106,7 +106,7 @@ export default function Procedure() {
 
   const getProcedureTypes = useCallback(async () => {
     try {
-      const res = await request('http://localhost:3300/api/proceduretypes', 'GET', null, {
+      const res = await request(`${API_URL}api/proceduretypes`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
       setProcedureTypeList(res);
@@ -191,6 +191,10 @@ export default function Procedure() {
     } else alert('You need to fill fields.')
   }
 
+  const handleUpdate = (update) => {
+    getProcedures()    
+  }
+
   return (
     <Page title="Procedure">
       <Container>
@@ -222,11 +226,9 @@ export default function Procedure() {
                     New procedure
                   </Typography>
                   <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                  {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={12}>
                         <TextField
-                          autoComplete="given-name"
                           name="procedure"
                           required
                           fullWidth
@@ -305,7 +307,7 @@ export default function Procedure() {
                 />
                 <TableBody>
                   {filteredProcedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, procedure, duration, cost, proceduretype } = row;
+                    const { id, procedure, duration, cost, proceduretype, proceduretype_id } = row;
                     const isItemSelected = selected.indexOf(procedure) !== -1;
 
                     return (
@@ -332,7 +334,7 @@ export default function Procedure() {
                         <TableCell align="left">{duration}</TableCell>
                         <TableCell align="left">{cost}</TableCell>
                         <TableCell align="right">
-                          <ProcedureMoreMenu />
+                          <ProcedureMoreMenu id={id} procedure={row} procedureTypeList={procedureTypeList} onChange={handleUpdate} />
                         </TableCell>
                       </TableRow>
                     );
