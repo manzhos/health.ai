@@ -2,7 +2,7 @@ const express    = require('express')
 const cors       = require('cors')
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
-const app               = express()
+const app        = express()
 require('dotenv').config()
 
 if(process.env.NODE_ENV === 'production') {
