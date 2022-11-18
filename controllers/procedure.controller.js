@@ -29,6 +29,37 @@ class ProcedureController {
     // console.log(procedures.rows)
     res.send(procedures.rows)
   }
+  async getProceduresInf(req, res){
+    // console.log('get all procedures:');
+    const sql = `
+        SELECT 
+        tt.id,
+        tt.procedure_id     AS procedure_id,
+        p.procedure         AS procedure,
+        p.proceduretype_id  AS proceduretype_id,
+        pt.proceduretype    AS proceduretype,
+        tt.user_id          AS client_id,
+        uc.firstname        AS client_firstname,
+        uc.lastname         AS client_lastname,
+        tt.doctor_id        AS doctor_id,
+        ud.firstname        AS doctor_firstname,
+        ud.lastname         AS doctor_lastname,
+        tt.duration         AS duration,
+        tt.date             AS date,
+        tt.time             AS time,
+        p.cost             AS cost
+      FROM timetable tt
+      JOIN procedures p ON p.id = tt.procedure_id
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      JOIN users uc ON uc.id = tt.user_id
+      JOIN users ud ON ud.id = tt.doctor_id
+      ORDER BY date, time
+    `
+    // console.log('SQL:', sql);
+    const procedures = await DB.query(sql)
+    // console.log(procedures.rows)
+    res.send(procedures.rows)
+  }
   async getProcedure(req, res){
     console.log('get procedures by ID:')
     const id = req.params.id

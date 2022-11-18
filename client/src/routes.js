@@ -12,7 +12,8 @@ import NotFound from './pages/Page404'
 import Register from './pages/Register'
 import Procedure from './pages/Procedure'
 import DashboardApp from './pages/DashboardApp'
-import TimeTable from './pages/TimeTable'
+// import TimeTable from './pages/TimeTable'
+import TimeTableAdmin from './pages/TimeTableAdmin'
 import TimeTableUser from './pages/TimeTableUser'
 import TimeTableDoctor from './pages/TimeTableDoctor'
 import TimeTableOutside from './pages/TimeTableOutside'
@@ -30,7 +31,7 @@ export default function Router() {
         { path: 'user', element: <User /> },
         { path: 'procedure', element: <Procedure /> },
         // { path: 'blog', element: <Blog /> },
-        { path: 'timetable', element: <TimeTable /> },
+        { path: 'timetable', element: <TimeTableAdmin /> },
       ],
     },
     {

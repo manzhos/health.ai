@@ -38,8 +38,6 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
     setProcedureType(event.target.value)
   }
   
-  console.log('procedure:', procedure, '\nprocedureType:', procedureType)
-
   const handleSubmit = async (event) => {
     event.preventDefault()
     console.log(`saving procedure #${id}`)
