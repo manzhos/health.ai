@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton } from '@mui/material';
 import { sentenceCase } from 'change-case';
@@ -33,6 +34,7 @@ export default function AccountPopover() {
   const anchorRef = useRef(null)
   const jwt = localStorage.getItem("jwt")
   const { request } = useHttp()
+  const navigate  = useNavigate()
   const [open, setOpen] = useState(null)
   const [currentUser, setCurrentUser] = useState({firstname:'', lastname:'', email:''})
 
@@ -75,10 +77,8 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     localStorage.setItem("jwt", '')
-    // const jwt = localStorage.getItem("jwt")
-    // console.log('jwt:', jwt)
-    window.top.location = `https://stunning-you.com`
-    // setOpen(null);
+    navigate('/login')
+    // window.top.location = `https://stunning-you.com`
   }
 
   return (
