@@ -1,5 +1,8 @@
-export const API_URL = 'http://localhost:3300/'
-export const URL = 'http://localhost:3000/'
+export const API_URL = '/'
+export const URL = '/'
+// dev
+// export const API_URL = 'http://localhost:3300/'
+// export const URL = 'http://localhost:3000/'
 export const MONTH = [
   'Jan',
   'Feb',
