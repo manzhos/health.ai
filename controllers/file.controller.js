@@ -19,10 +19,20 @@ class FileController {
               port: 21,
               user: "u958818119",
               password: "zqs3ROG4",
-              secure: true
+              rejectUnauthorized: false
+              // secure: false
           })
-          console.log(await client.list())
+          // console.log('client.list()', await client.list())
+
+          console.log('\n\n\nDONE\n\n\n')
+          let cd = await client.cd('domains/manzhos.cz/public_html/health.io/files')
+          console.log('\n\n\nCD:', cd)
+
+          // await client.upload(fs.createReadStream("test/to_upload.txt"), "uploaded.txt");
+          // await client.download(fs.createWriteStream("test/downloaded.txt"), "README.txt", 0);
+
           let res = await client.uploadFrom(file, filePath)
+          // await client.downloadTo(file, filePath)
           console.log('result of upload:', res)
           // await client.downloadTo("README_COPY.md", "README_FTP.md")
       }
