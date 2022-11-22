@@ -45,9 +45,10 @@ create TABLE files(
   "id" SERIAL4 PRIMARY KEY,
   "filename" TEXT NOT NULL, 
   "type" TEXT, 
-  "size" INT2, 
+  "size" INT4, 
   "path" TEXT, 
   "user_id" INT4, 
+  "doc_id" INT4, 
   "ts" TIMESTAMPTZ
 );
 
@@ -59,6 +60,8 @@ create TABLE notes(
   "doctor_id" INT4, 
   "procedure_id" INT4, 
   "archive" BOOLEAN DEFAULT false,  
+  "doc_type" INT2,
+  "invoice" JSONB,  
   "ts" TIMESTAMPTZ
 );
 

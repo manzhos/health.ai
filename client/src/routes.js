@@ -7,6 +7,7 @@ import LogoOnlyLayout from './layouts/LogoOnlyLayout'
 //
 import User from './pages/User'
 import UserForDoctor from './pages/UserForDoctor'
+import UserDocs from './pages/UserDocs'
 import Login from './pages/Login'
 import NotFound from './pages/Page404'
 import Register from './pages/Register'
@@ -18,6 +19,7 @@ import TimeTableUser from './pages/TimeTableUser'
 import TimeTableDoctor from './pages/TimeTableDoctor'
 import TimeTableOutside from './pages/TimeTableOutside'
 import Note from './pages/Note'
+import InvoicePrint from './pages/InvoicePrint'
 
 // ----------------------------------------------------------------------
 
@@ -49,26 +51,31 @@ export default function Router() {
       element: <DashboardLayoutDoctor />,
       children: [
         { path: 'user', element: <UserForDoctor /> },
+        { path: 'user/docs/:id', element: <UserDocs /> },
         { path: 'procedure', element: <Procedure /> },
         { path: 'timetable', element: <TimeTableDoctor /> },
         { path: 'note', element: <Note /> },
       ],
     },
     {
-      path: 'procedure',
+      path: '/procedure',
       element: <Procedure />
     },
     {
-      path: 'timetable',
+      path: '/timetable',
       element: <TimeTableOutside />
     },
     {
-      path: 'login',
+      path: '/login',
       element: <Login />,
     },
     {
-      path: 'register',
+      path: '/register',
       element: <Register />,
+    },
+    {
+      path: '/invoiceprint',
+      element: <InvoicePrint />,
     },
     {
       path: '/',

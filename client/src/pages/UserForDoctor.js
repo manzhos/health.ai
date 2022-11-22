@@ -1,7 +1,7 @@
-import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
-import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { filter } from 'lodash'
+import { sentenceCase } from 'change-case'
+import React, { useState, useCallback, useEffect, useContext } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 // material
 import {
@@ -27,6 +27,7 @@ import {
   MenuItem,
   TableContainer,
   TablePagination,
+  Link
 } from '@mui/material';
 // components
 import Page from '../components/Page';
@@ -44,7 +45,7 @@ import {API_URL} from '../config'
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
   { id: 'email', label: 'Email', alignRight: false },
-  { id: 'role', label: 'Role', alignRight: false },
+  // { id: 'role', label: 'Role', alignRight: false },
   { id: 'promo', label: 'Ready for promo', alignRight: false },
   { id: 'status', label: '', alignRight: false },
   // { id: '' },
@@ -211,7 +212,7 @@ export default function User() {
         setOpen(false)
         setAvatarURL(false)
         handleUpdate()
-        navigate('/admin/user')
+        navigate('/doctor/user')
       } catch (e) {console.log('error:', e)} 
     } else alert('You need to fill fields.')
   }
@@ -243,17 +244,23 @@ export default function User() {
     getUsers()    
   }
 
+  const getUser = (event, id) => {
+    event.preventDefault()
+    console.log('get User:', id)
+    navigate(`/doctor/user/docs/${id}`)
+  }
+
   if (loading) return <Loader/>
   else {
     return (
-      <Page title="User">
+      <Page title="Clients">
         <Container>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
             <Typography variant="h4" gutterBottom>
-              Users
+              Clients
             </Typography>
             <Button variant="contained" onClick={handleOpen} startIcon={<Iconify icon="eva:plus-fill" />}>
-              New User
+              New Client
             </Button>
             {/* add new user */}
             <Modal
@@ -277,7 +284,7 @@ export default function User() {
                     }}
                   >
                     <Typography component="h1" variant="h5">
-                      New user
+                      New client
                     </Typography>
                     <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
@@ -367,7 +374,7 @@ export default function User() {
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                       >
-                        Register
+                        Save
                       </Button>
                     </Box>
                   </Box>
@@ -409,7 +416,7 @@ export default function User() {
                           <TableCell padding="checkbox">
                             <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
                           </TableCell>
-                          <TableCell component="th" scope="row" padding="none">
+                          <TableCell component="th" scope="row" padding="none" onClick={(event) => getUser(event, id)}>
                             <Stack direction="row" alignItems="center" spacing={2}>
                               {/* <Avatar alt={firstname} src={avatarUrl} /> */}
                               <Typography variant="subtitle2" noWrap>
@@ -418,7 +425,7 @@ export default function User() {
                             </Stack>
                           </TableCell>
                           <TableCell align="left">{email}</TableCell>
-                          <TableCell align="left">{usertype}</TableCell>
+                          {/* <TableCell align="left">{usertype}</TableCell> */}
                           <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
                           {/* <TableCell align="left">{id}</TableCell> */}
                           <TableCell align="right">

@@ -150,8 +150,11 @@ export default function TimeTable(){
     return d.getDate() + ' ' + MONTH[Number(d.getMonth())] + ' ' + d.getFullYear()
   }
   const [open, setOpen] = useState(true)
+  const [openBook, setOpenBook] = useState(false)
   // const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+  const handleBookOpen = () => setOpenBook(true)
+  const handleBookClose = () => setOpenBook(false)
 
   return(
     <Page title="Booking">
@@ -160,6 +163,111 @@ export default function TimeTable(){
           <Typography variant="h4" gutterBottom>
             Time Table
           </Typography>
+
+          {/* Block add new procedure */}
+          <Button variant="contained" onClick={handleBookOpen} startIcon={<Iconify icon="eva:plus-fill" />}>
+            Book new procedure
+          </Button>
+          <Modal
+            open={openBook}
+            onClose={handleBookClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box component="form" noValidate sx={{ mt: 3 }}>
+              {/* --- header --- */}
+              {/* <Grid container spacing={2} mb={5}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl>
+                    <InputLabel id="doctor-select">Doctor</InputLabel>
+                    <Select
+                      labelId="doctor-select"
+                      id="doctor-select"
+                      sx={{ minWidth: 200 }}
+                      value={doctor}
+                      label="Doctor"
+                      onChange={handleChangeDoctor} 
+                    >
+                      {doctorList.map((item, key)=>{
+                        return(
+                          <MenuItem key={item.id} value={item.id}>{item.firstname}&nbsp;{item.lastname}</MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl>
+                    <InputLabel id="procedure-select">Procedure</InputLabel>
+                    <Select
+                      labelId="procedure-select"
+                      id="procedure-select"
+                      sx={{ minWidth: 200 }}
+                      value={procedure}
+                      label="Procedure"
+                      onChange={handleChangeProcedure} 
+                    >
+                      {procedureList.map((item, key)=>{
+                        return(
+                          <MenuItem key={item.id} value={item.id}>{item.procedure}</MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box className='tt_title'> 
+                    Procedure: <strong>{procedureTitle()}</strong> <br /> 
+                    Doctor: <strong>{doctorName()}</strong> <br /> 
+                    Date: <strong>{takeDate()}</strong>&nbsp;&nbsp;&nbsp;&nbsp;Time: <strong>{time}</strong>
+                  </Box>            
+                </Grid>
+              </Grid> */}
+
+              {/* --- photo + calendar --- */}
+
+              {/* <Grid container spacing={2}>
+                {doctorSelected.map((item, key)=>{
+                  return(
+                    <Grid key={item.id} container item spasing={2} direction="row">
+                      <Grid item xs={6} sm={3}>
+                        <img src={API_URL + 'avatars/' + item.avatar} alt={'Doctor ' + sentenceCase(item.firstname) + ' ' + sentenceCase(item.lastname)}/>
+                      </Grid>
+                      <Grid item xs={1} sm={1}>&nbsp;</Grid>
+                      <Grid item xs={12} sm={8}>
+                        <Card style={{padding:"30px"}}>
+                          <Grid container>
+                            <Grid item xs={12} sm={8}>
+                              <Typography component="h1" variant="h5">
+                                {sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <CalendarOutside onDateChange={handleDateChange} /> 
+                            </Grid>
+                          </Grid>
+                          <Grid>
+                            <Time onTimeChange={handleTimeChange} slots={slots}/>
+                          </Grid>
+                        </Card>
+                      </Grid>
+                    </Grid>
+                  )
+                })}
+              </Grid> */}
+              <Button
+                type="button"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                // onClick={handleRecord}
+              >
+                Book
+              </Button>
+            </Box>
+          </Modal>
+
+          {/* Modal PROMO */}
           <Modal
               open={open}
               onClose={handleClose}
@@ -199,85 +307,84 @@ export default function TimeTable(){
                   </Box>
                 </div>
               </Container>
-            </Modal>
-
+          </Modal>
         </Stack>
         <Card>
-            <ProcedureListToolbar numSelected={selected.length} filterProcedure={filterProcedure} onFilterProcedure={handleFilterByProcedure} />
-            <Scrollbar>
-              <TableContainer sx={{ minWidth: 800 }}>
-                <Table>
-                  <ProcedureListHead
-                    order={order}
-                    orderBy={orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={procedureList.length}
-                    // numSelected={selected.length}
-                    // onRequestSort={handleRequestSort}
-                    // onSelectAllClick={handleSelectAllClick}
-                  />
-                  <TableBody>
-                    {filteredProcedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      const { id, procedure, date, time, duration, cost } = row;
-                      const isItemSelected = selected.indexOf(procedure) !== -1;
-  
-                      return (
-                        <TableRow
-                          hover
-                          key={id}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={isItemSelected}
-                          aria-checked={isItemSelected}
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, procedure)} />
-                          </TableCell>
-                          <TableCell component="th" scope="row" padding="none">
-                            <Stack direction="row" alignItems="center" spacing={2}>
-                              <Typography variant="subtitle2" noWrap>
-                                {sentenceCase(procedure)}
-                              </Typography>
-                            </Stack>
-                          </TableCell>
-                          <TableCell align="left">{humanDate(date)}</TableCell>
-                          <TableCell align="left">{time}</TableCell>
-                          <TableCell align="left">{humanDuration(duration)}</TableCell>
-                          <TableCell align="left">{cost}</TableCell>
-                          {/* <TableCell align="left">{id}</TableCell> */}
-                        </TableRow>
-                      );
-                    })}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-  
-                  {isProcedureNotFound && (
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                          <SearchNotFound searchQuery={filterProcedure} />
+          <ProcedureListToolbar numSelected={selected.length} filterProcedure={filterProcedure} onFilterProcedure={handleFilterByProcedure} />
+          <Scrollbar>
+            <TableContainer sx={{ minWidth: 800 }}>
+              <Table>
+                <ProcedureListHead
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={procedureList.length}
+                  // numSelected={selected.length}
+                  // onRequestSort={handleRequestSort}
+                  // onSelectAllClick={handleSelectAllClick}
+                />
+                <TableBody>
+                  {filteredProcedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                    const { id, procedure, date, time, duration, cost } = row;
+                    const isItemSelected = selected.indexOf(procedure) !== -1;
+
+                    return (
+                      <TableRow
+                        hover
+                        key={id}
+                        tabIndex={-1}
+                        role="checkbox"
+                        selected={isItemSelected}
+                        aria-checked={isItemSelected}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, procedure)} />
                         </TableCell>
+                        <TableCell component="th" scope="row" padding="none">
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Typography variant="subtitle2" noWrap>
+                              {sentenceCase(procedure)}
+                            </Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell align="left">{humanDate(date)}</TableCell>
+                        <TableCell align="left">{time}</TableCell>
+                        <TableCell align="left">{humanDuration(duration)}</TableCell>
+                        <TableCell align="left">{cost}</TableCell>
+                        {/* <TableCell align="left">{id}</TableCell> */}
                       </TableRow>
-                    </TableBody>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
                   )}
-                </Table>
-              </TableContainer>
-            </Scrollbar>
-  
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={procedureList.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Card>
+                </TableBody>
+
+                {isProcedureNotFound && (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                        <SearchNotFound searchQuery={filterProcedure} />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
+          </Scrollbar>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={procedureList.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Card>
       </Container>
     </Page>
   )

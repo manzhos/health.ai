@@ -125,7 +125,7 @@ export default function TimeTable(){
       const res = await request(`${API_URL}api/doc_procedures/${userId}`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
-      console.log('procedures:', res)
+      // console.log('procedures:', res)
       let procedures = res.map((el) => {
         const d = new Date(el.date),
               t = el.time.split(':'),
@@ -143,7 +143,7 @@ export default function TimeTable(){
           'end'             : end,
         }
       })
-      console.log('p:', procedures)
+      // console.log('p:', procedures)
       setProcedureList(procedures)
     } catch (e) { console.log('error:', e)}
   }, [jwt, request])

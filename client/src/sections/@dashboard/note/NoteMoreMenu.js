@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { sentenceCase } from 'change-case';
 // material
 import { 
@@ -11,6 +11,7 @@ import {
   Button,
   Box,
   Modal,
+  Link,
   Checkbox,
   Container,
   Typography,
@@ -41,12 +42,25 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
   // };
   // const pJWT = parseJwt(jwt)
   // const userId = pJWT.userId
+  
+  const {request} = useHttp()
 
   const [client, setClient] = useState(note.client_id)
   const [doctor, setDoctor] = useState(note.doctor_id)
   const [procedure, setProcedure] = useState(note.procedure_id)
+  const [file, setFile] = useState()
+  const [files, setFiles] = useState([{"id":1,"2":2,"3":3}, {"1":1,"id":2,"3":3}, {"1":1,"id":2,"3":3}])
   
-  const {request} = useHttp()
+  const getFiles = useCallback(async () => {
+    try {
+      const res_f = await request(`${API_URL}api/files/${note.id}`, 'GET', null, {
+        Authorization: `Bearer ${jwt}`
+      })
+      setFiles(res_f)
+      console.log('files', files)
+      console.log('res_f', res_f)
+    } catch (e) { console.log('error:', e)}
+  }, [jwt, request])
 
   const handleDelete = async (event) => {
     event.preventDefault()
@@ -83,7 +97,10 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
   }
 
   const [open, setOpen] = useState(false)
-  const handleOpen = () => setOpen(true)
+  const handleOpen = async () => {
+    await getFiles()
+    setOpen(true)
+  }
   const handleClose = () => setOpen(false)
 
   const handleChangeClient = (event) => {
@@ -98,6 +115,36 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
     event.preventDefault();
     setProcedure(event.target.value)
   } 
+
+  //send File
+  const onFileChange = (e) => {
+    console.log('E:', e)
+    setFile(e.target.files[0])
+    console.log('file:', file)
+  } 
+
+  const addFile = async (event) => {
+    event.preventDefault()
+    // console.log('adding file:', event)
+    // console.log('note.id:', note.id)
+    // console.log('file:', file)
+    // const data = new FormData(event.currentTarget)
+    try {
+      const formData = new FormData()
+      formData.append('note_id', note.id)
+      formData.append('client_id', note.client_id)
+      formData.append('doctor_id', note.doctor_id)
+      formData.append('procedure_id', note.procedure_id)
+      formData.append('file', file)
+      const res = await fetch(`${API_URL}api/file`, {
+        method: 'POST', 
+        body: formData,
+      })
+      // setOpen(false)
+      // onChange(true)
+      getFiles()
+    } catch (e) { console.log('error:', e)}
+  }
 
   return (
     <>
@@ -175,62 +222,84 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
-                          <FormControl sx={{ width: 1 }}>
-                            <InputLabel id="client-select">Client</InputLabel>
-                            <Select
-                              labelId="client-select"
-                              id="client-select"
-                              name="client_id"
-                              value={client}
-                              label="Client"
-                              onChange={handleChangeClient} 
-                            >
-                              {clientList.map((item, key)=>{
-                                return(
-                                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                          <FormControl sx={{ width: 1 }}>
-                            <InputLabel id="doctor-select">Doctor</InputLabel>
-                            <Select
-                              labelId="doctor-select"
-                              id="doctor-select"
-                              name="doctor_id"
-                              value={doctor}
-                              label="Doctor"
-                              onChange={handleChangeDoctor} 
-                            >
-                              {doctorList.map((item, key)=>{
-                                return(
-                                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                          <FormControl sx={{ width: 1 }}>
-                            <InputLabel id="procedure-select">Procedure</InputLabel>
-                            <Select
-                              labelId="procedure-select"
-                              id="procedure-select"
-                              name="procedure_id"
-                              value={procedure}
-                              label="Procedure"
-                              onChange={handleChangeProcedure} 
-                            >
-                              {procedureList.map((item, key)=>{
-                                return(
-                                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.procedure)}</MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Grid>
+                    <FormControl sx={{ width: 1 }}>
+                      <InputLabel id="client-select">Client</InputLabel>
+                      <Select
+                        labelId="client-select"
+                        id="client-select"
+                        name="client_id"
+                        value={client}
+                        label="Client"
+                        onChange={handleChangeClient} 
+                      >
+                        {clientList.map((item, key)=>{
+                          return(
+                            <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                          )
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <FormControl sx={{ width: 1 }}>
+                      <InputLabel id="doctor-select">Doctor</InputLabel>
+                      <Select
+                        labelId="doctor-select"
+                        id="doctor-select"
+                        name="doctor_id"
+                        value={doctor}
+                        label="Doctor"
+                        onChange={handleChangeDoctor} 
+                      >
+                        {doctorList.map((item, key)=>{
+                          return(
+                            <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                          )
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <FormControl sx={{ width: 1 }}>
+                      <InputLabel id="procedure-select">Procedure</InputLabel>
+                      <Select
+                        labelId="procedure-select"
+                        id="procedure-select"
+                        name="procedure_id"
+                        value={procedure}
+                        label="Procedure"
+                        onChange={handleChangeProcedure} 
+                      >
+                        {procedureList.map((item, key)=>{
+                          return(
+                            <MenuItem key={item.id} value={item.id}>{sentenceCase(item.procedure)}</MenuItem>
+                          )
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* add file */}
+                  <Grid item xs={12} sm={12}>
+                    {/* <img src={avatarURL || avatar()} className='avatar' alt="" /> */}
+                    <div>
+                      Files: 
+                      {files.map(item => 
+                        <div key={item.id} style={{marginBottom:"20px"}}>
+                          <Link  href={API_URL+'docs/'+item.filename}>
+                            <img src={API_URL+'docs/'+item.filename} style={{width:"140px", height:"auto"}}/>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                    <label htmlFor="files">
+                      <input id="files" name="file" type="file" accept='image/*' onChange={onFileChange}/>
+                      <Button variant="outlined" component="span" onClick={addFile}>
+                        Add file
+                      </Button>
+                    </label>
+                  </Grid>
+
                 </Grid>
                 <Button
                   type="submit"
