@@ -50,7 +50,7 @@ class NoteController {
   async getNote(req, res){
     // console.log('get note by ID:')
     const id = req.params.id
-    const sql = `SELECT id, title, note, client_id, doctor_id, procedure_id FROM notes WHERE doctype=0 AND id = $1;`
+    const sql = `SELECT id, title, note, client_id, doctor_id, procedure_id FROM notes WHERE doc_type=0 AND id = $1;`
     const note = await DB.query(sql,[id])
     // console.log(`note #${id}:`, note.rows[0])
     res.send(note.rows[0])

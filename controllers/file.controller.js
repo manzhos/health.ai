@@ -7,31 +7,44 @@ class FileController {
   async uploadFile(req, res){
     if(!req.files) return
 
-    // save the file
-    const file = req.files.file
-    const fileName = uuid.v4() + '_' + file.name
-    // console.log('File:', file)
-    // console.log('fileName:', fileName)
+    const {doctor_id, note_id} = req.body
     const folderName = process.env.filePath + '\\docs'
     try { if (!fs.existsSync(folderName)) fs.mkdirSync(folderName) } catch (e) { console.error(e) }
-    const pathFile = folderName + '\\' + fileName
-    // console.log('\nPath:', folderName)
-    if (fs.existsSync(pathFile)) {
-      return res.status(400).json({message: 'File already exist'})
+    
+    let file = []
+    if(req.files.file.length && req.files.file.length > 0) file = req.files.file
+    else file.push(req.files.file)
+
+    let fileName = [],
+    pathFile = []
+
+    // save the file
+    for(let key in file){
+      fileName[key] = uuid.v4() + '_' + file[key].name
+      // console.log('File:', file[key])
+      // console.log('fileName:', fileName[key])
+      pathFile[key] = folderName + '\\' + fileName[key]
+      // console.log('\nPath:', folderName, pathFile[key])
+      if (fs.existsSync(pathFile)) {
+        return res.status(400).json({message: 'File already exist'})
+      }
+      // console.log('try to move')
+      // let f = file[key]
+      file[key].mv(pathFile[key])
+      // console.log('file was saved')
+
+      // add file to DB
+      const sql = 'INSERT INTO files (filename, type, size, path, user_id, ts, doc_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
+      const ts = new Date()
+      const type = file[key].name.split('.').pop()
+      // console.log('for DB:\n', fileName, type, file.size, folderName, doctor_id, ts, note_id)    
+      await DB.query(sql, [fileName[key], type, file[key].size, folderName, doctor_id, ts, note_id])
+      // console.log('newFile:', newFile)
     }
-    // console.log('try to move')
-    file.mv(pathFile)
-    // console.log('file was saved')
   
-    // add file to DB
-    const {doctor_id, note_id} = req.body
-    const sql = 'INSERT INTO files (filename, type, size, path, user_id, ts, doc_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
-    const ts = new Date()
-    const type = file.name.split('.').pop()
-    // console.log('for DB:\n', fileName, type, file.size, folderName, doctor_id, ts, note_id)    
-    const newFile = await DB.query(sql, [fileName, type, file.size, folderName, doctor_id, ts, note_id])
-    // console.log('newFile:', newFile)
-    res.send(newFile.rows[0])  
+    const newFiles = await DB.query('SELECT * FROM files WHERE doc_id = $1', [note_id])
+    // console.log('newFiles:', newFiles)
+    res.send(newFiles.rows)  
   }
 
   async getFiles(req, res){
@@ -61,7 +74,29 @@ class FileController {
   }
 
   async deleteFile(req, res){
-    console.log('delete File by ID')
+    const id = req.params.id
+    // console.log(`delete File by ID #${id}`)
+
+    // delete from DB
+    const sql = `DELETE FROM files WHERE id = $1 RETURNING filename;`
+    const fileDeleted = await DB.query(sql, [id])
+    // console.log('fileDeleted', fileDeleted)
+    const fileName = fileDeleted.rows[0].filename
+    // console.log(`file #${id}: ${fileName} with SQL: ${sql}`)
+    
+    //delete from FS
+    const folderName = process.env.filePath + '\\docs'
+    const pathFile = folderName + '\\' + fileName
+    // console.log('pathFile:', pathFile)
+    fs.unlink(pathFile, (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      // console.log(`file #${id} removed`)
+    })
+
+    res.send(fileDeleted)    
   }
 }
 

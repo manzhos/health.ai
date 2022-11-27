@@ -19,7 +19,9 @@ import TimeTableUser from './pages/TimeTableUser'
 import TimeTableDoctor from './pages/TimeTableDoctor'
 import TimeTableOutside from './pages/TimeTableOutside'
 import Note from './pages/Note'
+import NoteInfo from './pages/NoteInfo'
 import InvoicePrint from './pages/InvoicePrint'
+import MailAdmin from './pages/MailAdmin'
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +36,14 @@ export default function Router() {
         { path: 'procedure', element: <Procedure /> },
         // { path: 'blog', element: <Blog /> },
         { path: 'timetable', element: <TimeTableAdmin /> },
+        { path: 'mail', 
+          element: <MailAdmin />, 
+          children: [
+            { path: 'mail', element: <MailAdmin /> },
+            { path: 'mail', element: <MailAdmin /> },
+            { path: 'mail', element: <MailAdmin /> }
+          ]
+        },
       ],
     },
     {
@@ -55,6 +65,7 @@ export default function Router() {
         { path: 'procedure', element: <Procedure /> },
         { path: 'timetable', element: <TimeTableDoctor /> },
         { path: 'note', element: <Note /> },
+        { path: 'user/note/:id', element: <NoteInfo /> },
       ],
     },
     {

@@ -106,3 +106,17 @@ body {
   height: auto;
   margin: 0 0 10px;
 }
+
+.docfile {
+  width: 140px;
+  text-align: center;
+  margin:20px;
+  display: inline-block;
+}
+
+.imgfile {
+  height: auto;
+  max-height: 120px;
+  margin: 0 auto;
+}
+

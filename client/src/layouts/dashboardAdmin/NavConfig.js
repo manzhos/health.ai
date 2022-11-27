@@ -26,6 +26,12 @@ const navConfig = [
     path: '/admin/timetable',
     icon: getIcon('eva:calendar-fill'),
   },
+  {
+    title: 'email',
+    path: '/admin/mail',
+    // icon: getIcon('eva:email-outline'),
+    icon: getIcon('eva:email-fill'),
+  },
   // {
   //   title: 'blog',
   //   path: '/dashboard/blog',

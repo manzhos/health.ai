@@ -45,20 +45,29 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
   
   const {request} = useHttp()
 
+  const [open, setOpen] = useState(false)
   const [client, setClient] = useState(note.client_id)
   const [doctor, setDoctor] = useState(note.doctor_id)
   const [procedure, setProcedure] = useState(note.procedure_id)
-  const [file, setFile] = useState()
-  const [files, setFiles] = useState([{"id":1,"2":2,"3":3}, {"1":1,"id":2,"3":3}, {"1":1,"id":2,"3":3}])
+  const [files, setFiles] = useState([])
+  const [savedFiles, setSavedFiles] = useState([])
   
   const getFiles = useCallback(async () => {
     try {
       const res_f = await request(`${API_URL}api/files/${note.id}`, 'GET', null, {
         Authorization: `Bearer ${jwt}`
       })
-      setFiles(res_f)
-      console.log('files', files)
-      console.log('res_f', res_f)
+      res_f.map((item) => {
+        let type = item.filename.toLowerCase().split('.')
+        if(type[1] === 'jpg' || type[1] === 'jpeg' || type[1] === 'png' || type[1] === 'gif') item.type = 'img'
+        else if(type[1] === 'mpg' || type[1] === 'mpeg' || type[1] === 'mov' || type[1] === 'avi' || type[1] === 'asf' || type[1] === 'mp4' || type[1] === 'm4v') item.type = 'mov'
+        else item.type = 'file'
+        let displayFileName = type[0].split('_')
+        displayFileName.shift()
+        item.displayFileName = displayFileName.join('_')
+      }) 
+      // console.log('savedFiles(res_f):', res_f)
+      setSavedFiles(res_f)
     } catch (e) { console.log('error:', e)}
   }, [jwt, request])
 
@@ -96,7 +105,6 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
     } catch (e) { console.log('error:', e)}
   }
 
-  const [open, setOpen] = useState(false)
   const handleOpen = async () => {
     await getFiles()
     setOpen(true)
@@ -118,16 +126,21 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
 
   //send File
   const onFileChange = (e) => {
-    console.log('E:', e)
-    setFile(e.target.files[0])
-    console.log('file:', file)
+    // console.log('E -> e.target.files:', e.target.files, typeof e.target.files)
+    let fileArr = [];    
+    for(let key in e.target.files){
+      fileArr.push(e.target.files[key])
+    }
+    fileArr.length = fileArr.length - 2;
+    setFiles(fileArr)
+    // console.log('files:', files)
   } 
 
   const addFile = async (event) => {
     event.preventDefault()
     // console.log('adding file:', event)
     // console.log('note.id:', note.id)
-    // console.log('file:', file)
+    // console.log('files:', files)
     // const data = new FormData(event.currentTarget)
     try {
       const formData = new FormData()
@@ -135,7 +148,7 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
       formData.append('client_id', note.client_id)
       formData.append('doctor_id', note.doctor_id)
       formData.append('procedure_id', note.procedure_id)
-      formData.append('file', file)
+      files.map((item)=>{formData.append('file', item)})
       const res = await fetch(`${API_URL}api/file`, {
         method: 'POST', 
         body: formData,
@@ -144,6 +157,14 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
       // onChange(true)
       getFiles()
     } catch (e) { console.log('error:', e)}
+  }
+
+  const onDelButtonClick = async (e, id) => {
+    // console.log('E:', e, 'Id:', id)
+    const del = await fetch(`${API_URL}api/file/${id}`, {
+      method: 'DELETE'
+    })
+    getFiles()
   }
 
   return (
@@ -281,19 +302,30 @@ export default function NoteMoreMenu({id, note, procedureList, clientList, docto
 
                   {/* add file */}
                   <Grid item xs={12} sm={12}>
-                    {/* <img src={avatarURL || avatar()} className='avatar' alt="" /> */}
                     <div>
                       Files: 
-                      {files.map(item => 
-                        <div key={item.id} style={{marginBottom:"20px"}}>
-                          <Link  href={API_URL+'docs/'+item.filename}>
-                            <img src={API_URL+'docs/'+item.filename} style={{width:"140px", height:"auto"}}/>
+                    </div>
+                    <div>
+                      {savedFiles.map(item => 
+                        <div key={item.id} style={{margin:"20px", width:"140px", display:"inline-block"}}>
+                          <Link href={API_URL+'docs/'+item.filename}>
+                            {item.type === 'img' &&
+                              <img src={API_URL+'docs/'+item.filename} style={{height:"auto", maxHeight:"120px"}}/>
+                            }
+                            {item.type === 'mov' &&
+                              <img src={API_URL+'video.png'} style={{height:"auto", maxHeight:"90px", margin:"0 auto"}}/>
+                            }
+                            {item.type === 'file' &&
+                              <img src={API_URL+'document.png'} style={{height:"auto", maxHeight:"90px", margin:"0 auto"}}/>
+                            }
+                            <div>{item.displayFileName}</div> 
                           </Link>
+                          <Button id="DelButton" onClick={(e) => onDelButtonClick(e, item.id)} variant="text" color="error" size="small">&#10006; Delete</Button>
                         </div>
                       )}
                     </div>
                     <label htmlFor="files">
-                      <input id="files" name="file" type="file" accept='image/*' onChange={onFileChange}/>
+                      <input id="files" name="file" type="file" formEncType='multipart/form-data' accept='' onChange={onFileChange} multiple/>
                       <Button variant="outlined" component="span" onClick={addFile}>
                         Add file
                       </Button>

@@ -246,7 +246,7 @@ export default function User() {
 
   const getUser = (event, id) => {
     event.preventDefault()
-    console.log('get User:', id)
+    // console.log('get User:', id)
     navigate(`/doctor/user/docs/${id}`)
   }
 

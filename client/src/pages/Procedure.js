@@ -164,7 +164,7 @@ export default function Procedure() {
   const handleChangeProcedureType = (event) => {
     event.preventDefault();
     setProcedureType(event.target.value)
-    console.log('procedureType now:', procedureType)
+    // console.log('procedureType now:', procedureType)
   }
 
   const handleSubmit = async (event) => {

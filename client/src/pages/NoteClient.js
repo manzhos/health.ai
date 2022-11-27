@@ -244,7 +244,13 @@ export default function NoteClient({clientId}) {
   const handleChangeProcedure = (event) => {
     event.preventDefault();
     setProcedure(event.target.value)
-  }  
+  } 
+  
+  const getNote = (event, id, doctor_firstname, doctor_lastname, procedure) => {
+    event.preventDefault()
+    // console.log('get Note:', id)
+    navigate(`/doctor/user/note/${id}?doctor_firstname=${doctor_firstname}&doctor_lastname=${doctor_lastname}&procedure=${procedure}`)
+  }
 
   if (loading) return <Loader/>
   else {
@@ -408,8 +414,8 @@ export default function NoteClient({clientId}) {
                           </Typography>
                         </Stack>
                       </TableCell> */}
-                      <TableCell align="left">{sentenceCase(title)}</TableCell>
-                      <TableCell align="left">{note}</TableCell>
+                      <TableCell align="left" onClick={(event) => getNote(event, id, doctor_firstname, doctor_lastname, procedure)}>{sentenceCase(title)}</TableCell>
+                      <TableCell align="left" onClick={(event) => getNote(event, id, doctor_firstname, doctor_lastname, procedure)}>{note}</TableCell>
                       <TableCell align="left">{sentenceCase(client_firstname)}&nbsp;{sentenceCase(client_lastname)}</TableCell>
                       <TableCell align="left">{sentenceCase(doctor_firstname)}&nbsp;{sentenceCase(doctor_lastname)}</TableCell>
                       <TableCell align="left">{procedure}</TableCell>

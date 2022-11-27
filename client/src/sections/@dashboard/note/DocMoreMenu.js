@@ -28,7 +28,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
 export default function DocMoreMenu({id, row}) {
-  console.log('DocMoreMenu:', id, row)
+  // console.log('DocMoreMenu:', id, row)
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const jwt = localStorage.getItem("jwt")
