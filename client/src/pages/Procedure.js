@@ -77,11 +77,11 @@ function applySortFilter(array, comparator, query) {
 export default function Procedure() {
   const jwt = localStorage.getItem("jwt")
   const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
   const [order, setOrder] = useState('asc')
   const [selected, setSelected] = useState([])
   const [orderBy, setOrderBy] = useState('name')
   const [filterName, setFilterName] = useState('')
-  const [rowsPerPage, setRowsPerPage] = useState(5)
   const [procedureList, setProcedureList] = useState([])
   const [procedureTypeList, setProcedureTypeList] = useState([])
   const [procedureType, setProcedureType] = useState(1)
@@ -107,7 +107,7 @@ export default function Procedure() {
   const getProcedureTypes = useCallback(async () => {
     try {
       const res = await request(`${API_URL}api/proceduretypes`, 'GET', null, {
-        Authorization: `Bearer ${jwt}`
+        // Authorization: `Bearer ${jwt}`
       })
       setProcedureTypeList(res);
     } catch (e) { console.log('error:', e)}

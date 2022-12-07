@@ -43,7 +43,7 @@ class UserController {
     const newuser = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
     if (newuser.rows && newuser.rows.length) return res.status(400).json({ message: 'User already exist' })
     const hashedPassword = await bcrypt.hash(password, 12)
-    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *'
+    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
     let ts = new Date()
     // User type:::  1 - Admin, 2 - Doctor, 3 - Client
     // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)

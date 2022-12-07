@@ -36,7 +36,7 @@ import { Loader } from '../components/Loader';
 import {API_URL} from '../config'
 import DocClient from './DocClient'
 import NoteClient from './NoteClient'
-
+import Mail from './Mail'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -68,6 +68,17 @@ function a11yProps(index) {
 
 export default function UserDocs() {
   const jwt = localStorage.getItem("jwt")
+  function parseJwt (token) {
+    var base64Url = token.split('.')[1]
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+    return JSON.parse(jsonPayload)
+  };
+  const pJWT = parseJwt(jwt)
+  const userId = pJWT.userId
+
   const {loading, request} = useHttp()
   const params = useParams()
   const clientId = params.id
@@ -112,7 +123,7 @@ export default function UserDocs() {
         <Tabs value={tab} onChange={handleTabChange} aria-label="doc tabs">
           <Tab label="Documents" {...a11yProps(0)} />
           <Tab label="Notes" {...a11yProps(1)} />
-          {/* <Tab label="Invoices" {...a11yProps(2)} /> */}
+          <Tab label="Comunications" {...a11yProps(2)} />
         </Tabs>
       </Box>
       <TabPanel value={tab} index={0}>
@@ -121,9 +132,9 @@ export default function UserDocs() {
       <TabPanel value={tab} index={1}>
         <NoteClient clientId={clientId} />
       </TabPanel>
-      {/* <TabPanel value={value} index={2}>
-        Invoices
-      </TabPanel> */}
+      <TabPanel value={tab} index={2}>
+        <Mail docId={userId} clientId={clientId} />
+      </TabPanel>
 
     </Card>
   )

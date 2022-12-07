@@ -8,6 +8,7 @@ create TABLE users(
   "usertype_id" INT2,
   "promo" BOOLEAN DEFAULT true,
   "avatar" TEXT,
+  "confirm" BOOLEAN DEFAULT false,
   "archive" BOOLEAN DEFAULT false
 );
 
@@ -38,6 +39,7 @@ create TABLE timetable(
   "date" DATE, 
   "time" TEXT, 
   "duration" INT2,
+  "consultation" BOOLEAN DEFAULT false,   
   "ts" TIMESTAMPTZ
 );
 

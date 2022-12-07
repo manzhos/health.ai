@@ -31,6 +31,11 @@ const navConfig = [
     path: '/doctor/note',
     icon: getIcon('material-symbols:note-alt-rounded'),
   },
+  {
+    title: 'email',
+    path: '/doctor/mail',
+    icon: getIcon('eva:email-fill'),
+  },
 ];
 
 export default navConfig;

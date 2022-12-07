@@ -22,6 +22,10 @@ import Note from './pages/Note'
 import NoteInfo from './pages/NoteInfo'
 import InvoicePrint from './pages/InvoicePrint'
 import MailAdmin from './pages/MailAdmin'
+import Mail from './pages/Mail'
+import ConsultForm from './pages/ConsultForm'
+import TestPage from './pages/TestPage'
+import Thanks from './pages/Thanks'
 
 // ----------------------------------------------------------------------
 
@@ -65,6 +69,7 @@ export default function Router() {
         { path: 'procedure', element: <Procedure /> },
         { path: 'timetable', element: <TimeTableDoctor /> },
         { path: 'note', element: <Note /> },
+        { path: 'mail', element: <Mail /> },
         { path: 'user/note/:id', element: <NoteInfo /> },
       ],
     },
@@ -87,6 +92,18 @@ export default function Router() {
     {
       path: '/invoiceprint',
       element: <InvoicePrint />,
+    },
+    {
+      path: '/consult',
+      element: <ConsultForm />,
+    },
+    {
+      path: '/thanks',
+      element: <Thanks />,
+    },
+    {
+      path: '/test',
+      element: <TestPage />,
     },
     {
       path: '/',

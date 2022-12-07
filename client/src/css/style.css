@@ -71,6 +71,13 @@ body {
   transform: translateX(-105px);
 }
 
+.logo-consult-form{
+  display: flex;
+  margin: 10vh 0px 0px;
+  transform: translateX(-50%);
+  max-width: 280px;
+}
+
 .time-btn{
   margin: 5px 10px;
   width: 80px;
@@ -120,3 +127,12 @@ body {
   margin: 0 auto;
 }
 
+.consult-form {
+  width: 100%;
+}
+
+.cons-input {
+  -webkit-box-shadow: 0px 4px 27px -20px rgba(66, 68, 90, 1);
+  -moz-box-shadow:    0px 4px 27px -20px rgba(66, 68, 90, 1);
+  box-shadow:         0px 4px 27px -20px rgba(66, 68, 90, 1);
+}
