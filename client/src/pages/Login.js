@@ -145,7 +145,7 @@ export default function Login() {
                     </Link>
                   </Grid>
                 </Grid>
-                <AuthSocial />
+                {/* <AuthSocial /> */}
               </Box>
             </Box>
           </div>

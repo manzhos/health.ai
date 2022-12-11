@@ -9,6 +9,7 @@ import User from './pages/User'
 import UserForDoctor from './pages/UserForDoctor'
 import UserDocs from './pages/UserDocs'
 import Login from './pages/Login'
+import LoginPWA from './pages/LoginPWA'
 import NotFound from './pages/Page404'
 import Register from './pages/Register'
 import Procedure from './pages/Procedure'
@@ -84,6 +85,10 @@ export default function Router() {
     {
       path: '/login',
       element: <Login />,
+    },
+    {
+      path: '/loginpwa',
+      element: <LoginPWA />,
     },
     {
       path: '/register',

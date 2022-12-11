@@ -1,10 +1,24 @@
 const {Router} = require('express')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const {check, validationResult} = require('express-validator')
-const User = require('../models/User')
+// const bcrypt = require('bcryptjs')
+// const jwt = require('jsonwebtoken')
+// const {check, validationResult} = require('express-validator')
+// const User = require('../models/User')
 const router = Router()
 require('dotenv').config()
+const passport = require('passport');
+
+
+router.get('/auth/google', authController.createNote);//passport.authenticate('google', { scope : ['profile', 'email'] }));
+ 
+router.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/error' }),
+  async function(req, res) {
+    // Successful authentication, redirect success.
+    console.log('req:', req);
+
+    res.redirect('http://localhost:3000/consult');
+  });
+
 
 // /api/auth/register
 // router.post(
@@ -38,8 +52,8 @@ require('dotenv').config()
 // })
 
 // /api/auth/login
-router.post(
-  '/login', (req, res)=>{res.json({message: 'login'})}
+// router.post(
+//   '/login', (req, res)=>{res.json({message: 'login'})}
   // async (req, res) => {
   // try {
   //   const {username, password} = req.body
@@ -59,6 +73,6 @@ router.post(
   //   res.status(500).json({ message: 'Something wrong' })
   // }
 // }
-)
+// )
 
 module.exports = router

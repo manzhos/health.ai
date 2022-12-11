@@ -1,6 +1,7 @@
 // scroll bar
 import 'simplebar/src/simplebar.css'
 
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
@@ -11,8 +12,6 @@ import App from './App'
 // import reportWebVitals from './reportWebVitals'
 import { store } from './app/store'
 import { Provider } from 'react-redux'
-import { GoogleOAuthProvider } from '@react-oauth/google'
-import {GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET} from './config'
 
 // ----------------------------------------------------------------------
 const root = ReactDOM.createRoot(document.getElementById('root'))
@@ -21,9 +20,7 @@ root.render(
   <Provider store={store}>
     <HelmetProvider>
       <BrowserRouter>
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <App />
-        </GoogleOAuthProvider>
+        <App />
       </BrowserRouter>
     </HelmetProvider>
   </Provider>

@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 // icons
 import { Icon } from '@iconify/react';

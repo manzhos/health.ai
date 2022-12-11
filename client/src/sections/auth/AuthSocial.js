@@ -1,45 +1,38 @@
+import React from 'react';
 // material
-import { Stack, Button, Divider, Typography } from '@mui/material';
+import { Stack, Button, Link, Divider, Typography } from '@mui/material';
 // component
-import Iconify from '../../components/Iconify';
-import { GoogleLogin } from '@react-oauth/google'
-// import { Navigate } from 'react-router-dom';
+import Iconify from 'src/components/Iconify';
+
+import { API_URL } from '../../config';
 
 // ----------------------------------------------------------------------
 
 export default function AuthSocial() {
-  // const navigate = Navigate()
 
-  // const login = (credentialResponse) => {
-  //   console.log(credentialResponse)
-  //   navigate('/admin/app')
-  // }
+  const regLinkGoogle = API_URL + 'auth/google';
 
   return (
     <>
-      <Divider sx={{ my: 1 }}>
+      {/* <Divider sx={{ my: 1 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           OR
         </Typography>
-      </Divider>
+      </Divider> */}
 
-      <Stack direction="row" spacing={2}>
-        {/* <Button fullWidth size="large" color="inherit" variant="outlined">
-          <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
+      <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" >
+        <Link href={regLinkGoogle} color="inherit" justifyContent="center" alignItems="center" className="social-reg" style={{ paddingTop:"8px" }}>
+          <Iconify icon="eva:google-fill" color="#DF3E30" width={26} height={26} />
+        </Link>
+        {/* <Button fullWidth size="large" color="inherit" variant="outlined" className="social-reg" onClick={regGoogle}>
+          <Iconify icon="eva:google-fill" color="#DF3E30" width={26} height={26} />
         </Button> */}
-        <div style={{width:"217px", margin:"0 auto"}}>
-          <GoogleLogin
-            onSuccess={(credentialResponse) => { console.log(credentialResponse) }}
-            // onSuccess={(credentialResponse) => { login(credentialResponse) }}
-            onError={() => { console.log('Login Failed') }}
-          />
-        </div>
 
-        {/* <Button fullWidth size="large" color="inherit" variant="outlined">
-          <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
+        <Button fullWidth size="large" color="inherit" variant="outlined" className="social-reg">
+          <Iconify icon="ic:baseline-apple" color="#282828" width={32} height={32} />
         </Button>
 
-        <Button fullWidth size="large" color="inherit" variant="outlined">
+        {/* <Button fullWidth size="large" color="inherit" variant="outlined">
           <Iconify icon="eva:twitter-fill" color="#1C9CEA" width={22} height={22} />
         </Button> */}
       </Stack>
