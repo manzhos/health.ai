@@ -20,10 +20,10 @@ import {
   Divider,
   Link
 } from '@mui/material'
-import ProcedureType from '../components/ProcedureType'
-import ProcedureList from '../components/ProcedureList'
-import AddFile       from '../components/AddFile'
-import BreastAugmentation from 'src/components/ConsForm/BreastAugmentation'
+import ProcedureType      from '../components/ProcedureType'
+import ProcedureList      from '../components/ProcedureList'
+import AddFile            from '../components/AddFile'
+import BreastAugmentation from '../components/ConsForm/BreastAugmentation'
 import {API_URL} from '../config'
 
 export default function ConsultForm(){

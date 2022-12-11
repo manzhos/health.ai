@@ -23,7 +23,7 @@ import { AuthContext } from '../context/AuthContext'
 
 const theme = createTheme()
 
-export default function Login() {
+export default function LoginPWA() {
   const {request} = useHttp()
   const navigate  = useNavigate()
   const auth = useContext(AuthContext)
@@ -34,23 +34,23 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     console.log('submit');
-    // const data = new FormData(event.currentTarget)
-    // if(data.get('email') && data.get('password')){
-    //   try {
-    //     const res = await request(`${API_URL}api/login`, 'POST', {
-    //       email:      data.get('email'),
-    //       password:   data.get('password'),
-    //       remember:   data.get('remember'),
-    //     })
-    //     auth.login(res.token, res.user.id)
-    //     localStorage.setItem("jwt", res.token)
-    //     Redirect(res.user.usertype_id)
-    //   } catch (e) {
-    //     console.log('error:', e)
-    //     alert('Please check your login and password details or you may need to register.')
-    //   } 
-    //   // eslint-disable-next-line
-    // } else alert('You need to fill fields.')
+    const data = new FormData(event.currentTarget)
+    if(data.get('email') && data.get('password')){
+      try {
+        const res = await request(`${API_URL}api/login`, 'POST', {
+          email:      data.get('email'),
+          // password:   data.get('password'),
+          // remember:   data.get('remember'),
+        })
+        auth.login(res.token, res.user.id)
+        localStorage.setItem("jwt", res.token)
+        Redirect(res.user.usertype_id)
+      } catch (e) {
+        console.log('error:', e)
+        alert('Please check your login and password details or you may need to register.')
+      } 
+      // eslint-disable-next-line
+    } else alert('You need to fill fields.')
   }
 
   function Redirect(route) {

@@ -13,6 +13,8 @@ if(process.env.NODE_ENV === 'production') {
 }
 
 const PORT = process.env.PORT || 3300
+const API_URL = process.env.API_URL
+const URL     = process.env.URL    
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -103,7 +105,7 @@ const GOOGLE_CLIENT_SECRET  = process.env.GOOGLE_CLIENT_SECRET;   //'our-google-
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3300/auth/google/callback"
+    callbackURL: `${API_URL}/auth/google/callback`
   },
   function(accessToken, refreshToken, profile, done) {
       userProfile=profile;
@@ -124,13 +126,23 @@ app.get('/auth/google/callback',
       'id':         req.user.id,
       'firstName':  req.user.name.givenName,
       'lastName':   req.user.name.familyName,
-      'emails':     req.user.name.emails,
-      'photos':     req.user.name.photos,
+      'email':      req.user.emails[0].value,
+      'avatar':     req.user.photos[0].value,
     }
     console.log('googleUser:', googleUser);
-    // const users = await DB.query('SELECT * FROM users ');
-    // console.log('users:', users);
+    const user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
+    console.log('user:', user);
+    if(!user || user.rows.length === 0){
+      user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
 
-    // res.redirect('http://localhost:3000/consult');
+      const hashedPassword = await bcrypt.hash(googleUser.id, 12)
+      const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
+      let ts = new Date()
+      // User type:::  1 - Admin, 2 - Doctor, 3 - Client
+      // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
+      user = await DB.query(sql,[googleUser.firstName, googleUser.lastName, googleUser.email, hashedPassword, ts, 3, true, googleUser.avatar])
+    }
+
+    res.redirect(`${URL}/consult`);
   });
   
