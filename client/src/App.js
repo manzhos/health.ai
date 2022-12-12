@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react';
-// routes
+import React from 'react';
 import Router from './routes';
 // theme
-// import { createTheme, ThemeProvider } from '@mui/material';
+// import { ThemeProvider } from '@mui/material';
 import ThemeProvider from './theme';
 import './css/style.css';
 // components
-import ScrollToTop from './components/ScrollToTop';
-import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
+// import ScrollToTop from './components/ScrollToTop';
+// import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
 
 // const theme = createMuiTheme({
 //   typography: {
@@ -22,8 +21,8 @@ import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
 export default function App() {
   return (
     <ThemeProvider>
-      <ScrollToTop />
-      <BaseOptionChartStyle />
+      {/* <ScrollToTop /> */}
+      {/* <BaseOptionChartStyle /> */}
       <Router />
     </ThemeProvider>
   );

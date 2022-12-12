@@ -1,18 +1,15 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, { useState, useEffect } from "react";
 // mui
 import { 
-  FormControl,
-  InputLabel,
   Grid,
-  Button,
-  Link
+  Button
 } from '@mui/material'
 // -----------------------------------------
-import { useHttp } from '../hooks/http.hook'
+// import { useHttp } from '../hooks/http.hook'
 import { API_URL } from '../config'
 
 export default function AddFile({ onFileChange }){
-  const {request} = useHttp()
+  // const {request} = useHttp()
 
   const [file, setFile] = useState([])
   const [fileURL, setFileURL] = useState([])
@@ -46,7 +43,7 @@ export default function AddFile({ onFileChange }){
 
   const onDelButtonClick = async (e, id) => {
     console.log('E:', e, 'Id:', id);
-    setFileURL(fileURL.filter(item => item.id != id));
+    setFileURL(fileURL.filter(item => item.id !== id));
   }
 
   return(
@@ -62,10 +59,10 @@ export default function AddFile({ onFileChange }){
               <img src={item.url} alt=""/>
             }
             {item.type === 'mov' &&
-              <img src={API_URL+'video.png'} />
+              <img src={API_URL+'video.png'} alt="" />
             }
             {item.type === 'file' &&
-              <img src={API_URL+'document.png'} />
+              <img src={API_URL+'document.png'} alt="" />
             }
             <p style={{fontSize:"10px", lineHeight:"10px", marginTop:"5px"}}>{item.name}</p>
             <Button id="DelButton" onClick={(e) => onDelButtonClick(e, item.id)} variant="text" color="error" size="small">&#10006; Delete</Button>

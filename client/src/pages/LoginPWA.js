@@ -1,27 +1,22 @@
 import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Avatar from '@mui/material/Avatar'
-import Button from '@mui/material/Button'
-import CssBaseline from '@mui/material/CssBaseline'
-import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
-import Link from '@mui/material/Link'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import Typography from '@mui/material/Typography'
-import Container from '@mui/material/Container'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { 
+  Button,
+  Grid,
+  Box,
+  Container,
+  TextField
+} from '@mui/material'
+// import { createTheme } from '@mui/material/styles'
 
-import AuthSocial from '../sections/auth/AuthSocial'
+import AuthSocial from '../components/AuthSocial'
 import Copyright from '../components/Copyright'
 import { API_URL } from '../config'
 
 import { useHttp } from '../hooks/http.hook'
 import { AuthContext } from '../context/AuthContext'
 
-const theme = createTheme()
+// const theme = createTheme()
 
 export default function LoginPWA() {
   const {request} = useHttp()
@@ -44,7 +39,7 @@ export default function LoginPWA() {
         })
         auth.login(res.token, res.user.id)
         localStorage.setItem("jwt", res.token)
-        Redirect(res.user.usertype_id)
+        navigate('/consult')
       } catch (e) {
         console.log('error:', e)
         alert('Please check your login and password details or you may need to register.')
@@ -53,30 +48,6 @@ export default function LoginPWA() {
     } else alert('You need to fill fields.')
   }
 
-  function Redirect(route) {
-    // redirect to external URL
-    switch (route){
-      case 1:
-        // window.top.location = `${URL}admin/app`
-        navigate('/admin/app')
-        break
-      case 2:
-        // window.top.location = `${URL}doctor/procedure`
-        navigate('/doctor/procedure')
-        break
-      case 3:
-        // window.top.location = `${URL}user/timetable`
-        navigate('/user/timetable')
-        break
-      default:
-        console.log(`Sorry, we are out of ${route}.`)
-    }
-    return null
-  }
-
-  const registrationLink = () => {
-    navigate('/register')
-  }
 
   return (
     <div className='authpage'>
@@ -126,6 +97,7 @@ export default function LoginPWA() {
             }
           </Box>
         </div>
+        <Copyright sx={{ mt: 8, mb: 4 }} style={{color:"white"}} />
       </Container>
     </div>
   )

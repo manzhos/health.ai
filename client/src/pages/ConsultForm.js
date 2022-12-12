@@ -3,33 +3,29 @@ import { useNavigate } from 'react-router-dom'
 // mui
 import { 
   Container,
-  Card,
   Box,
   Grid,
   TextField,
   FormControl,
   Typography,
-  InputLabel,
-  Select,
   FormLabel,
   RadioGroup,
   Radio,
   FormControlLabel,
   Checkbox,
   Button,
-  Divider,
-  Link
+  Divider
 } from '@mui/material'
 import ProcedureType      from '../components/ProcedureType'
 import ProcedureList      from '../components/ProcedureList'
 import AddFile            from '../components/AddFile'
 import BreastAugmentation from '../components/ConsForm/BreastAugmentation'
-import {API_URL} from '../config'
+// import {API_URL} from '../config'
 
 export default function ConsultForm(){
   const navigate  = useNavigate()
 
-  const [sex, setSex] = useState('female')
+  // const [sex, setSex] = useState('female')
   const [age, setAge] = useState(18)
   const [nameClient, setNameClient] = useState('Vladimir')
   const [confirm, setConfirm] = useState(true)
@@ -50,37 +46,37 @@ export default function ConsultForm(){
   const handleSubmit = async(event) => {
     event.preventDefault()
     navigate('/thanks')
-    const data = new FormData(event.currentTarget)
-    if(emailClient !== ''){
-      try {
-        const formData = new FormData()
-        formData.append('name',         nameClient)
-        formData.append('age',          data.get('age'))
-        formData.append('sex',          sex)
-        formData.append('procedure_id', procedureId)
-        formData.append('note',         data.get('note'))
-        formData.append('email',        emailClient)
-        formData.append('info', {
-          when: botoxWhen,
-          what: botoxWhat,
-        })
-        const res = await fetch(`${API_URL}api/consult`, {
-          method: 'POST', 
-          body: formData,
-        })
+    // const data = new FormData(event.currentTarget)
+    // if(emailClient !== ''){
+    //   try {
+    //     const formData = new FormData()
+    //     formData.append('name',         nameClient)
+    //     formData.append('age',          data.get('age'))
+    //     formData.append('sex',          sex)
+    //     formData.append('procedure_id', procedureId)
+    //     formData.append('note',         data.get('note'))
+    //     formData.append('email',        emailClient)
+    //     formData.append('info', {
+    //       when: botoxWhen,
+    //       what: botoxWhat,
+    //     })
+    //     const res = await fetch(`${API_URL}api/consult`, {
+    //       method: 'POST', 
+    //       body: formData,
+    //     })
 
-        if(files){
-          console.log('files:', files)
-          // files.map((item)=>{ formData.append('file', item) })
-          // const f = await fetch(`${API_URL}api/file`, {
-          //   method: 'POST', 
-          //   body: formData,
-          // })
-        }
+    //     if(files){
+    //       console.log('files:', files)
+    //       // files.map((item)=>{ formData.append('file', item) })
+    //       // const f = await fetch(`${API_URL}api/file`, {
+    //       //   method: 'POST', 
+    //       //   body: formData,
+    //       // })
+    //     }
 
-        navigate('/thanks')
-      } catch (e) {console.log('error:', e)} 
-    } else alert('Need to check the filled information.')
+    //     navigate('/thanks')
+    //   } catch (e) {console.log('error:', e)} 
+    // } else alert('Need to check the filled information.')
 
   }
 
@@ -180,9 +176,9 @@ export default function ConsultForm(){
                           <FormLabel id="botox-what">What drug was used for the procedure?</FormLabel>  
                           <RadioGroup row aria-labelledby="botox-what" name="botox-what">
                             <FormControlLabel value="0" control={<Radio size="small" />}  label="Allergan BTX"  onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
-                            <FormControlLabel value="1" control={<Radio size="small" />}  label="Azalure"         onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
-                            <FormControlLabel value="2" control={<Radio size="small" />}  label="Bocoutur"        onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
-                            <FormControlLabel value="3" control={<Radio size="small" />}  label="Other"           onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
+                            <FormControlLabel value="1" control={<Radio size="small" />}  label="Azalure"       onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
+                            <FormControlLabel value="2" control={<Radio size="small" />}  label="Bocoutur"      onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
+                            <FormControlLabel value="3" control={<Radio size="small" />}  label="Other"         onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
                           </RadioGroup>
                         </FormControl>
                       </Grid>

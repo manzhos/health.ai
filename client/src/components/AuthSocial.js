@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 // material
-import { Stack, Button, Link, Divider, Typography } from '@mui/material';
+import { Stack, Button, Link } from '@mui/material';
 // component
-import Iconify from '../../components/Iconify';
+import Iconify from './Iconify';
 
-import { API_URL } from '../../config';
+import { API_URL } from '../config';
 
 // ----------------------------------------------------------------------
 

@@ -1,5 +1,0 @@
-// .eslintignore
-build/*
-public/*
-src/service-worker.js
-src/serviceWorkerRegistration.js
