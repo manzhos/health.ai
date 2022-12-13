@@ -1,3 +1,26 @@
+<!-- 
+!
+What did you want to see? I made this in Word 1.0
+!
+!
+
+####     ####       ####       #####   ####
+#####   #####      ######      ######  ####
+###### ######     ########     #### ## ####
+#############    ####  ####    ####  ######
+#### ### ####   ############   ####   #####
+####  #  ####  ####      ####  ####    ####
+
+!
+!
+!
+!
+-->
+
+<!-- manžos&manžos (c) design is not forever -->
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,9 +32,24 @@
   <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon/favicon-16x16.png">
 
+	<!-- PWA -->
+    <!-- icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="manifest" href="icons/site.webmanifest">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#4b66ac">  
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- /icon -->
+
+<!--
   <meta name="theme-color" content="#000000" />
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+-->
 
   <!-- Using Google Font -->
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -29,6 +67,111 @@
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  
+  <!-- pwa script -->
+	<script type="module">
+		import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
+		const el = document.createElement('pwa-update');
+		document.body.appendChild(el);  
+	</script>
+
+  <!-- iOS install banner block -->
+    <!-- iOS install banner -->
+    <div id="iOSinstallBanner" class="iOSinstallBanner"
+         style="
+                display: none;
+                background-color: #E4E4E4;
+                border: 0 solid #F9F9F9;
+                border-radius: 10px;
+                color: #131313;
+                position: fixed;
+                width: 90vw;
+                padding: 15px;
+                bottom:20px;
+                left: 5vw;
+                z-index: 9999;
+                box-shadow: 0 0 30px 0 rgba(0,0,0,0.35);
+            ">
+
+        <div>
+            <div class="d-inline-block vert-top" style="width: 32px">
+                <img src="static/add_plus.svg" width="100%" height="auto">
+            </div>
+            <div class="d-inline-block vert-top" style="width: calc(100% - 55px); margin-left: 15px">
+                <span class="f-14">Install this app on your iPhone:</span>
+                <br/>
+                <span class="f-14">
+                        tap <img src="static/Share.svg" width="32" height="auto" class="icon-install-banner"> and then
+                        <br/>
+                        "Add to Home screen" <img src="static/Add.svg" width="32" height="auto" class="icon-install-banner">
+                    </span>
+            </div>
+        </div>
+        <div style="
+                background-image: url(static/bannerarr.svg);
+                background-size: contain;
+                background-repeat: no-repeat;
+                position: fixed;
+                bottom: 1px;
+                left: 50%;
+                margin-left: -20px;
+                width: 40px;
+                height: 40px;
+            ">
+        </div>
+
+        <div id="closeIosBanner">
+            <div class="w-100 text-center f-14 text-uppercase" onclick=" document.getElementsByClassName('iOSinstallBanner')[0].style='display: none;' " >
+                <hr class="w-25" />
+                Later
+            </div>
+        </div>
+    </div>
+
+    <!-- script for iOS install banner -->
+    <script>
+        $(window).ready(function(){
+            // Detects if device is on iOS
+            const isIos = () => {
+                const userAgent = window.navigator.userAgent.toLowerCase();
+                return /iphone|ipad|ipod/.test( userAgent );
+            }
+            // Detects if device is in standalone mode
+            const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+            this.wanttoclose = false;
+
+            // Checks if should display install popup notification:
+            if (isIos() && !isInStandaloneMode()) {
+                document.getElementsByClassName('iOSinstallBanner')[0].style= "" +
+                    "display: block;" +
+                    "background-color: #E4E4E4;" +
+                    "border: 0 solid #F9F9F9;" +
+                    "border-radius: 10px;" +
+                    "color: #131313;" +
+                    "position: fixed;" +
+                    "width: 90vw;" +
+                    "padding: 15px;" +
+                    "bottom:20px;" +
+                    "left: 5vw;" +
+                    "z-index: 9999;" +
+                    "box-shadow: 0 0 30px 0 rgba(0,0,0,0.35)";
+            }
+        });
+
+        $(document).ready(
+            close = () => {
+                console.log('Close the banner');
+                if (this.wanttoclose) {
+                    document.getElementsByClassName('iOSinstallBanner')[0].style= "" +
+                        "display: none;"
+                }
+            }
+        )
+
+    </script>
+  <!-- ENF OF iOS install banner block -->
+
 </body>
 
 </html>
