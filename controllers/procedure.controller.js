@@ -32,9 +32,8 @@ class ProcedureController {
   }
 
   async getProceduresByType(req, res){
-    console.log('get all procedures:');
     const id = req.params.id
-    console.log('ID:', id)
+    // console.log('get procedures by type:', id);
     const sql = `
       SELECT 
         p.id AS id,

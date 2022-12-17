@@ -1,12 +1,12 @@
 {
-  "name": "Helth.AI",
-  "short_name": "Helth.AI",
+  "name": "Stunning You",
+  "short_name": "SY",
   "description": "organize your clinic",
   "lang": "en-GB",
-  "start_url": "https://helth.manzhos.cz/",
+  "start_url": "https://health.sy-way.com/",
   "display": "fullscreen",
-  "theme_color": "#4b66ac",
-  "background_color": "#4b66ac",    
+  "theme_color": "#addfe0",
+  "background_color": "#addfe0",    
  "icons": [
   {
    "src": "\/icons/icon36.png",

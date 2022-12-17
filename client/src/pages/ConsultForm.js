@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react'
-import { useNavigate } from 'react-router-dom'
-// mui
+import React, { useState, useEffect, useContext } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+
 import { 
   Container,
   Box,
@@ -16,15 +16,29 @@ import {
   Button,
   Divider
 } from '@mui/material'
+import Iconify from '../components/Iconify';
+
 import ProcedureType      from '../components/ProcedureType'
 import ProcedureList      from '../components/ProcedureList'
 import AddFile            from '../components/AddFile'
 import BreastAugmentation from '../components/ConsForm/BreastAugmentation'
+import { AuthContext }    from '../context/AuthContext'
 // import {API_URL} from '../config'
 
 export default function ConsultForm(){
+  // console.warn('Authentication')
   const navigate  = useNavigate()
+  const {token} = useContext(AuthContext)
 
+  // const auth = useContext(AuthContext)
+  // const [searchParams, setSearchParams] = useSearchParams()
+  // const token  = searchParams.get("token"),
+  //       userId = searchParams.get("user_id");
+
+  // console.log('params:', token, '\n\n', userId);
+  // if(token && userId){
+  //   auth.login(token, userId)
+  // }else{navigate('/loginpwa')}
   // const [sex, setSex] = useState('female')
   const [age, setAge] = useState(18)
   const [nameClient, setNameClient] = useState('Vladimir')
@@ -34,6 +48,10 @@ export default function ConsultForm(){
   const [procedureId, setProcedureId] = useState(0)
   const [botoxWhen, setBotoxWhen] = useState(0)
   const [botoxWhat, setBotoxWhat] = useState(3)
+  const [migren, setMigren] = useState(1)
+  const [allergy, setAllergy] = useState(1)
+  const [autoimmune, setAutoimmune] = useState(1)
+  const [pregnant, setPregnant] = useState(1)
   const [breastAugmentationDetail, setBreastAugmentationDetail] = useState({});
 
   const [files, setFiles] = useState()
@@ -103,6 +121,12 @@ export default function ConsultForm(){
 
   return(
     <Container style={{textAlign:"center"}}>
+
+      <div className='user-menu'>
+        <Iconify icon="fluent:form-24-filled" className="comm-icon" />
+        <Iconify icon="material-symbols:chat-rounded" className="comm-icon" sx={{ ml:6 }} />
+      </div>
+
       <div className='logo-block'>
         <div className='logo-consult-form'>
           <img
@@ -125,7 +149,7 @@ export default function ConsultForm(){
             <Grid container item xs={10} sm={10} spacing={6}>
               <Grid item xs={12} sm={12}>
                 <Typography variant="h2" sx={{ color: 'text.secondary' }}>
-                  Hi, {nameClient}
+                  Hi {nameClient}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:3 }}>
                   {'Which procedure are you interested in?'}
@@ -140,8 +164,8 @@ export default function ConsultForm(){
                   <FormControl>
                     {/* <FormLabel id="surgery-radio-buttons-group">Choose the type of service</FormLabel> */}
                     <RadioGroup row aria-labelledby="surgery-radio-buttons-group" name="surgery" defaultValue="non-surgical">
-                      <FormControlLabel value="surgical"      control={<Radio size="small" />}  label="Surgical"     onChange={(e)=>{setSurgical(e.target.value)}} />
-                      <FormControlLabel value="non-surgical"  control={<Radio size="small" />}  label="NON-Surgical" onChange={(e)=>{setSurgical(e.target.value)}} sx={{ml: 4}} />
+                      <FormControlLabel value="surgical"      control={<Radio size="small" />}  label="Medical" onChange={(e)=>{setSurgical(e.target.value)}} />
+                      <FormControlLabel value="non-surgical"  control={<Radio size="small" />}  label="Estetic" onChange={(e)=>{setSurgical(e.target.value)}} sx={{ml: 4}} />
                     </RadioGroup>
                   </FormControl>
                 </Grid>
@@ -158,7 +182,7 @@ export default function ConsultForm(){
                   </Grid>
                 </Grid>
                 { procedureId === 1 &&
-                  <Grid container spacing={2} sx={{ mt: 2 }} justifyContent="center">
+                  <Grid container spacing={2} sx={{ mt: 2, mb: 3 }} justifyContent="center">
                     <Grid item xs={12} sm={6}>
                       <FormControl>
                         <FormLabel id="botox-when">When was the last time you had the procedure?</FormLabel>  
@@ -183,6 +207,51 @@ export default function ConsultForm(){
                         </FormControl>
                       </Grid>
                     }
+                    
+                    {/* headpain */}
+                    <Grid item xs={12} sm={6}>
+                      <FormControl sx={{ mt: 2 }}>
+                        <FormLabel id="botox-what">Have a migraine or chronic headaches?</FormLabel>  
+                        <RadioGroup row aria-labelledby="botox-what" name="botox-what" defaultValue="1">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setMigren(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setMigren(e.target.value)}} className="cons-radio"/>
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+
+                    {/* allergy */}
+                    <Grid item xs={12} sm={6}>
+                      <FormControl sx={{ mt: 2 }}>
+                        <FormLabel id="botox-what">Are there any allergies to medications?</FormLabel>  
+                        <RadioGroup row aria-labelledby="botox-what" name="botox-what" defaultValue="1">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setAllergy(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setAllergy(e.target.value)}} className="cons-radio"/>
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+
+                    {/* autoimmune */}
+                    <Grid item xs={6} sm={6}>
+                      <FormControl sx={{ mt: 2 }}>
+                        <FormLabel id="botox-what">Autoimmune</FormLabel>  
+                        <RadioGroup aria-labelledby="botox-what" name="botox-what" defaultValue="1">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+
+                    {/* pregnant */}
+                    <Grid item xs={6} sm={6}>
+                      <FormControl sx={{ mt: 2 }}>
+                        <FormLabel id="botox-what">Pregnant</FormLabel>  
+                        <RadioGroup aria-labelledby="botox-what" name="botox-what" defaultValue="1">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+                  
                   </Grid>
                 }
                 { [32,33,34,35,36,37,39,40,41,44].filter(item => item === procedureId).length > 0 &&
@@ -195,19 +264,22 @@ export default function ConsultForm(){
                 { Number(procedureId) !== 0 &&
                   <>
                     <Divider />
-                    { Object.keys(breastAugmentationDetail).length > 0 &&
-                      <>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:0 }}>
-                          {'For a more detailed calculation, add photos'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', mt:0, mb:1 }}>
-                          Check out the <a href="#">guide</a> before.
-                        </Typography>
-                      </>
-                    }
-                    <AddFile onFileChange={handlerFileChange}/>
-                    <Grid item xs={12} sm={12}>
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
+                    <Grid container sx={{ mt: 4}}>
+                      { Object.keys(breastAugmentationDetail).length > 0 &&
+                        <>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:1 }}>
+                            {'For a more detailed calculation, add photos'}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mt:0 }}>
+                            Check out the <a href="#">guide</a> before.
+                          </Typography>
+                        </>
+                      }
+                      
+                      <AddFile onFileChange={handlerFileChange}/>
+                      <Grid item xs={12} sm={12}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
+                      </Grid>
                     </Grid>
                   </>
                 }
@@ -246,7 +318,7 @@ export default function ConsultForm(){
                       </Grid> */}
                     </Grid>
                     
-                    <Button type="submit" variant="contained" sx={{ mt: 3, mb: 1 }} >Send request</Button>
+                    <Button type="submit" variant="contained" sx={{ mt: 3, mb: 8 }} >Send request</Button>
                     <Grid item xs={12} sm={12}>
                       <Box sx={{ mt: 5, mb: 1 }}>&nbsp;</Box>
                     </Grid>

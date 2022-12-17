@@ -61,7 +61,7 @@ class UserController {
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
       
-      let exp = '1h'
+      let exp = '7d'
       if(!remember) exp = '24h'
       const jwtSecret = process.env.jwtSecret
       const token = jwt.sign(
@@ -72,6 +72,54 @@ class UserController {
       // 1 : "admin" | 2 : "doctor" | 3 : "client"
       user.password = 'fuckYou';
       // console.log('user:', user);
+      res.json({ token, user:user })
+    } catch (e) {
+      res.status(500).json({ message: 'Something wrong' })
+    }
+  }
+
+  async loginPwaUser(req, res){
+    [
+      check('email', 'Minimal length of email 3 symbols').isEmail(),
+      check('password', 'Minimal length of password 8 symbols').isLength({ min: 8 })
+    ]  
+    const errors = validationResult(req)
+    // console.log('errors:', errors)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+        message: 'Invalid Apple ID'
+      })
+    }
+    const {email, password} = req.body
+    // console.log(email, password)
+    try {
+      let q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
+      let user = q.rows[0]
+      if (!user) {
+        // save to DB
+        const hashedPassword = await bcrypt.hash(password, 12)
+        const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, true) RETURNING *'
+        let ts = new Date()
+        let firstName = 'AppleUser';
+        let lastName = email.split('@')[0];
+        // User type:::  1 - Admin, 2 - Doctor, 3 - Client
+        // console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true)
+        user = await DB.query(sql,[firstName, lastName, email, hashedPassword, ts, 3, false])
+      } else {
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
+      }     
+      // console.log('user:', user);
+      
+      // const exp = '200h'
+      const exp = '5m'
+      const jwtSecret = process.env.jwtSecret
+      const token = jwt.sign(
+        { userId: user.id },
+        jwtSecret,
+        { expiresIn: exp }
+      )
       res.json({ token, user:user })
     } catch (e) {
       res.status(500).json({ message: 'Something wrong' })
@@ -95,7 +143,6 @@ class UserController {
         JOIN user_types ut ON ut.id = u.usertype_id
         ORDER BY firstname, lastname;`
       const users = await DB.query(sql)
-      // console.log(users.rows)
       return res.send(users.rows)
     } catch(e){
       console.log(`Error: ${e}`)  
@@ -104,12 +151,17 @@ class UserController {
   }
 
   async getUser(req, res){
-    // console.log('get user by ID:')
     const id = req.params.id
-    const sql = `SELECT id, firstname, lastname, email, usertype_id, avatar FROM users WHERE id = $1;`
-    const user = await DB.query(sql,[id])
-    // console.log(`user #${id}:`, user.rows[0])
-    res.send(user.rows[0])
+    // console.log('get user by ID:', id)
+    try{
+      const sql = `SELECT id, firstname, lastname, email, usertype_id, avatar FROM users WHERE id = $1;`
+      const user = await DB.query(sql,[id])
+      // console.log(`user #${id}:`, user.rows[0])
+      res.send(user.rows[0])
+    }catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
   }
 
   async updateUser(req, res){

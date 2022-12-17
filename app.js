@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
 const app        = express()
 const nodemailer = require('nodemailer')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 
@@ -114,6 +116,7 @@ passport.use(new GoogleStrategy({
 ));
 
 const DB = require('./db')
+const url = require('url')
 // app.use('/auth', require('./routes/auth.routes'))
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
  
@@ -121,7 +124,7 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/error' }),
   async function(req, res) {
     // Successful authentication, redirect success.
-    console.log('req:', req.user);
+    // console.log('req:', req.user);
     const googleUser = {
       'id':         req.user.id,
       'firstName':  req.user.name.givenName,
@@ -130,19 +133,40 @@ app.get('/auth/google/callback',
       'avatar':     req.user.photos[0].value,
     }
     console.log('googleUser:', googleUser);
-    const user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
-    console.log('user:', user);
+    let user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
+    // console.log('user:', user);
     if(!user || user.rows.length === 0){
-      user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
-
       const hashedPassword = await bcrypt.hash(googleUser.id, 12)
       const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
       let ts = new Date()
       // User type:::  1 - Admin, 2 - Doctor, 3 - Client
-      // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
+      // console.log('try to save: ', googleUser.firstName, googleUser.lastName, googleUser.email, hashedPassword, ts, 3, true, googleUser.avatar)
       user = await DB.query(sql,[googleUser.firstName, googleUser.lastName, googleUser.email, hashedPassword, ts, 3, true, googleUser.avatar])
+      user = user.rows[0]
+    } else {
+      user = user.rows[0]
+      const isMatch = await bcrypt.compare(googleUser.id, user.password)
+      if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
     }
+    
+    const exp = '200h'
+    const jwtSecret = process.env.jwtSecret
+    const token = jwt.sign(
+      { userId: user.id },
+      jwtSecret,
+      { expiresIn: exp }
+    )
 
-    res.redirect(`${URL}/consult`);
+    // console.log('token:', token)
+
+    // res.redirect(url.format({
+    //   hostname: URL,
+    //   pathname:'/consult',
+    //   query:{
+    //     token: token,
+    //     user : user
+    //   },
+    // }));
+    res.redirect(`${URL}/authentication?token=${token}&user_id=${user.id}`);
   });
   

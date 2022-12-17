@@ -94,16 +94,16 @@ What did you want to see? I made this in Word 1.0
             ">
 
         <div>
-            <div class="d-inline-block vert-top" style="width: 32px">
-                <img src="static/add_plus.svg" width="100%" height="auto">
+            <div style="width: 32px; display: inline-block; position: relative;">
+                <img src="static/add_plus.svg" width="100%" height="auto" style="position: absolute; top: -60px;">
             </div>
-            <div class="d-inline-block vert-top" style="width: calc(100% - 55px); margin-left: 15px">
-                <span class="f-14">Install this app on your iPhone:</span>
+            <div style="width: calc(100% - 55px); margin-left: 15px; display: inline-block;">
+                <span style="font-size: 14px;">Install this app on your iPhone:</span>
                 <br/>
-                <span class="f-14">
-                        tap <img src="static/Share.svg" width="32" height="auto" class="icon-install-banner"> and then
+                <span style="font-size: 14px;">
+                        tap "Share"<img src="static/Share.svg" width="32" height="auto" style="display: inline-block; margin-left: 4px;"> and then
                         <br/>
-                        "Add to Home screen" <img src="static/Add.svg" width="32" height="auto" class="icon-install-banner">
+                        "Add to Home screen" <img src="static/Add.svg" width="32" height="auto" style="display: inline-block; margin-left: 4px;">
                     </span>
             </div>
         </div>
@@ -121,26 +121,27 @@ What did you want to see? I made this in Word 1.0
         </div>
 
         <div id="closeIosBanner">
-            <div class="w-100 text-center f-14 text-uppercase" onclick=" document.getElementsByClassName('iOSinstallBanner')[0].style='display: none;' " >
-                <hr class="w-25" />
-                Later
+            <div style="width: 100%; text-align: center; font-size: 14px; text-transform: uppercase; margin-top: 10px;" onclick=" document.getElementsByClassName('iOSinstallBanner')[0].style='display: none;' " >
+                <hr />
+                <div style="margin-top: 10px; color: grey;">Later</div>
             </div>
         </div>
     </div>
 
     <!-- script for iOS install banner -->
     <script>
-        $(window).ready(function(){
+        window.onload = function() {
             // Detects if device is on iOS
             const isIos = () => {
                 const userAgent = window.navigator.userAgent.toLowerCase();
+                // return true;
                 return /iphone|ipad|ipod/.test( userAgent );
             }
             // Detects if device is in standalone mode
             const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
+    
             this.wanttoclose = false;
-
+    
             // Checks if should display install popup notification:
             if (isIos() && !isInStandaloneMode()) {
                 document.getElementsByClassName('iOSinstallBanner')[0].style= "" +
@@ -157,9 +158,9 @@ What did you want to see? I made this in Word 1.0
                     "z-index: 9999;" +
                     "box-shadow: 0 0 30px 0 rgba(0,0,0,0.35)";
             }
-        });
+        };
 
-        $(document).ready(
+        document.ready = (
             close = () => {
                 console.log('Close the banner');
                 if (this.wanttoclose) {

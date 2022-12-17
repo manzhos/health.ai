@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 export default function Copyright(props) {
   return (
     <div className="copyright">
-      <Typography variant="caption" color="text.secondary" align="center" {...props} style={{ textAlign:"center", color:"#fff" }}>
+      <Typography variant="caption" color="text.secondary" align="center" {...props} style={{ textAlign:"center", color:"#000" }}>
         {'Copyright © '}
         <Link color="inherit" href="https://stunning-you.com/">
           Stunning-You.com
