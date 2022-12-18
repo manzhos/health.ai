@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { 
   Container,
@@ -16,32 +16,42 @@ import {
   Button,
   Divider
 } from '@mui/material'
-import Iconify from '../components/Iconify';
+// import Iconify from '../components/Iconify';
 
 import ProcedureType      from '../components/ProcedureType'
 import ProcedureList      from '../components/ProcedureList'
 import AddFile            from '../components/AddFile'
 import BreastAugmentation from '../components/ConsForm/BreastAugmentation'
+import Sculptra           from '../components/ConsForm/Sculptra'
+import Co2                from '../components/ConsForm/Co2'
+import PWAMenu            from '../components/PWAMenu'
 import { AuthContext }    from '../context/AuthContext'
-// import {API_URL} from '../config'
+import {API_URL} from '../config'
+import { useHttp } from '../hooks/http.hook'
+
 
 export default function ConsultForm(){
-  // console.warn('Authentication')
+  const {request} = useHttp()
   const navigate  = useNavigate()
-  const {token} = useContext(AuthContext)
+  const {token}   = useContext(AuthContext)
 
-  // const auth = useContext(AuthContext)
-  // const [searchParams, setSearchParams] = useSearchParams()
-  // const token  = searchParams.get("token"),
-  //       userId = searchParams.get("user_id");
+  function parseJwt (token) {
+    if(token && token !== ''){
+      var base64Url = token.split('.')[1]
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      }).join(''))
+      return JSON.parse(jsonPayload)
+    }
+  };
+  const pJWT = parseJwt(token)
+  const userId = pJWT ? pJWT.userId : null
+  // console.log('userId:', userId);
 
-  // console.log('params:', token, '\n\n', userId);
-  // if(token && userId){
-  //   auth.login(token, userId)
-  // }else{navigate('/loginpwa')}
-  // const [sex, setSex] = useState('female')
+  const [files, setFiles] = useState()
   const [age, setAge] = useState(18)
-  const [nameClient, setNameClient] = useState('Vladimir')
+  const [note, setNote] = useState('')
   const [confirm, setConfirm] = useState(true)
   const [surgical, setSurgical] = useState('non-surgical')
   const [procedureTypeId, setProcedureTypeId] = useState(4)
@@ -52,51 +62,12 @@ export default function ConsultForm(){
   const [allergy, setAllergy] = useState(1)
   const [autoimmune, setAutoimmune] = useState(1)
   const [pregnant, setPregnant] = useState(1)
-  const [breastAugmentationDetail, setBreastAugmentationDetail] = useState({});
-
-  const [files, setFiles] = useState()
-
+  const [detail, setDetail] = useState({})
+  
   useEffect(() => {
     if(surgical === 'non-surgical') setProcedureTypeId(4)
     else setProcedureTypeId(1)
   }, [surgical])
-
-  const handleSubmit = async(event) => {
-    event.preventDefault()
-    navigate('/thanks')
-    // const data = new FormData(event.currentTarget)
-    // if(emailClient !== ''){
-    //   try {
-    //     const formData = new FormData()
-    //     formData.append('name',         nameClient)
-    //     formData.append('age',          data.get('age'))
-    //     formData.append('sex',          sex)
-    //     formData.append('procedure_id', procedureId)
-    //     formData.append('note',         data.get('note'))
-    //     formData.append('email',        emailClient)
-    //     formData.append('info', {
-    //       when: botoxWhen,
-    //       what: botoxWhat,
-    //     })
-    //     const res = await fetch(`${API_URL}api/consult`, {
-    //       method: 'POST', 
-    //       body: formData,
-    //     })
-
-    //     if(files){
-    //       console.log('files:', files)
-    //       // files.map((item)=>{ formData.append('file', item) })
-    //       // const f = await fetch(`${API_URL}api/file`, {
-    //       //   method: 'POST', 
-    //       //   body: formData,
-    //       // })
-    //     }
-
-    //     navigate('/thanks')
-    //   } catch (e) {console.log('error:', e)} 
-    // } else alert('Need to check the filled information.')
-
-  }
 
   const handleProcedureTypeChange = (newProcedureTypeId) => {
     setProcedureTypeId(newProcedureTypeId)
@@ -106,12 +77,45 @@ export default function ConsultForm(){
     setProcedureId(newProcedureId)
   }
 
-  const handleBreastAugmentation = (newBSNow, newBSWant, newBShape) => {
+  useEffect(()=>{
+    setDetail({
+      'botoxWhen' : botoxWhen,
+      'botoxWhat' : botoxWhat,
+      'migren'    : migren,
+      'allergy'   : allergy,
+      'autoimmune': autoimmune,
+      'pregnant'  : pregnant,
+    });  
+  },[botoxWhen, botoxWhat, migren, allergy, autoimmune, pregnant])  
+
+  const handleBreastAugmentation = (newBSNow, newBSWant, newBShape, newBPtosis, newBdisease) => {
     // console.log('newBSNow, newBSWant, newBShape:', newBSNow, newBSWant, newBShape);
-    setBreastAugmentationDetail({
-      'breastSizeNow':  newBSNow,
+    setDetail({
+      'breastSizeNow' : newBSNow,
       'breastSizeWant': newBSWant,
-      'breastShape':    newBShape,
+      'breastShape'   : newBShape,
+      'breastPtosis'  : newBPtosis,
+      'breastDisease' : newBdisease,
+    })
+  }
+
+  const handleSculptra = (newSculptraAutoimmune, newSculptraLocalReaction, newSculptraPregnant, newSculptraEdema) => {
+    setDetail({
+      'sculptraAutoimmune'    : newSculptraAutoimmune,
+      'sculptraLocalReaction' : newSculptraLocalReaction,
+      'sculptraPregnant'      : newSculptraPregnant,
+      'sculptraEdema'         : newSculptraEdema,
+    })
+  }
+
+  const handleCo2 = (newCo2Akne, newCo2Rosacea, newCo2Tatoo, newCo2Burns, newCo2LightSensitivity, newCo2Pigmentation) => {
+    setDetail({
+      'co2Akne'             : newCo2Akne,
+      'co2Rosacea'          : newCo2Rosacea,
+      'co2Tatoo'            : newCo2Tatoo,
+      'co2Edema'            : newCo2Burns,
+      'co2LightSensitivity' : newCo2LightSensitivity,
+      'co2Pigmentation'     : newCo2Pigmentation,
     })
   }
 
@@ -119,14 +123,31 @@ export default function ConsultForm(){
     setFiles(files)
   }
 
+  const sendRequest = async () => {
+    // console.log('send request');
+    try {
+      const res = await request(`${API_URL}api/message`, 'POST', {
+        'clientId': userId,
+        'body':{
+          'procedureTypeId': procedureTypeId,
+          'procedureId': procedureId,
+          'detail': detail,
+        },
+        'note':note,
+        'age':age,
+      })
+      // console.log(res);
+      navigate('/thanks')
+    } catch (e) {
+      console.log('error:', e);
+      alert('Something wrong.');
+    } 
+
+  }
+
   return(
     <Container style={{textAlign:"center"}}>
-
-      <div className='user-menu'>
-        <Iconify icon="fluent:form-24-filled" className="comm-icon" />
-        <Iconify icon="material-symbols:chat-rounded" className="comm-icon" sx={{ ml:6 }} />
-      </div>
-
+      <PWAMenu />
       <div className='logo-block'>
         <div className='logo-consult-form'>
           <img
@@ -137,7 +158,7 @@ export default function ConsultForm(){
         </div>
       </div>
       <div className='consult-form'>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 7 }}>
+        <Box sx={{ mt: 7 }}>
           <Grid container>
             <Grid item xs={12} sm={12}>
               <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 1 }}>&nbsp;</Box>
@@ -149,7 +170,8 @@ export default function ConsultForm(){
             <Grid container item xs={10} sm={10} spacing={6}>
               <Grid item xs={12} sm={12}>
                 <Typography variant="h2" sx={{ color: 'text.secondary' }}>
-                  Hi {nameClient}
+                  Hello
+                  {/* {nameClient} */}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:3 }}>
                   {'Which procedure are you interested in?'}
@@ -233,10 +255,10 @@ export default function ConsultForm(){
                     {/* autoimmune */}
                     <Grid item xs={6} sm={6}>
                       <FormControl sx={{ mt: 2 }}>
-                        <FormLabel id="botox-what">Autoimmune</FormLabel>  
-                        <RadioGroup aria-labelledby="botox-what" name="botox-what" defaultValue="1">
-                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
-                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
+                        <FormLabel id="autoimmune">Autoimmune</FormLabel>  
+                        <RadioGroup aria-labelledby="autoimmune" name="autoimmune" defaultValue="0">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="No"  onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="Yes" onChange={(e)=>{setAutoimmune(e.target.value)}} className="cons-radio"/>
                         </RadioGroup>
                       </FormControl>
                     </Grid>
@@ -244,10 +266,10 @@ export default function ConsultForm(){
                     {/* pregnant */}
                     <Grid item xs={6} sm={6}>
                       <FormControl sx={{ mt: 2 }}>
-                        <FormLabel id="botox-what">Pregnant</FormLabel>  
-                        <RadioGroup aria-labelledby="botox-what" name="botox-what" defaultValue="1">
-                          <FormControlLabel value="0" control={<Radio size="small" />}  label="Yes"  onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
-                          <FormControlLabel value="1" control={<Radio size="small" />}  label="No"   onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
+                        <FormLabel id="pregnant">Pregnant</FormLabel>  
+                        <RadioGroup aria-labelledby="pregnant" name="pregnant" defaultValue="0">
+                          <FormControlLabel value="0" control={<Radio size="small" />}  label="No"  onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
+                          <FormControlLabel value="1" control={<Radio size="small" />}  label="Yes" onChange={(e)=>{setPregnant(e.target.value)}} className="cons-radio"/>
                         </RadioGroup>
                       </FormControl>
                     </Grid>
@@ -259,13 +281,23 @@ export default function ConsultForm(){
                     <BreastAugmentation onChangeBreastAugmentation={handleBreastAugmentation} />
                   </>
                 }
+                { [55].filter(item => item === procedureId).length > 0 &&
+                  <>
+                    <Sculptra onChangeSculptra={handleSculptra} />
+                  </>
+                }
+                { [56].filter(item => item === procedureId).length > 0 &&
+                  <>
+                    <Co2 onChangeCo2={handleCo2} />
+                  </>
+                }
 
                 {/* add file */}
                 { Number(procedureId) !== 0 &&
                   <>
-                    <Divider />
-                    <Grid container sx={{ mt: 4}}>
-                      { Object.keys(breastAugmentationDetail).length > 0 &&
+                    <Divider sx={{ mt: 4 }} />
+                    <Grid container sx={{ mt: 4 }}>
+                      { Object.keys(detail).length > 0 &&
                         <>
                           <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:1 }}>
                             {'For a more detailed calculation, add photos'}
@@ -291,7 +323,7 @@ export default function ConsultForm(){
                     </Typography>
 
                     <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
-                      <TextField name="note" fullWidth multiline rows={4} id="note" label="Medications you are taking" className='cons-input' />
+                      <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Medications you are taking" className='cons-input' />
                     </Grid>
                     <Grid item xs={12} sm={12}>
                       <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
@@ -307,6 +339,7 @@ export default function ConsultForm(){
                           label="I confirm terms"
                         />
                       </Grid>
+                      
                       {/* <Grid item xs={8} sm={8}>
                         <FormControl>
                           <FormLabel id="set-sex-radio-buttons-group">Set your sex</FormLabel>  
@@ -316,9 +349,10 @@ export default function ConsultForm(){
                           </RadioGroup>
                         </FormControl>
                       </Grid> */}
+
                     </Grid>
                     
-                    <Button type="submit" variant="contained" sx={{ mt: 3, mb: 8 }} >Send request</Button>
+                    <Button variant="contained" sx={{ mt: 3, mb: 8 }} onClick={sendRequest}>Send request</Button>
                     <Grid item xs={12} sm={12}>
                       <Box sx={{ mt: 5, mb: 1 }}>&nbsp;</Box>
                     </Grid>

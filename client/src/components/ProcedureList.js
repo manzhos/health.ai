@@ -51,7 +51,7 @@ export default function ProcedureList({ procedureTypeId, onChangeProcedure }) {
       >
         {procedureList.map((item)=>{
           return(
-            <MenuItem key={item.id} value={item.id}>{sentenceCase(item.procedure)}</MenuItem>
+            <MenuItem key={item.id} value={item.id}>{item.procedure}</MenuItem>
           )
         })}
       </Select>

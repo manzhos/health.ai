@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 // const uuid = require('uuid')
 // const avatar = uuid.v4() + ".jpg"
 const {check, validationResult} = require('express-validator')
-require('dotenv').config()
+// require('dotenv').config()
 
 class UserController {  
   async createUser(req, res){
@@ -47,7 +47,7 @@ class UserController {
     let ts = new Date()
     // User type:::  1 - Admin, 2 - Doctor, 3 - Client
     // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
-    const newUser = await DB.query(sql,[firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar])
+    const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar])
     res.send(newUser.rows[0]);
   }
 

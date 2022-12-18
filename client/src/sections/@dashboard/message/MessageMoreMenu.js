@@ -25,27 +25,26 @@ import { AuthContext } from '../../../context/AuthContext'
 import Iconify from '../../../components/Iconify';
 import { useHttp } from '../../../hooks/http.hook'
 import { API_URL } from '../../../config'
-import { useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
-export default function UserMoreMenu({id, user, roleList, onChange}) {
-  // console.log('User:', user)
+export default function MessageMoreMenu({id, message, roleList, onChange}) {
+  // console.log('Message:', message)
   const {token} = useContext(AuthContext)
   const ref = useRef(null);
-  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [role, setRole] = useState(user.usertype_id)
+  const [role, setRole] = useState(message.messagetype_id)
   const {request} = useHttp()
   const [newAvatar, setNewAvatar] = useState()
   const [avatarURL, setAvatarURL] = useState();
 
   const handleDelete = async (event) => {
     event.preventDefault()
-    // console.log(`deleting user #${id}`)
+    // console.log(`deleting message #${id}`)
     try {
-      await request(`${API_URL}api/user/${id}`, 'patch', null, {
+      const res = await request(`${API_URL}api/message/${id}`, 'patch', null, {
         Authorization: `Bearer ${token}`
       })
+      // console.log(res)
       setOpen(false)
       onChange(true)
     } catch (e) { console.log('error:', e)}
@@ -53,7 +52,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    // console.log(`saving user #${id}`)
+    // console.log(`saving message #${id}`)
     const data = new FormData(event.currentTarget)
     try {
       const formData = new FormData()
@@ -61,11 +60,11 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
       formData.append('lastname',   data.get('lastName'))
       formData.append('email',      data.get('email'))
       formData.append('password',   data.get('password'))
-      formData.append('usertype_id',data.get('usertype_id'))
+      formData.append('messagetype_id',data.get('messagetype_id'))
       formData.append('promo',      data.get('allowExtraEmails'))
       formData.append('avatar',     data.get('avatar'))
 
-      await fetch(`${API_URL}api/user/${id}`, {
+      const res = await fetch(`${API_URL}api/message/${id}`, {
         method: 'POST', 
         body: formData,
       })
@@ -84,8 +83,8 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   }
 
   const avatar = () => {
-    // console.log('user:', user)
-    // if(user.avatar) return API_URL + 'avatars/' + user.avatar
+    // console.log('message:', message)
+    // if(message.avatar) return API_URL + 'avatars/' + message.avatar
     return API_URL + 'blank-avatar.svg'
   }
   const onAvatarChange = (e) => {
@@ -99,8 +98,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   }, [newAvatar]) 
 
   const handleCommunicate = () => {
-    // console.log('start communication');
-    navigate(`/admin/user/communication/client/${id}`);
+    console.log('start communication');
   }
 
   return (
@@ -140,7 +138,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
           <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
       </Menu>
-      {/* edit user */}
+      {/* edit message */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -158,7 +156,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
               }}
             >
               <Typography component="h1" variant="h5">
-                Edit user
+                Edit message
               </Typography>
               <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
               {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
@@ -182,7 +180,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                         id="firstName"
                         label="First Name"
                         autoFocus
-                        defaultValue={user.firstname}
+                        defaultValue={message.firstname}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -193,7 +191,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                         label="Last Name"
                         name="lastName"
                         autoComplete="family-name"
-                        defaultValue={user.lastname}
+                        defaultValue={message.lastname}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -204,7 +202,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                         label="Email Address"
                         name="email"
                         autoComplete="email"
-                        defaultValue={user.email}
+                        defaultValue={message.email}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -223,14 +221,14 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                         <Select
                           labelId="role-select"
                           id="role-select"
-                          name="usertype_id"
+                          name="messagetype_id"
                           value={role}
                           label="Role"
                           onChange={handleChangeRole} 
                         >
                           {roleList.map((item, key)=>{
                             return(
-                              <MenuItem key={item.id} value={item.id}>{sentenceCase(item.usertype)}</MenuItem>
+                              <MenuItem key={item.id} value={item.id}>{sentenceCase(item.messagetype)}</MenuItem>
                             )
                           })}
                         </Select>

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { alpha } from '@mui/material/styles';
@@ -8,6 +8,7 @@ import { sentenceCase } from 'change-case';
 import MenuPopover from '../components/MenuPopover';
 import { useHttp } from '../hooks/http.hook'
 import { API_URL } from '../config'
+import { AuthContext } from '../context/AuthContext'
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
@@ -32,7 +33,7 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const anchorRef = useRef(null)
-  const jwt = localStorage.getItem("jwt")
+  const {token} = useContext(AuthContext)
   const { request } = useHttp()
   const navigate  = useNavigate()
   const [open, setOpen] = useState(null)
@@ -52,18 +53,18 @@ export default function AccountPopover() {
       return JSON.parse(jsonPayload)
     }
   };
-  const pJWT = parseJwt(jwt)
+  const pJWT = parseJwt(token)
   const userId = pJWT ? pJWT.userId : null
   // console.log('UserId:', userId)
 
   const getUser = useCallback(async () => {
     try {
       const res = await request(`${API_URL}api/user/${userId}`, 'GET', null, {
-        Authorization: `Bearer ${jwt}`
+        Authorization: `Bearer ${token}`
       })
       setCurrentUser(res)
     } catch (e) { console.log('error:', e)}
-  }, [jwt, request])
+  }, [token, request])
   
   useEffect(() => {getUser()}, [getUser]) 
   // console.log('currentUser:', currentUser)
@@ -76,8 +77,9 @@ export default function AccountPopover() {
 
 
   const handleClose = () => {
-    localStorage.setItem("jwt", '')
-    navigate('/login')
+    localStorage.clear();
+    navigate('/admin');
+    document.location.reload();
     // window.top.location = `https://stunning-you.com`
   }
 

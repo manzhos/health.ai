@@ -40,6 +40,7 @@ app.use('/api', require('./routes/file.routes'))
 app.use('/api', require('./routes/procedure.routes'))
 app.use('/api', require('./routes/timetable.routes'))
 app.use('/api', require('./routes/note.routes'))
+app.use('/api', require('./routes/message.routes'))
 app.use(express.static('files'))
 
 // app.get('/', (req, res)=>{res.send('hello, man')});

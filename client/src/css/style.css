@@ -163,7 +163,7 @@ body {
 }
 
 .cons-radio {
-  width: 48%;
+  width: 45%;
   text-align: left;
   
 }
@@ -213,4 +213,10 @@ body {
   height: 26px;
   margin-bottom: -5px;
   color: #dfbd63;
+}
+
+.c-button {
+  top: 15px;
+  left: 50%;
+  transform: translateX(-51%);
 }

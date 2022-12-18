@@ -85,11 +85,11 @@ class ProcedureController {
     res.send(procedures.rows)
   }
   async getProcedure(req, res){
-    console.log('get procedures by ID:')
+    // console.log('get procedures by ID:')
     const id = req.params.id
     const sql = 'SELECT * FROM procedures WHERE id = $1'
     const procedure = await DB.query(sql,[id])
-    console.log(`procedure #${id}:`, procedure.rows[0])
+    // console.log(`procedure #${id}:`, procedure.rows[0])
     res.send(procedure.rows[0])
   }
   async updateProcedure(req, res){

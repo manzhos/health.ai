@@ -67,3 +67,14 @@ create TABLE notes(
   "ts" TIMESTAMPTZ
 );
 
+create TABLE messages(
+  "id" SERIAL4 PRIMARY KEY,
+  "ticket" TEXT, 
+  "client_id" INT4,
+  "admin_id" INT4,
+  "body" JSONB, 
+  "status" INT2 DEFAULT 0, -- // 0 - not answered, 1 - answered, 2 - closed
+  "archive" BOOLEAN DEFAULT false,  
+  "ts" TIMESTAMPTZ
+);
+

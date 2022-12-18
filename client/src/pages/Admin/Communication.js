@@ -33,9 +33,10 @@ import {
   Tabs
 } from '@mui/material'
 // components
-import Page from '../../components/Page'
-import Iconify from '../../components/Iconify'
-import {API_URL} from '../../config'
+import Page       from '../../components/Page'
+import Iconify    from '../../components/Iconify'
+import Inbox      from '../../components/Inbox'
+import {API_URL}  from '../../config'
 import { AuthContext } from '../../context/AuthContext'
 
 // ----------------------------------------------------------------------
@@ -329,7 +330,7 @@ export default function Communication(){
             </Tabs>
           </Box>
           <TabPanel value={tab} index={0}>
-            INBOX
+            <Inbox />
           </TabPanel>
           <TabPanel value={tab} index={1}>
             SENT
