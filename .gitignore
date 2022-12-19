@@ -6,3 +6,5 @@
 /server
 /server/node_modules/
 /_source
+/client/src/config.js
+package-lock.json

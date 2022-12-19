@@ -15,8 +15,9 @@ if(process.env.NODE_ENV === 'production') {
 }
 
 const PORT = process.env.PORT || 3300
-const API_URL = process.env.API_URL
-const URL     = process.env.URL    
+const API_URL  = process.env.API_URL
+const AUTH_URL = process.env.AUTH_URL
+const URL      = process.env.URL    
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -101,14 +102,14 @@ passport.deserializeUser(function(obj, cb) {
 
 /*  Google AUTH  */
  
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const GoogleStrategy        = require('passport-google-oauth').OAuth2Strategy;
 const GOOGLE_CLIENT_ID      = process.env.GOOGLE_CLIENT_ID;       //'our-google-client-id';
 const GOOGLE_CLIENT_SECRET  = process.env.GOOGLE_CLIENT_SECRET;   //'our-google-client-secret';
 
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: `${API_URL}/auth/google/callback`
+    callbackURL: `${URL}/auth/google/callback`
   },
   function(accessToken, refreshToken, profile, done) {
       userProfile=profile;
@@ -118,7 +119,7 @@ passport.use(new GoogleStrategy({
 
 const DB = require('./db')
 const url = require('url')
-// app.use('/auth', require('./routes/auth.routes'))
+
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
  
 app.get('/auth/google/callback', 
@@ -168,6 +169,6 @@ app.get('/auth/google/callback',
     //     user : user
     //   },
     // }));
-    res.redirect(`${URL}/authentication?token=${token}&user_id=${user.id}`);
+    res.redirect(`${URL}/successauthentication?token=${token}&user_id=${user.id}`);
   });
   

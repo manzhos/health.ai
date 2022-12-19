@@ -21,7 +21,7 @@ export const useMyRoutes = isAuthenticated => {
     return (
       <Routes>
         <Route path="/"  element={<ConsultForm />} />
-        <Route path="/authentication" element={<Authentication />} />
+        <Route path="/successauthentication" element={<Authentication />} />
         <Route path="/consult"  element={<ConsultForm />} />
         <Route path="/communicate"  element={<CommunicationPWA />} />
         <Route path="/thanks"   element={<Thanks />} />
@@ -43,7 +43,7 @@ export const useMyRoutes = isAuthenticated => {
       <Route path="*" element={<LoginPWA />} />
       <Route path="/admin" element={<Login />} />
       <Route path="/loginpwa" element={<LoginPWA />} />
-      <Route path="/authentication" element={<Authentication />} />
+      <Route path="/successauthentication" element={<Authentication />} />
     </Routes>
   )
 }

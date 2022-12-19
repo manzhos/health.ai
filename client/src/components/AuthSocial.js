@@ -5,14 +5,14 @@ import { Stack, Button, Link, Modal, Box, Grid, Container, TextField } from '@mu
 // component
 import Iconify from './Iconify';
 
-import { API_URL } from '../config';
+import { AUTH_URL } from '../config';
 
 // ----------------------------------------------------------------------
 
 export default function AuthSocial({ onChangeClientEmail }) {
   // const navigate  = useNavigate()
 
-  const regLinkGoogle = API_URL + 'auth/google';
+  const regLinkGoogle = AUTH_URL + 'google';
 
   const [open, setOpen] = useState(false)
   const handleAppleOpen = () => setOpen(true)
