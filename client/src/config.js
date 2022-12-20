@@ -1,9 +1,12 @@
-// export const API_URL = '/'
-// export const URL = '/'
-
 // dev
-export const API_URL = 'http://localhost:3300/'
-export const URL = 'http://localhost:3000/'
+export const API_URL  = 'http://localhost:3300/'
+export const AUTH_URL = 'http://localhost:3300/auth/'
+export const URL      = 'http://localhost:3000/'
+
+// 
+// export const API_URL  = 'https://health.sy-way.com/'
+// export const AUTH_URL = 'https://health.sy-way.com/auth/'
+// export const URL      = 'https://health.sy-way.com/'
 
 export const MONTH = [
   'Jan',

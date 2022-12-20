@@ -24,6 +24,7 @@ export default function LoginPWA() {
   const auth = useContext(AuthContext)
 
   const [emailClient, setEmailClient] = useState('');
+  const [passwordClient, setPasswordClient] = useState('');
   const [regEmail, setRegEmail] = useState(false);
 
   const appleReg = async (appleUser) => {
@@ -35,7 +36,6 @@ export default function LoginPWA() {
       })
       // console.log('res:', res)
       auth.login(res.token, res.user.id)
-      // localStorage.setItem("jwt", res.token)
       navigate('/consult')
     } catch (e) {
       console.log('error:', e)
@@ -48,12 +48,10 @@ export default function LoginPWA() {
     navigate('/consult')
     try {
       const res = await request(`${API_URL}api/login`, 'POST', {
-        email: emailClient,
-        // password:   data.get('password'),
-        // remember:   data.get('remember'),
+        email:    emailClient,
+        password: passwordClient,
       })
       auth.login(res.token, res.user.id)
-      localStorage.setItem("jwt", res.token)
       navigate('/consult')
     } catch (e) {
       console.log('error:', e)
@@ -100,6 +98,7 @@ export default function LoginPWA() {
                   <Grid container item xs={10} sm={10} spacing={6}>
                     <Grid item xs={12} sm={12}>
                       <TextField fullWidth id="email" name="email" value={emailClient} onChange={(e)=>{setEmailClient(e.target.value)}} autoFocus className='login-pwa-input'/>
+                      <TextField fullWidth id="password" name="password" value={passwordClient} onChange={(e)=>{setPasswordClient(e.target.value)}} autoFocus className='login-pwa-input'/>
                     </Grid>
                   </Grid>
                 </Grid>

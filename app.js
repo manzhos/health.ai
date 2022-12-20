@@ -34,7 +34,6 @@ app.use(session({
 }));
 
 app.use(express.json({ extended: true }))
-// app.use('/api/auth', require('./routes/auth.routes'))
 app.use('/api', require('./routes/user.routes'))
 app.use('/api', require('./routes/file.routes'))
 app.use('/api', require('./routes/procedure.routes'))
@@ -108,7 +107,7 @@ const GOOGLE_CLIENT_SECRET  = process.env.GOOGLE_CLIENT_SECRET;   //'our-google-
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: `${API_URL}/auth/google/callback`
+    callbackURL: `${URL}/auth/google/callback`
   },
   function(accessToken, refreshToken, profile, done) {
       userProfile=profile;
@@ -118,9 +117,9 @@ passport.use(new GoogleStrategy({
 
 const DB = require('./db')
 const url = require('url')
-// app.use('/auth', require('./routes/auth.routes'))
+
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
- 
+
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/error' }),
   async function(req, res) {
@@ -168,6 +167,6 @@ app.get('/auth/google/callback',
     //     user : user
     //   },
     // }));
-    res.redirect(`${URL}/authentication?token=${token}&user_id=${user.id}`);
+    res.redirect(`${URL}/successauthentication?token=${token}&user_id=${user.id}`);
   });
   
