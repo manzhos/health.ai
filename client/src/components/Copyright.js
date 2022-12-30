@@ -10,7 +10,7 @@ export default function Copyright(props) {
         <Link color="inherit" href="https://stunning-you.com/">
           Stunning-You.com
         </Link>{' '}
-        2018–{new Date().getFullYear()}
+        2016–{new Date().getFullYear()}
         {'.'}
       </Typography>
     </div>
