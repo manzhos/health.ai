@@ -51,16 +51,17 @@ export default function MessageListToolbar({ numSelected, filterName, onFilterNa
           {numSelected} selected
         </Typography>
       ) : (
-        <SearchStyle
-          value={filterName}
-          onChange={onFilterName}
-          placeholder="Search message..."
-          startAdornment={
-            <InputAdornment position="start">
-              <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
-            </InputAdornment>
-          }
-        />
+        <></>
+        // <SearchStyle
+        //   value={filterName}
+        //   onChange={onFilterName}
+        //   placeholder="Search message..."
+        //   startAdornment={
+        //     <InputAdornment position="start">
+        //       <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
+        //     </InputAdornment>
+        //   }
+        // />
       )}
 
       {numSelected > 0 ? (
@@ -70,11 +71,12 @@ export default function MessageListToolbar({ numSelected, filterName, onFilterNa
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <Iconify icon="ic:round-filter-list" />
-          </IconButton>
-        </Tooltip>
+        <></>
+        // <Tooltip title="Filter list">
+        //   <IconButton>
+        //     <Iconify icon="ic:round-filter-list" />
+        //   </IconButton>
+        // </Tooltip>
       )}
     </RootStyle>
   );

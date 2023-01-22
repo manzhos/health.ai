@@ -69,7 +69,6 @@ function a11yProps(index) {
 }
 
 
-
 export default function Communication(){
   const {token} = useContext(AuthContext)
   const[sent, setSent] = useState(false)
@@ -326,7 +325,7 @@ export default function Communication(){
             <Tabs value={tab} onChange={handleTabChange} aria-label="doc tabs">
               <Tab label="INBOX" {...a11yProps(0)} />
               <Tab label="SENT" {...a11yProps(1)} />
-              <Tab label="SCHEDULED" {...a11yProps(2)} />
+              {/* <Tab label="SCHEDULED" {...a11yProps(2)} /> */}
             </Tabs>
           </Box>
           <TabPanel value={tab} index={0}>
@@ -335,9 +334,9 @@ export default function Communication(){
           <TabPanel value={tab} index={1}>
             SENT
           </TabPanel>
-          <TabPanel value={tab} index={2}>
+          {/* <TabPanel value={tab} index={2}>
             SCHEDULED
-          </TabPanel>
+          </TabPanel> */}
         </Card>
       </Container>
     </Page>

@@ -1,19 +1,37 @@
 const {Router} = require('express')
 const userController = require('../controllers/user.controller')
 const router = Router()
+const {check, validationResult} = require('express-validator')
 
-router.post('/user', userController.createUser)
+const validateFields = [
+  check('email', 'Check the Email').isEmail(),
+  check('password', 'Minimal length of password 8 symbols').isLength({ min: 8 })
+]
+
+router.post(
+  '/user', 
+  validateFields, 
+  userController.createUser
+)
+
 router.post('/login', userController.loginUser)
-router.post('/loginpwa', userController.loginPwaUser)
+
+router.post(
+  '/loginpwa', 
+  validateFields,  
+  userController.loginPwaUser
+)
+
 router.get('/users', userController.getUsers)
 router.get('/user/:id', userController.getUser)
 router.post('/user/:id', userController.updateUser)
-router.patch('/user/:id', userController.deleteUser)
+router.get('/deluser/:id', userController.deleteUser)
 
 router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)
 router.get('/roles', userController.getRoles)
 
 router.get('/clients_by_doctor/:id', userController.getClientsByDoctor)
+router.get('/client/loyalty/:id', userController.getLoyaltyClient)
 
 module.exports = router 

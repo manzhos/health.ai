@@ -3,12 +3,14 @@ const bcrypt = require('bcryptjs')
 
 class TimeTableController {
   async createRecord(req, res){
-    // console.log('Create Procedure:', req.body)
-    const {procedure_id, user_id, date, time} = req.body
-    const duration = await DB.query('SELECT duration FROM procedures WHERE id=$1',[procedure_id])
-    const sql = 'INSERT INTO timetable (procedure_id, user_id, date, time, ts, duration) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
+    console.log('Create Procedure:', req.body)
+    const {procedure_id, user_id, doctor_id, date, time} = req.body
+    if(!procedure_id || !user_id || !date || !time) return res.status(400).json({message: 'Set all parametrs'});
+
+    const duration = await DB.query('SELECT duration FROM procedures WHERE id=$1', [procedure_id])
+    const sql = 'INSERT INTO timetable (procedure_id, user_id, doctor_id, date, time, ts, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
     let ts = new Date()
-    const newProcedure = await DB.query(sql,[procedure_id, user_id, date, time, ts, duration.rows[0].duration])
+    const newProcedure = await DB.query(sql,[procedure_id, user_id, doctor_id, date, time, ts, duration.rows[0].duration])
     res.send(newProcedure.rows[0])
   }
 
@@ -42,15 +44,17 @@ class TimeTableController {
     // console.log('get all records:');
     const sql = `
       SELECT 
-        u.user AS user,
-        p.procedure AS procedure,
-        p.date AS date,
-        p.time AS time,
-        pt.proceduretype AS proceduretype
-      FROM timetable tt
-      JOIN users u ON u.id = t.user_id
-      JOIN procedures p ON p.id = t.procedure_id
-      JOIN procedure_types pt ON pt.id = p.id
+          u.firstname AS client_firstname,
+          u.lastname  AS client_lastname,
+          p.procedure AS procedure,
+          p.duration  AS duration,
+      --     pt.proceduretype AS proceduretype,
+          tt.date AS date,
+          tt.time AS time
+      FROM "public".timetable tt
+          JOIN "public".users u ON u.id = tt.user_id
+          JOIN "public".procedures p ON p.id = tt.procedure_id
+      --     JOIN "public".procedure_types pt ON pt.id = p.id
     `
     // console.log('SQL:', sql);
     const records = await DB.query(sql)
@@ -74,6 +78,30 @@ class TimeTableController {
   }
   async deleteRecord(req, res){
     console.log('delete Record by ID')
+  }
+
+  async getRecordsByDoctor(req, res){
+    const id = req.params.id;
+    console.log('get all records for doctor:', id);
+    const sql = `
+      SELECT 
+          u.firstname AS client_firstname,
+          u.lastname  AS client_lastname,
+          p.procedure AS procedure,
+          p.duration  AS duration,
+      --     pt.proceduretype AS proceduretype,
+          tt.date AS date,
+          tt.time AS time
+      FROM "public".timetable tt
+          JOIN "public".users u ON u.id = tt.user_id
+          JOIN "public".procedures p ON p.id = tt.procedure_id
+      --     JOIN "public".procedure_types pt ON pt.id = p.id
+      WHERE doctor_id = $1;
+    `
+    // console.log('SQL:', sql);
+    const records = await DB.query(sql, [id])
+    // console.log(records.rows)
+    res.send(records.rows)
   }
 }
 

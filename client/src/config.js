@@ -1,6 +1,3 @@
-// export const API_URL = '/'
-// export const URL = '/'
-
 // dev
 //export const API_URL = 'http://45.93.139.145:3300/'
 //export const URL = 'http://45.93.139.145:3000/'

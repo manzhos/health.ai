@@ -35,7 +35,7 @@ export default function ProcedureType({ onChangeProcedureType }) {
 
   return(
     <FormControl sx={{ width: 1 }}>
-      <InputLabel id="proceduretype-select">Zone</InputLabel>
+      <InputLabel id="proceduretype-select">Procedure type</InputLabel>
       <Select
         labelId="proceduretype-select"
         id="proceduretype-select"

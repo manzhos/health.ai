@@ -64,8 +64,8 @@ export default function AuthSocial({ onChangeClientEmail }) {
             >
               <Iconify icon="ic:baseline-apple" color="#282828" width={32} height={32} />
               <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                <Grid container spacing={2} item xs={12} sm={10}>
-                  <Grid item xs={12}>
+                <Grid container spacing={2} item xs={12} sm={12}>
+                  <Grid item xs={12} >
                     <TextField
                       required
                       fullWidth

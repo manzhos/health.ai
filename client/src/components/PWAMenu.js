@@ -15,14 +15,29 @@ export default function PWAMenu() {
     navigate('/consult')
   }
 
+  const handleDashboard = () => {
+    navigate('/dashboard')
+  }
+
+  const handleBooking = () => {
+    navigate('/booking')
+  }
+
+  const handleCalendar = () => {
+    navigate('/calendar')
+  }
+
   const handleCommenicate = () => {
     navigate('/communicate')
   }
 
   return (
     <div className='user-menu'>
-      <Iconify icon="fluent:form-24-filled" className="comm-icon" onClick={handleConsult}/>
-      <Iconify icon="material-symbols:chat-rounded" className="comm-icon" sx={{ ml:6 }} onClick={handleCommenicate}/>
+      <Iconify icon="material-symbols:bungalow-outline-rounded" className="comm-icon" onClick={handleDashboard}/>
+      <Iconify icon="fluent:form-24-filled"                     className="comm-icon" sx={{ ml: 3 }} onClick={handleConsult}/>
+      <Iconify icon="material-symbols:calendar-add-on"          className="comm-icon" sx={{ ml: 3 }} onClick={handleBooking}/>
+      <Iconify icon="material-symbols:calendar-month"           className="comm-icon" sx={{ ml: 3 }} onClick={handleCalendar}/>
+      <Iconify icon="material-symbols:chat-rounded"             className="comm-icon" sx={{ ml: 3 }} onClick={handleCommenicate}/>
     </div>
   )
 }

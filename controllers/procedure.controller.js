@@ -96,7 +96,7 @@ class ProcedureController {
     const id = req.params.id
     // save to DB
     const {procedure, proceduretype_id, duration, cost} = req.body
-    console.log(id, procedure, proceduretype_id, duration, cost);
+    // console.log(id, procedure, proceduretype_id, duration, cost);
     const sql =`
       UPDATE procedures SET
         procedure        = $2,
@@ -105,7 +105,7 @@ class ProcedureController {
         proceduretype_id = $5
       WHERE id = $1;`
     await DB.query(sql, [id, procedure, duration, cost, proceduretype_id])
-    console.log(`procudure #${id} was updates`)
+    // console.log(`procudure #${id} was updates`)
     res.send(true) 
   }
   async deleteProcedure(req, res){
@@ -127,7 +127,7 @@ class ProcedureController {
 
   async getUserProcedures(req, res){
     const user_id = req.params.user_id
-    // console.log('get Procedures for user:', user_id)
+    console.log('get Procedures for user:', user_id)
     const sql = `
       SELECT 
         tt.id,
@@ -169,6 +169,61 @@ class ProcedureController {
       WHERE tt.doctor_id = $1
       ;`
     const proceduretypes = await DB.query(sql, [doctor_id])
+    // console.log('procedures:', proceduretypes.rows)
+    res.send(proceduretypes.rows)    
+  }
+
+  async getTimeTableProcedures(req, res){
+    // console.log('get Procedures for timetable')
+    const sql = `
+      SELECT 
+        tt.id,
+        tt.procedure_id AS procedure_id,
+        tt.user_id AS client_id,
+        uc.firstname AS client_firstname,
+        uc.lastname AS client_lastname,
+        tt.doctor_id AS doctor_id,
+        p.procedure,
+        tt.duration,
+        date,
+        time,
+        cost
+      FROM timetable tt
+      JOIN procedures p ON p.id = tt.procedure_id
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      JOIN users uc ON uc.id = tt.user_id
+      ;`
+    const proceduretypes = await DB.query(sql)
+    // console.log('procedures:', proceduretypes.rows)
+    res.send(proceduretypes.rows)    
+  }
+
+  async getTimeTableProceduresById(req, res){
+    const id = req.params.id
+    // console.log('get Procedures for timetable for', id);
+    const checkDoctor = await DB.query(`SELECT usertype_id FROM users WHERE id = ${id} LIMIT 1`);
+    const isDoc = checkDoctor.rows[0].usertype_id;
+    const sql = `
+      SELECT 
+        tt.id,
+        tt.procedure_id AS procedure_id,
+        tt.user_id AS client_id,
+        uc.firstname AS client_firstname,
+        uc.lastname AS client_lastname,
+        tt.doctor_id AS doctor_id,
+        p.procedure,
+        tt.duration,
+        date,
+        time,
+        cost
+      FROM timetable tt
+      JOIN procedures p ON p.id = tt.procedure_id
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      JOIN users uc ON uc.id = tt.user_id
+      ${isDoc === 2 ? `WHERE tt.doctor_id = ${id}` : ``}
+      ;`
+    // console.log('sql:', sql);
+    const proceduretypes = await DB.query(sql)
     // console.log('procedures:', proceduretypes.rows)
     res.send(proceduretypes.rows)    
   }

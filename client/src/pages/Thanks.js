@@ -6,10 +6,12 @@ import {
   Typography
 } from '@mui/material';
 import Page from '../components/Page';
+import PWAMenu from '../components/PWAMenu';
 
 export default function Thanks(){
   return(
     <Page title="THANKS">
+      <PWAMenu />
       <Container style={{textAlign:"center"}}>
         <Typography variant="h4" gutterBottom style={{ color:"#4b66ac", marginTop:"15vh"}}>
           Thank you for request.

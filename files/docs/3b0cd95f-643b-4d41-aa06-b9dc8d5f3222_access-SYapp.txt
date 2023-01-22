@@ -1,5 +1,0 @@
-vladimir 
-https://gitlab.darkarmylabs.com/
-
-user: vladimir 
-pass: Dark*321

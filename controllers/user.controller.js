@@ -9,10 +9,6 @@ const {check, validationResult} = require('express-validator')
 
 class UserController {  
   async createUser(req, res){
-    [
-      check('email', 'Minimal length of email 3 symbols').isEmail(),
-      check('password', 'Minimal length of password 8 symbols').isLength({ min: 8 })
-    ]  
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
 		  return res.status(400).json({
@@ -79,33 +75,32 @@ class UserController {
   }
 
   async loginPwaUser(req, res){
-    [
-      check('email', 'Minimal length of email 3 symbols').isEmail(),
-      check('password', 'Minimal length of password 8 symbols').isLength({ min: 8 })
-    ]  
+    console.log('loginPwaUser'); 
     const errors = validationResult(req)
-    // console.log('errors:', errors)
+    console.log('errors:', errors)
     if (!errors.isEmpty()) {
       return res.status(400).json({
         errors: errors.array(),
-        message: 'Invalid Apple ID'
+        message: 'Check fields data'
       })
     }
-    const {email, password} = req.body
-    // console.log(email, password)
+      
+    const {email, password, ref_id} = req.body
+    // console.log('email, password, ref_id:', email, password, ref_id);
     try {
-      let q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
-      let user = q.rows[0]
+      const q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email]);
+      let user = q.rows[0];
       if (!user) {
         // save to DB
         const hashedPassword = await bcrypt.hash(password, 12)
-        const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, true) RETURNING *'
-        let ts = new Date()
-        let firstName = 'AppleUser';
-        let lastName = email.split('@')[0];
-        // User type:::  1 - Admin, 2 - Doctor, 3 - Client
-        // console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true)
-        user = await DB.query(sql,[firstName, lastName, email, hashedPassword, ts, 3, false])
+        const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm, ref_id) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING *'
+
+        const ts = new Date(),
+              firstName = 'New User',
+              lastName = email.split('@')[0];
+        // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Staff
+        // console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true, ref_id);
+        user = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, 3, false, ref_id || null]);
       } else {
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
@@ -141,6 +136,7 @@ class UserController {
           u.avatar AS avatar
         FROM users u 
         JOIN user_types ut ON ut.id = u.usertype_id
+        WHERE NOT u.archive
         ORDER BY firstname, lastname;`
       const users = await DB.query(sql)
       return res.send(users.rows)
@@ -152,11 +148,42 @@ class UserController {
 
   async getUser(req, res){
     const id = req.params.id
-    // console.log('get user by ID:', id)
+    console.log('get user by ID:', id)
     try{
-      const sql = `SELECT id, firstname, lastname, email, usertype_id, avatar FROM users WHERE id = $1;`
-      const user = await DB.query(sql,[id])
-      // console.log(`user #${id}:`, user.rows[0])
+      const sql = `
+        WITH 
+        loyal AS (
+            SELECT 
+                client_id, 
+                SUM(points) AS total_points 
+            FROM loyalty 
+            WHERE client_id = $1 
+            GROUP BY client_id
+        ),
+        refs AS (
+            SELECT
+                ref_id,
+                COUNT(id) AS total_refs
+            FROM users
+            WHERE ref_id = $1
+            GROUP BY ref_id
+        )
+        SELECT 
+            u.id AS id, 
+            u.firstname AS firstname, 
+            u.lastname AS lastname, 
+            u.email AS email, 
+            u.usertype_id AS usertype_id, 
+            u.avatar AS avatar,
+            l.total_points AS total_points,
+            refs.total_refs AS total_refs
+        FROM users u
+        LEFT JOIN loyal l ON l.client_id = u.id
+        LEFT JOIN refs ON refs.ref_id = u.id
+        WHERE id = $1;`
+      console.log(`sql:\n #${sql}:`)
+      const user = await DB.query(sql, [id])
+      console.log(`user #${id}:`, user.rows[0])
       res.send(user.rows[0])
     }catch(e){
       console.log(`Error: ${e}`)  
@@ -166,9 +193,10 @@ class UserController {
 
   async updateUser(req, res){
     const id = req.params.id
+    console.log(`try to update user ${id}`);
+    const oldAvatar = await DB.query(`SELECT avatar FROM users WHERE id = $1`, [id])
     if(req.files){
       // delete current avatar
-      const oldAvatar = await DB.query(`SELECT avatar FROM users WHERE id = $1`, [id])
       // console.log('avatar:', oldAvatar.rows)
       if(oldAvatar || oldAvatar.rows[0].avatar !== ''){
         const folderName = process.env.filePath + '\\avatars'
@@ -213,13 +241,12 @@ class UserController {
   }
   
   async deleteUser(req, res){
-    // console.log('delete user by ID', req.param.id)
     const id = req.params.id
+    // console.log('delete user by ID:', id)
     // const sql = `DELETE FROM users WHERE id = $1 RETURNING firstname, lastname;`
-    const sql =`
-      UPDATE users SET archive = true WHERE id = $1;`    
+    const sql =`UPDATE users SET archive = true WHERE id = $1;`    
     const userDeleted = await DB.query(sql, [id])
-    // console.log(`user #${id}: ${userDeleted} with SQL: ${sql}`)
+    // console.log(`user #${id} with SQL: ${sql}. `, userDeleted)
     res.send(userDeleted)    
   }
 
@@ -259,6 +286,43 @@ class UserController {
     const clients = await DB.query(sql,[id])
     // console.log('clients.rows', clients.rows)
     res.send(clients.rows)    
+  }
+
+  async getLoyaltyClient(req, res){
+    const id = req.params.id
+    // console.log(`get loyalty for client ${id}`)
+
+    let sql = `
+      SELECT
+        SUM(final_cost) AS procedure_points
+      FROM timetable
+      WHERE user_id = $1
+    `
+    const procedure_points = await DB.query(sql,[id])
+
+    sql = `
+      WITH costs AS (
+        SELECT DISTINCT ON (user_id)
+            user_id,
+            final_cost
+        FROM timetable
+        WHERE user_id = ANY(SELECT id FROM users WHERE ref_id = $1)
+      )
+      SELECT 
+          SUM(final_cost) AS ref_points
+      FROM costs
+    `
+    const ref_points = await DB.query(sql,[id])
+
+    // console.log(`Points for ${id}:`, {
+    //   'procedure_points': procedure_points.rows[0].procedure_points,
+    //   'ref_points'      : ref_points.rows[0].ref_points
+    // })
+
+    res.send({
+      'procedure_points': procedure_points.rows[0].procedure_points,
+      'ref_points'      : ref_points.rows[0].ref_points
+    })    
   }
 
   async getClients(req, res){

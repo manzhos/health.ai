@@ -5,16 +5,19 @@ require('dotenv').config()
 
 class FileController {
   async uploadFile(req, res){
-    if(!req.files) return
+    if(!req.files) return res.status(400).json({message: 'Relogin please'});
+    
+    const {user_id, client_id} = req.body
+    if(!user_id || !client_id) return res.status(400).json({message: 'Relogin please'});
 
-    const {doctor_id, note_id} = req.body
     const folderName = process.env.filePath + '\\docs'
+
     try { if (!fs.existsSync(folderName)) fs.mkdirSync(folderName) } catch (e) { console.error(e) }
     
     let file = []
     if(req.files.file.length && req.files.file.length > 0) file = req.files.file
     else file.push(req.files.file)
-
+    // console.log('file[]', file);
     let fileName = [],
     pathFile = []
 
@@ -34,15 +37,14 @@ class FileController {
       // console.log('file was saved')
 
       // add file to DB
-      const sql = 'INSERT INTO files (filename, type, size, path, user_id, ts, doc_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
+      const sql = 'INSERT INTO files (filename, type, size, path, user_id, client_id, ts) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
       const ts = new Date()
       const type = file[key].name.split('.').pop()
-      // console.log('for DB:\n', fileName, type, file.size, folderName, doctor_id, ts, note_id)    
-      await DB.query(sql, [fileName[key], type, file[key].size, folderName, doctor_id, ts, note_id])
+      // console.log('for DB:\n', fileName, type, file.size, folderName, user_id, client_id, ts)    
+      await DB.query(sql, [fileName[key], type, file[key].size, folderName, user_id, client_id, ts])
       // console.log('newFile:', newFile)
     }
-  
-    const newFiles = await DB.query('SELECT * FROM files WHERE doc_id = $1', [note_id])
+    const newFiles = await DB.query('SELECT * FROM files WHERE client_id = $1', [client_id])
     // console.log('newFiles:', newFiles)
     res.send(newFiles.rows)  
   }

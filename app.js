@@ -35,13 +35,13 @@ app.use(session({
 }));
 
 app.use(express.json({ extended: true }))
-// app.use('/api/auth', require('./routes/auth.routes'))
 app.use('/api', require('./routes/user.routes'))
 app.use('/api', require('./routes/file.routes'))
 app.use('/api', require('./routes/procedure.routes'))
 app.use('/api', require('./routes/timetable.routes'))
 app.use('/api', require('./routes/note.routes'))
 app.use('/api', require('./routes/message.routes'))
+app.use('/api', require('./routes/loyalty.routes'))
 app.use(express.static('files'))
 
 // app.get('/', (req, res)=>{res.send('hello, man')});
@@ -121,7 +121,7 @@ const DB = require('./db')
 const url = require('url')
 
 app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
- 
+
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/error' }),
   async function(req, res) {

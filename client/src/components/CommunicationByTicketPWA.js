@@ -6,6 +6,8 @@ import {
   IconButton, 
   ListItemIcon, 
   ListItemText,
+  Grid,
+  Button,
   Box,
   Modal,
   Container,
@@ -26,6 +28,11 @@ export default function CommunicationByTicketPWA({ticket, message, procedure, cl
   const handleAnswerOpen = () => setAnswerOpen(true)
   const handleClose = () => setOpen(false)
   const handleAnswerClose = () => setAnswerOpen(false)
+
+  const handleSend = () => {
+    // console.log('send');
+    handleAnswerClose();
+  }
 
   return (
     <>
@@ -66,20 +73,20 @@ export default function CommunicationByTicketPWA({ticket, message, procedure, cl
         aria-describedby="modal-modal-description"
       >
         <Container component="main" maxWidth="md" disableGutters>
-          <div className="login-modal" style={{margin:"20px"}}>
+          <div className="login-modal" style={{ margin:"20px", padding:"30px 0"}}>
             <Box
               sx={{
                 // marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
+                // display: 'flex',
+                // flexDirection: 'column',
                 alignItems: 'center',
               }}
             >
-              <Typography component="h1" variant="h5">
-                Reply to the ticket
+              <Typography component="h1" variant="h5" style={{ textAlign:"center"}}>
+                {'Reply to the ticket'}
               </Typography>
               <p style={{ textAlign:"center"}}>{ticket}</p>
-              <ReplyTicketPWA ticket={ticket} message={message} procedure={procedure} client={client} />
+              <ReplyTicketPWA ticket={ticket} client={client} admin={null} onSend={handleSend} />
             </Box>
           </div>
         </Container>
@@ -93,7 +100,7 @@ export default function CommunicationByTicketPWA({ticket, message, procedure, cl
         aria-describedby="modal-modal-description"
       >
         <Container component="main" maxWidth="md" disableGutters>
-          <div className="login-modal" style={{margin:"20px"}}>
+          <div className="login-modal" style={{margin:"20px", maxHeight:"85vh"}}>
             <Box
               sx={{
                 // marginTop: 8,
@@ -102,10 +109,21 @@ export default function CommunicationByTicketPWA({ticket, message, procedure, cl
                 alignItems: 'center',
               }}
             >
-              <Typography component="h1" variant="h5">
-                Communication by ticket 
-                #{ticket}
-              </Typography>
+              <Grid container>
+                <Grid item xs={8} sm={8}>
+                  <h4>{'Ticket'}</h4>
+                  <p><strong>#{ticket}</strong></p>
+                </Grid>
+                <Grid item xs={4} sm={4} style={{textAlign:"right"}}>
+                  <Button variant="outlined" size="small" onClick={()=>{
+                                                            handleClose();
+                                                            handleAnswerOpen();
+                                                            }}
+                  >
+                    {'New'}
+                  </Button>
+                </Grid>
+              </Grid>
               <InboxTicketPWA ticket={ticket} />
             </Box>
           </div>
