@@ -45,7 +45,7 @@ export default function LoginPWA() {
   }
 
   const handleSubmit = async () => {
-    console.log('submit:', emailClient, 'pass:', passwordClient, 'check pass:', verifyPasswordClient);
+    // console.log('submit:', emailClient, 'pass:', passwordClient, 'check pass:', verifyPasswordClient);
     if(passwordClient !== verifyPasswordClient) {
       alert('The entered passwords do not match');
       return;
@@ -60,7 +60,7 @@ export default function LoginPWA() {
       navigate('/consult')
     } catch (e) {
       console.log('error:', e)
-      alert('Please check your login and password details or you may need to register.')
+      alert('Please check your login and password details...')
     } 
   }
 
@@ -113,6 +113,11 @@ export default function LoginPWA() {
                   { (emailClient !== '') &&
                     <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2, mb: 1 }} style={{ padding:"6px 30px", backgroundColor:"#dfbd63" }}>Login</Button>
                   }
+                  <Grid container>
+                    <Grid item xs={12} sm={12}>
+                      <Box sx={{ width:'100%', height:'140px'}}>&nbsp;</Box>
+                    </Grid>
+                  </Grid>
                 </>
               }
           </Box>

@@ -8,6 +8,7 @@ router.get('/timetable/:id',    timetableController.getRecord)
 router.put('/timetable',        timetableController.updateRecord)
 router.delete('/timetable/:id', timetableController.deleteRecord)
 
-router.post('/consult', timetableController.createConsult)
+router.get('/tt_bydoctor/:id',  timetableController.getRecordsByDoctor)
+router.post('/consult',         timetableController.createConsult)
 
 module.exports = router 

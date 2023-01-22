@@ -19,8 +19,7 @@ export default function humanDate (d) {
   d = new Date(d)
   return (
     <div>
-      {d.getDate()} {MONTH[Number(d.getMonth())]} {d.getFullYear()}<br/>
-      {d.getHours()} : {d.getMinutes()}
+      {d.getDate()} {MONTH[Number(d.getMonth())]} {d.getFullYear()} / {d.getHours()}:{d.getMinutes() === 0 ? '00' : (String(d.getMinutes()).length === 1 ? '0' + d.getMinutes() : d.getMinutes())}
     </div>
   );
 }

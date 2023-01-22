@@ -17,10 +17,8 @@ import {
 } from '@mui/material';
 // components
 import Page from './Page';
-// import Label from '../components/Label';
-import Scrollbar from './Scrollbar';
 import SearchNotFound from './SearchNotFound';
-import { MessageListHead, MessageListToolbar, MessageMoreMenu } from '../sections/@dashboard/message';
+import { MessageListHead, MessageMoreMenu } from '../sections/@dashboard/message';
 import { Loader } from './Loader';
 import { useHttp } from '../hooks/http.hook'
 import { AuthContext } from '../context/AuthContext'
@@ -29,10 +27,10 @@ import {API_URL} from '../config'
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'ts',           label: 'Date',          alignRight: false },
-  { id: 'clientEmail',  label: 'Email Client',  alignRight: false },
-  { id: 'message',      label: 'Message',       alignRight: false },
-  // { id: '' },
+  { id: 'clientEmail',  label: 'Ticket',  alignRight: false },
+  { id: 'clientEmail',  label: 'Status',  alignRight: false },
+  { id: 'message',      label: 'Client / Email', alignRight: false },
+  { id: '' },
 ];
 
 // ----------------------------------------------------------------------
@@ -73,7 +71,7 @@ export default function Inbox() {
   const [selected, setSelected] = useState([])
   const [orderBy, setOrderBy] = useState('name')
   const [filterName, setFilterName] = useState('')
-  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [messageList, setMessageList] = useState([])
   const [client, setClient] = useState({})
   const [procedure, setProcedure] = useState({});
@@ -108,13 +106,17 @@ export default function Inbox() {
         Authorization: `Bearer ${token}`
       })
       messages.map(async (message) => {
-        const c = await getClient(message.client_id);
-        // console.log('client', c);
-        const huMessage = await humanMessage(message.ticket, message.body)
+        let client, huMessage='';
+        if(message.client_id) client = await getClient(message.client_id);
+        console.log('client', client  );
+        if(message.ticket && message.body) huMessage = await humanMessage(message.ticket, message.body)
         // console.log('humanMessage:', huMessage)
-        message.clientEmail = c.email;
+        if(client.email)      message.clientEmail     = client.email;
+        if(client.firstname)  message.clientFirstName = client.firstname; else message.clientFirstName = '';
+        if(client.lastname)   message.clientLastName  = client.lastname;  else message.clientLastName = '';
         message.huMessage = huMessage;
       })
+      // console.log('mess:', messages);
       setMessageList(messages);
     } catch (e) { console.log('error:', e)}
   }, [token, request])
@@ -131,38 +133,53 @@ export default function Inbox() {
   } 
 
   async function humanMessage(ticket, body) {
-    try{
-      const proc = await request(`${API_URL}api/procedure/${body.procedureId}`, 'GET', null, {
-          Authorization: `Bearer ${token}`
-        })
-        // console.log('procedure:', proc);
-        setProcedure(proc);
-    }catch(err){console.log(`Error ${err}`)}
-  
-    return (
-      <>
-        <h3>Ticket: {ticket}</h3>
-        <p>The client {body.age} year old needs a procedure</p>
-        <p><strong>{procedure.procedure}</strong></p>
-        <p>Details:</p>
-        { procedure.id === 1 && (
-          <>
-            <p>When:       <strong>{botox.botoxWhen[body.detail?.botoxWhen]}</strong></p>
-            <p>What:       <strong>{botox.botoxWhat[body.detail?.botoxWhat]}</strong></p>
-            <p>Migren:     <strong>{yesno[body.detail?.migren]}</strong></p>
-            <p>Allergy:    <strong>{yesno[body.detail?.allergy]}</strong></p>
-            <p>Autoimmune: <strong>{yesno[body.detail?.autoimmune]}</strong></p>
-            <p>Pregnant:   <strong>{yesno[body.detail?.pregnant]}</strong></p>
-          </>
-        )}
-        { body.note && (
-          <>
-            <p>Also client wrote about:</p>
-            <p>{body.note}</p>
-          </>
-        )}
-      </>
-    )
+    if(body.procedureId){
+      try{
+        const proc = await request(`${API_URL}api/procedure/${body.procedureId}`, 'GET', null, {
+            Authorization: `Bearer ${token}`
+          })
+          // console.log('procedure:', proc);
+          setProcedure(proc);
+      }catch(err){console.log(`Error ${err}`)}
+    
+      return (
+        <div>
+          <h4>Ticket: {ticket}</h4>
+          { procedure?.procedure &&(
+            <div>
+              <p>The client {body.age} year old asks about the procedure:</p>
+              <p><strong>{procedure.procedure}</strong></p>
+            </div>
+          )}
+          {/* <p>Details:</p>
+          { procedure.id === 1 && (
+            <>
+              <p>When:       <strong>{botox.botoxWhen[body.detail?.botoxWhen]}</strong></p>
+              <p>What:       <strong>{botox.botoxWhat[body.detail?.botoxWhat]}</strong></p>
+              <p>Migren:     <strong>{yesno[body.detail?.migren]}</strong></p>
+              <p>Allergy:    <strong>{yesno[body.detail?.allergy]}</strong></p>
+              <p>Autoimmune: <strong>{yesno[body.detail?.autoimmune]}</strong></p>
+              <p>Pregnant:   <strong>{yesno[body.detail?.pregnant]}</strong></p>
+            </>
+          )} */}
+          { body.note && (
+            <div>
+              <p>Also client wrote about:</p>
+              <p>{body.note}</p>
+            </div>
+          )}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <h3>Ticket: {ticket}</h3>
+          {body.note && (
+            <p>body.note</p>
+          )}
+        </div>
+      )
+    }
   } 
 
   const handleSelectAllClick = (event) => {
@@ -220,6 +237,18 @@ export default function Inbox() {
 
   const handleUpdate = (update) => {getMessages()}
 
+  const stat = (s) => {
+    // 0 - not answered, 1 - answered, 2 - closed
+    switch(s){
+      case 0:
+        return (<span style={{ color:"lightblue" }}>{'Processing'}</span>);
+      case 1:
+        return (<span style={{ color:"green" }}>{'Answered'}</span>);
+      case 2:
+        return (<span style={{ color:"lightgray" }}>{'Closed'}</span>);
+      default : return '';
+    }
+  }
 
 
   if (loading) return <Loader/>
@@ -227,71 +256,72 @@ export default function Inbox() {
     return (
       <Page title="Message">
         <Container>
-            <MessageListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-  
-            <Scrollbar>
-              <TableContainer sx={{ minWidth: 800 }}>
-                <Table>
-                  <MessageListHead
-                    order={order}
-                    orderBy={orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={messageList.length}
-                    numSelected={selected.length}
-                    onRequestSort={handleRequestSort}
-                    onSelectAllClick={handleSelectAllClick}
-                  />
-                  <TableBody>
-                    {filteredMessages.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      const { id, ts, ticket, client_id, clientEmail, body, huMessage } = row;
-                      const isItemSelected = selected.indexOf(ts) !== -1;
-  
-                      return (
-                        <TableRow
-                          hover
-                          key={id}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={isItemSelected}
-                          aria-checked={isItemSelected}
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, id)} />
-                          </TableCell>
-                          <TableCell component="th" scope="row" padding="none">
-                            <Stack direction="row" alignItems="left" spacing={2}>
-                              <Typography variant="subtitle2" noWrap>
-                                {humanDate(ts)}
-                              </Typography>
-                            </Stack>
-                          </TableCell>
-                          <TableCell align="left">{clientEmail}</TableCell>
-                          <TableCell align="left">{huMessage}</TableCell>
-                          {/* <TableCell align="right">
-                            <MessageMoreMenu id={id} message={row} roleList={roleList} onChange={handleUpdate} />
-                          </TableCell> */}
-                        </TableRow>
-                      );
-                    })}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-  
-                  {isMessageNotFound && (
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                          <SearchNotFound searchQuery={filterName} />
+            {/* <MessageListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} /> */}
+            <TableContainer sx={{ minWidth: 800 }}>
+              <Table>
+                <MessageListHead
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={messageList.length}
+                  numSelected={selected.length}
+                  onRequestSort={handleRequestSort}
+                  onSelectAllClick={handleSelectAllClick}
+                />
+                <TableBody>
+                  {filteredMessages.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                    const { id, ts, ticket, client_id, clientEmail, clientFirstName, clientLastName, body, huMessage, status } = row;
+                    const isItemSelected = selected.indexOf(ts) !== -1;
+                    console.log('row:', row);
+
+                    return (
+                      <TableRow
+                      hover
+                      key={id}
+                      tabIndex={-1}
+                      role="checkbox"
+                      selected={isItemSelected}
+                      aria-checked={isItemSelected}
+                      >
+                        <TableCell>
+                          <p>{ticket}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>{stat(status)}</p>
+                        </TableCell>
+                        <TableCell component="th" scope="row" padding="none">
+                          { clientFirstName && clientLastName ? (
+                            <p><strong>{clientFirstName} {clientLastName}</strong> / {clientEmail}</p>
+                          ) : null }
+                        </TableCell>
+                        {/* <TableCell align="left">
+                          <p>{huMessage}</p>
+                          <p>{humanDate(ts)}</p>
+                        </TableCell> */}
+                        <TableCell align="right">
+                          <MessageMoreMenu id={id} ticket={ticket} messageList={messageList} onChange={handleUpdate} />
                         </TableCell>
                       </TableRow>
-                    </TableBody>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
                   )}
-                </Table>
-              </TableContainer>
-            </Scrollbar>
+                </TableBody>
+
+                {isMessageNotFound && (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                        <SearchNotFound searchQuery={filterName} />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
   
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}

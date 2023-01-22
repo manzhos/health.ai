@@ -1,27 +1,22 @@
 import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import React, { useState, useCallback, useEffect, useContext } from 'react';
 // import { Link as RouterLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 // material
 import {
-  Card,
   Table,
-  Stack,
   Checkbox,
   TableRow,
   TableBody,
   TableCell,
   Container,
-  Typography,
+  Button,
   TableContainer,
   TablePagination,
 } from '@mui/material';
 // components
 import Page from './Page';
 // import Label from '../components/Label';
-import Scrollbar from './Scrollbar';
-import Iconify from './Iconify';
 import SearchNotFound from './SearchNotFound';
 import { MessageListHead, MessageListToolbar, MessageMoreMenu } from '../sections/@dashboard/message';
 import { Loader } from './Loader';
@@ -75,7 +70,7 @@ export default function InboxPWA(clientId) {
   const {token} = useContext(AuthContext)
   const [page, setPage] = useState(0)
   const [order, setOrder] = useState('asc')
-  const [selected, setSelected] = useState([])
+  // const [selected, setSelected] = useState([])
   const [orderBy, setOrderBy] = useState('name')
   const [filterName, setFilterName] = useState('')
   const [rowsPerPage, setRowsPerPage] = useState(5)
@@ -99,21 +94,23 @@ export default function InboxPWA(clientId) {
     }
   }
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc'
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(property)
-  };
+  // const handleRequestSort = (event, property) => {
+  //   const isAsc = orderBy === property && order === 'asc'
+  //   setOrder(isAsc ? 'desc' : 'asc')
+  //   setOrderBy(property)
+  // };
   
   const getMessagesById = useCallback(async () => {
+    if(!clientId.clientId) return;
     try {
       const messages = await request(`${API_URL}api/messages/${clientId.clientId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
+      // console.log('getMessagesById clientId:', messages);
       for(let key in messages){
+        if(messages[key].client_id)         messages[key].client    = await getClient(messages[key].client_id);
+        if(messages[key].body.procedureId && messages[key].body.procedureId !== 0)  messages[key].procedure = await getProcedure(messages[key].body.procedureId);
         // console.log('message:', messages[key]);
-        messages[key].client = await getClient(messages[key].client_id);
-        messages[key].procedure = await getProcedure(messages[key].body.procedureId);
       }
       // console.log('messages:', messages);
       setMessageList(messages);
@@ -143,29 +140,29 @@ export default function InboxPWA(clientId) {
     }
   } 
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = messageList.map((n) => n.name)
-      setSelected(newSelecteds)
-      return
-    }
-    setSelected([]);
-  };
+  // const handleSelectAllClick = (event) => {
+  //   if (event.target.checked) {
+  //     const newSelecteds = messageList.map((n) => n.name)
+  //     setSelected(newSelecteds)
+  //     return
+  //   }
+  //   setSelected([]);
+  // };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
-  };
+  // const handleClick = (event, name) => {
+  //   const selectedIndex = selected.indexOf(name);
+  //   let newSelected = [];
+  //   if (selectedIndex === -1) {
+  //     newSelected = newSelected.concat(selected, name);
+  //   } else if (selectedIndex === 0) {
+  //     newSelected = newSelected.concat(selected.slice(1));
+  //   } else if (selectedIndex === selected.length - 1) {
+  //     newSelected = newSelected.concat(selected.slice(0, -1));
+  //   } else if (selectedIndex > 0) {
+  //     newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+  //   }
+  //   setSelected(newSelected);
+  // };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -176,9 +173,9 @@ export default function InboxPWA(clientId) {
     setPage(0);
   };
 
-  const handleFilterByName = (event) => {
-    setFilterName(event.target.value);
-  };
+  // const handleFilterByName = (event) => {
+  //   setFilterName(event.target.value);
+  // };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - messageList.length) : 0
 
@@ -190,11 +187,11 @@ export default function InboxPWA(clientId) {
     // 0 - not answered, 1 - answered, 2 - closed
     switch(s){
       case 0:
-        return (<span style={{ color:"red" }}>Not answered</span>);
+        return (<span style={{ color:"lightblue" }}>{'Processing'}</span>);
       case 1:
-        return (<span style={{ color:"green" }}>Answered</span>);
+        return (<span style={{ color:"green" }}>{'Answered'}</span>);
       case 2:
-        return (<span style={{ color:"lightgray" }}>Closed</span>);
+        return (<span style={{ color:"lightgray" }}>{'Closed'}</span>);
       default : return '';
     }
   }
@@ -204,131 +201,148 @@ export default function InboxPWA(clientId) {
     return (
       <Page title="Message">
         <Container sx={{ mb: 15 }}>
-            <MessageListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-  
-            <Scrollbar>
-              <TableContainer sx={{ width: '100%' }}>
-                <Table>
-                  <MessageListHead
-                    order={order}
-                    orderBy={orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={messageList.length}
-                    numSelected={selected.length}
-                    onRequestSort={handleRequestSort}
-                    onSelectAllClick={handleSelectAllClick}
-                  />
-                  <TableBody>
-                    {filteredMessages.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      const { id, ts, ticket, status, client, body, procedure } = row;
-                      const isItemSelected = selected.indexOf(ts) !== -1;
-  
-                      return (
-                        <TableRow
-                          hover
-                          key={id}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={isItemSelected}
-                          aria-checked={isItemSelected}
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, id)} />
-                          </TableCell>
-                          <TableCell align="left">
-                            <p>Ticket:</p>
-                            <h4>{ticket}</h4>
-                            <span style={{ fontSize:"12px" }}>{humanDate(ts)}</span>
-                            <hr />
-                            <p>You request about procedure</p>
-                            <p><strong>{procedure.procedure}</strong></p>
-                            {stat(status)}
-                            {/* botox */}
-                            { procedure.id === 1 && (
-                              <>
-                                <p>Details:</p>
-                                <p>When:       <strong>{botox.botoxWhen[body.detail?.botoxWhen]}</strong></p>
-                                <p>What:       <strong>{botox.botoxWhat[body.detail?.botoxWhat]}</strong></p>
-                                <p>Migren:     <strong>{yesno[body.detail?.migren]}</strong></p>
-                                <p>Allergy:    <strong>{yesno[body.detail?.allergy]}</strong></p>
-                                <p>Autoimmune: <strong>{yesno[body.detail?.autoimmune]}</strong></p>
-                                <p>Pregnant:   <strong>{yesno[body.detail?.pregnant]}</strong></p>
-                              </>
-                            )}
-                            {/* breast */}
-                            { [32,33,34,35,36,37,39,40,41,44].filter(item => item === procedure.id).length > 0 && (
-                              <>
-                                <p>Details:</p>
-                                {/* {"breastShape": "Drop", "breastPtosis": 0, "breastDisease": "never", "breastSizeNow": "A", "breastSizeWant": "C"} */}
-                                <p>Now the size is      <strong>{body.detail?.breastSizeNow}</strong></p>  
-                                <p>Desired size is      <strong>{body.detail?.breastSizeWant}</strong></p>  
-                                <p>Desired shape is     <strong>{body.detail?.breastShape}</strong></p>  
-                                <p>Breast ptosis        <strong>{yesno[Number(body.detail?.breastPtosis)]}</strong></p>  
-                                <p>Previous surgeries:  <strong>{body.detail?.breastDisease}</strong></p>
-                              </>
-                            )}
-
-                            {/* sculptra */}
-                            { [55].filter(item => item === procedure.id).length > 0 && (
-                              <>
-                                <p>Details:</p>
-                                {/* "sculptraEdema": 0, "sculptraPregnant": 0, "sculptraAutoimmune": 0, "sculptraLocalReaction": 0 */}
-                                <p>Autoimmune:      <strong>{yesno[Number(body.detail?.sculptraAutoimmune)]}</strong></p>  
-                                <p>Pregnant:        <strong>{yesno[Number(body.detail?.sculptraPregnant)]}</strong></p>  
-                                <p>Local reaction:  <strong>{yesno[Number(body.detail?.sculptraLocalReaction)]}</strong></p>  
-                                <p>Edema:           <strong>{yesno[Number(body.detail?.sculptraEdema)]}</strong></p>  
-                              </>
-                            )}
-
-                            {/* CO2 */}
-                            { [56].filter(item => item === procedure.id).length > 0 && (
-                              <>
-                                <p>Details:</p>
-                                {/* {"co2Akne": 0, "co2Edema": "1", "co2Tatoo": "1", "co2Rosacea": 0, "co2Pigmentation": "0", "co2LightSensitivity": "1" */}
-                                <p>Akne:             <strong>{yesno[Number(body.detail?.co2Akne)]}</strong></p>  
-                                <p>Rosacea:          <strong>{yesno[Number(body.detail?.co2Rosacea)]}</strong></p>  
-                                <p>Tatoo:            <strong>{yesno[Number(body.detail?.co2Tatoo)]}</strong></p>  
-                                <p>Edema:            <strong>{yesno[Number(body.detail?.co2Edema)]}</strong></p>  
-                                <p>LightSensitivity: <strong>{yesno[Number(body.detail?.co2LightSensitivity)]}</strong></p>  
-                                <p>Pigmentation:     <strong>{yesno[Number(body.detail?.co2Pigmentation)]}</strong></p>  
-                              </>
-                            )}
-
-                            { body.note && (
-                              <>
-                                <p>Also client wrote about:</p>
-                                <p>{body.note}</p>
-                              </>
-                            )}
-                          </TableCell>
-                          <TableCell align="left">
-                            <CommunicationByTicketPWA ticket={ticket} message={row} procedure={procedure} client={client} />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-  
-                  {isMessageNotFound && (
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                          <SearchNotFound searchQuery={filterName} />
+            {/* <MessageListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} /> */}
+            <TableContainer sx={{ width: '100%' }}>
+              <Table>
+                <MessageListHead
+                  // order={order}
+                  // orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={messageList.length}
+                  // numSelected={selected.length}
+                  // onRequestSort={handleRequestSort}
+                  // onSelectAllClick={handleSelectAllClick}
+                />
+                <TableBody>
+                  {messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                    const { id, ts, ticket, status, client, body, procedure } = row;
+                    // const isItemSelected = selected.indexOf(ts) !== -1;
+                    return (
+                      <TableRow
+                        hover
+                        key={id}
+                        // tabIndex={-1}
+                        // role="checkbox"
+                        // selected={isItemSelected}
+                        // aria-checked={isItemSelected}
+                      >
+                        {/* <TableCell padding="checkbox">
+                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, id)} />
+                        </TableCell> */}
+                        <TableCell align="left">
+                          <p>Ticket:</p>
+                          <h4>{ticket}</h4>
+                          <span style={{ fontSize:"12px" }}>{humanDate(ts)}</span>
+                          {!body.answer && (stat(status))}
+                          <hr />
+                          {!body.answer && (
+                            <div>
+                              { body.note && (
+                                <div>
+                                  <p>You wrote:</p>
+                                  <p>{body.note}</p>
+                                </div>
+                              )}
+                              { procedure?.procedure && (
+                                <div>
+                                  <p>{'Procedure: '}<strong>{procedure.procedure}</strong></p>
+                                </div>
+                              )}
+                              { body.procedureId && body.procedureId !== 0 ? (
+                                <div>
+                                  {/* botox */}
+                                  { procedure?.id === 1 && (
+                                    <div>
+                                      <p>Details:</p>
+                                      <p style={{ marginLeft:"20px" }}>When:       <strong>{botox.botoxWhen[body.detail?.botoxWhen]}</strong></p>
+                                      <p style={{ marginLeft:"20px" }}>What:       <strong>{botox.botoxWhat[body.detail?.botoxWhat]}</strong></p>
+                                      <p style={{ marginLeft:"20px" }}>Migren:     <strong>{yesno[body.detail?.migren]}</strong></p>
+                                      <p style={{ marginLeft:"20px" }}>Allergy:    <strong>{yesno[body.detail?.allergy]}</strong></p>
+                                      <p style={{ marginLeft:"20px" }}>Autoimmune: <strong>{yesno[body.detail?.autoimmune]}</strong></p>
+                                      <p style={{ marginLeft:"20px" }}>Pregnant:   <strong>{yesno[body.detail?.pregnant]}</strong></p>
+                                    </div>
+                                  )}
+                                  {/* breast */}
+                                  { [32,33,34,35,36,37,39,40,41,44].filter(item => item === procedure.id).length > 0 && (
+                                    <div>
+                                      <p>Details:</p>
+                                      {/* {"breastShape": "Drop", "breastPtosis": 0, "breastDisease": "never", "breastSizeNow": "A", "breastSizeWant": "C"} */}
+                                      <p style={{ marginLeft:"20px" }}>Now the size is      <strong>{body.detail?.breastSizeNow}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Desired size is      <strong>{body.detail?.breastSizeWant}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Desired shape is     <strong>{body.detail?.breastShape}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Breast ptosis        <strong>{yesno[Number(body.detail?.breastPtosis)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Previous surgeries:  <strong>{body.detail?.breastDisease}</strong></p>
+                                    </div>
+                                  )}
+                                  {/* sculptra */}
+                                  { [55].filter(item => item === procedure.id).length > 0 && (
+                                    <div>
+                                      <p>Details:</p>
+                                      {/* "sculptraEdema": 0, "sculptraPregnant": 0, "sculptraAutoimmune": 0, "sculptraLocalReaction": 0 */}
+                                      <p style={{ marginLeft:"20px" }}>Autoimmune:      <strong>{yesno[Number(body.detail?.sculptraAutoimmune)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Pregnant:        <strong>{yesno[Number(body.detail?.sculptraPregnant)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Local reaction:  <strong>{yesno[Number(body.detail?.sculptraLocalReaction)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Edema:           <strong>{yesno[Number(body.detail?.sculptraEdema)]}</strong></p>  
+                                    </div>
+                                  )}
+                                  {/* CO2 */}
+                                  { [56].filter(item => item === procedure.id).length > 0 && (
+                                    <div>
+                                      <p>Details:</p>
+                                      {/* {"co2Akne": 0, "co2Edema": "1", "co2Tatoo": "1", "co2Rosacea": 0, "co2Pigmentation": "0", "co2LightSensitivity": "1" */}
+                                      <p style={{ marginLeft:"20px" }}>Akne:             <strong>{yesno[Number(body.detail?.co2Akne)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Rosacea:          <strong>{yesno[Number(body.detail?.co2Rosacea)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Tatoo:            <strong>{yesno[Number(body.detail?.co2Tatoo)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Edema:            <strong>{yesno[Number(body.detail?.co2Edema)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>LightSensitivity: <strong>{yesno[Number(body.detail?.co2LightSensitivity)]}</strong></p>  
+                                      <p style={{ marginLeft:"20px" }}>Pigmentation:     <strong>{yesno[Number(body.detail?.co2Pigmentation)]}</strong></p>  
+                                    </div>
+                                  )}
+                                </div>
+                              ) : null}
+                            </div>
+                          )}
+                          {body.answer && body.procedureId !==0 ? (
+                            <div>
+                              <p><strong style={{color:"green"}}>Answer about you request</strong></p>
+                              <p>{body.note}</p>
+                              {/* <p>Hello.</p>
+                              <p>At your request regarding the <strong>BTX-A treatment</strong> and the specified additional parameters, a preliminary cost has been formed in the amount of: <strong>199 EUR.</strong></p>
+                              <p>The indicated cost is not final. For the formation of a detailed calculation and proposal, we suggest signing up for a consultation.</p> */}
+                              <Button variant="outlined" sx={{ mt:2, mb:2 }} onClick={()=>{navigate('/bookconsult')}}>
+                                Book the consultation
+                              </Button>
+                              <p style={{fontSize:"10px"}}>Or respond to this message by asking a more specific question</p>
+                            </div>
+                          ) : null}
+                        </TableCell>
+                        <TableCell align="right">
+                          <CommunicationByTicketPWA ticket={ticket} message={row} procedure={procedure} client={client} />
                         </TableCell>
                       </TableRow>
-                    </TableBody>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
                   )}
-                </Table>
-              </TableContainer>
-            </Scrollbar>
+                </TableBody>
+
+                {/* {isMessageNotFound && (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                        <SearchNotFound searchQuery={filterName} />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )} */}
+              </Table>
+            </TableContainer>
   
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[4, 8, 16]}
               component="div"
               count={messageList.length}
               rowsPerPage={rowsPerPage}

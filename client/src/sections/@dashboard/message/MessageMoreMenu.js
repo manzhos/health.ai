@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from 'react';
-import { sentenceCase } from 'change-case';
+import React, { useState, useRef, useContext } from 'react';
 // material
 import { 
   Menu, 
@@ -11,94 +10,44 @@ import {
   Button,
   Box,
   Modal,
-  Checkbox,
   Container,
   Typography,
-  TextField,
-  InputLabel,
-  Select,
-  FormControl,
-  FormControlLabel,
  } from '@mui/material';
-// component
-import { AuthContext } from '../../../context/AuthContext'
 import Iconify from '../../../components/Iconify';
-import { useHttp } from '../../../hooks/http.hook'
-import { API_URL } from '../../../config'
-// ----------------------------------------------------------------------
+import { AuthContext } from '../../../context/AuthContext'
+import InboxTicketPWA from '../../../components/InboxTicketPWA';
+import ReplyTicketPWA from '../../../components/ReplyTicketPWA';
 
-export default function MessageMoreMenu({id, message, roleList, onChange}) {
-  // console.log('Message:', message)
+
+export default function MessageMoreMenu({id, ticket, messageList, onChange}) {
   const {token} = useContext(AuthContext)
+  function parseJwt (token) {
+    if(token && token !== ''){
+      var base64Url = token.split('.')[1]
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      }).join(''))
+      return JSON.parse(jsonPayload)
+    }
+  };
+  const pJWT = parseJwt(token);
+  const userId = pJWT ? pJWT.userId : null;
+  // console.log('userId:', userId);
+
   const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [openAnswer, setAnswerOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [role, setRole] = useState(message.messagetype_id)
-  const {request} = useHttp()
-  const [newAvatar, setNewAvatar] = useState()
-  const [avatarURL, setAvatarURL] = useState();
 
-  const handleDelete = async (event) => {
-    event.preventDefault()
-    // console.log(`deleting message #${id}`)
-    try {
-      const res = await request(`${API_URL}api/message/${id}`, 'patch', null, {
-        Authorization: `Bearer ${token}`
-      })
-      // console.log(res)
-      setOpen(false)
-      onChange(true)
-    } catch (e) { console.log('error:', e)}
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    // console.log(`saving message #${id}`)
-    const data = new FormData(event.currentTarget)
-    try {
-      const formData = new FormData()
-      formData.append('firstname', data.get('firstName'))
-      formData.append('lastname',   data.get('lastName'))
-      formData.append('email',      data.get('email'))
-      formData.append('password',   data.get('password'))
-      formData.append('messagetype_id',data.get('messagetype_id'))
-      formData.append('promo',      data.get('allowExtraEmails'))
-      formData.append('avatar',     data.get('avatar'))
-
-      const res = await fetch(`${API_URL}api/message/${id}`, {
-        method: 'POST', 
-        body: formData,
-      })
-      setOpen(false)
-      onChange(true)
-    } catch (e) { console.log('error:', e)}
-  }
-
-  const [open, setOpen] = useState(false)
   const handleOpen = () => setOpen(true)
+  const handleAnswerOpen = () => setAnswerOpen(true)
   const handleClose = () => setOpen(false)
-  const handleChangeRole = (event) => {
-    event.preventDefault();
-    setRole(event.target.value)
-    // console.log('role now:', role)
-  }
+  const handleAnswerClose = () => setAnswerOpen(false)
 
-  const avatar = () => {
-    // console.log('message:', message)
-    // if(message.avatar) return API_URL + 'avatars/' + message.avatar
-    return API_URL + 'blank-avatar.svg'
-  }
-  const onAvatarChange = (e) => {
-    // console.log('E:', e)
-    setNewAvatar(e.target.files[0]);
-    // console.log('new avatar:', newAvatar);
-  } 
-  useEffect(()=>{
-    if(!newAvatar) return
-    setAvatarURL(URL.createObjectURL(newAvatar))
-  }, [newAvatar]) 
-
-  const handleCommunicate = () => {
-    console.log('start communication');
+  const handleSend = () => {
+    // console.log('send');
+    handleAnswerClose();
   }
 
   return (
@@ -117,28 +66,49 @@ export default function MessageMoreMenu({id, message, roleList, onChange}) {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem sx={{ color: 'text.secondary' }} onClick={handleCommunicate}>
+        <MenuItem sx={{ color: 'text.secondary' }} onClick={handleAnswerOpen}>
           <ListItemIcon>
-            <Iconify icon="material-symbols:chat-rounded" width={24} height={24} />
+            <Iconify icon="material-symbols:send-rounded" width={24} height={24} />
           </ListItemIcon>
-          <ListItemText primary="Communication" primaryTypographyProps={{ variant: 'body2' }} />
+          <ListItemText primary="Answer" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
         <MenuItem sx={{ color: 'text.secondary' }} onClick={handleOpen}>
           <ListItemIcon>
-            <Iconify icon="eva:edit-fill" width={24} height={24} />
+            <Iconify icon="material-symbols:wifi-find-rounded" width={24} height={24} />
           </ListItemIcon>
-          <ListItemText primary="Edit" primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
-
-        <MenuItem sx={{ color: 'text.secondary' }} onClick={handleDelete}>
-          <ListItemIcon>
-            <Iconify icon="eva:trash-2-outline" width={24} height={24} />
-          </ListItemIcon>
-          <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
+          <ListItemText primary="Filter by ticket" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
       </Menu>
-      {/* edit message */}
+      
+      {/* answer */}
+      <Modal
+        open={openAnswer}
+        onClose={handleAnswerClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Container component="main" maxWidth="md" disableGutters>
+          <div className="login-modal" style={{ margin:"20px", padding:"30px 0"}}>
+            <Box
+              sx={{
+                // marginTop: 8,
+                // display: 'flex',
+                // flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Typography component="h1" variant="h5" style={{ textAlign:"center"}}>
+                {'Reply to the ticket'}
+              </Typography>
+              <p style={{ textAlign:"center"}}>{ticket}</p>
+              <ReplyTicketPWA ticket={ticket} client={null} admin_id={userId} onSend={handleSend} />
+            </Box>
+          </div>
+        </Container>
+      </Modal>
+
+      {/* communication flow */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -146,7 +116,7 @@ export default function MessageMoreMenu({id, message, roleList, onChange}) {
         aria-describedby="modal-modal-description"
       >
         <Container component="main" maxWidth="md" disableGutters>
-          <div className="login-modal">
+          <div className="login-modal" style={{margin:"20px", maxHeight:"85vh"}}>
             <Box
               sx={{
                 // marginTop: 8,
@@ -155,102 +125,22 @@ export default function MessageMoreMenu({id, message, roleList, onChange}) {
                 alignItems: 'center',
               }}
             >
-              <Typography component="h1" variant="h5">
-                Edit message
-              </Typography>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
-                <Grid container spacing={2}>
-                  <Grid container item xs={12} sm={2} direction="column" justifyContent="flex-start" alignItems="center">
-                    <img src={avatarURL || avatar()} className='avatar' alt="" />
-                    <label htmlFor="avatar">
-                      <input id="avatar" name="avatar" type="file" accept='image/*' onChange={onAvatarChange} style={{ display: "none" }}/>
-                      <Button variant="outlined" component="span">
-                        Set Photo
-                      </Button>
-                    </label>
-                  </Grid> 
-                  <Grid container item spacing={2} xs={12} sm={10}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        autoComplete="given-name"
-                        name="firstName"
-                        required
-                        fullWidth
-                        id="firstName"
-                        label="First Name"
-                        autoFocus
-                        defaultValue={message.firstname}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        id="lastName"
-                        label="Last Name"
-                        name="lastName"
-                        autoComplete="family-name"
-                        defaultValue={message.lastname}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        defaultValue={message.email}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        name="password"
-                        label="New password if needed"
-                        type="password"
-                        id="password"
-                        autoComplete="new-password"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl sx={{ width: 1 }}>
-                        <InputLabel id="role-select">Role</InputLabel>
-                        <Select
-                          labelId="role-select"
-                          id="role-select"
-                          name="messagetype_id"
-                          value={role}
-                          label="Role"
-                          onChange={handleChangeRole} 
-                        >
-                          {roleList.map((item, key)=>{
-                            return(
-                              <MenuItem key={item.id} value={item.id}>{sentenceCase(item.messagetype)}</MenuItem>
-                            )
-                          })}
-                        </Select>
-                      </FormControl>
-                    </Grid>                          
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={<Checkbox name="allowExtraEmails" value="allowExtraEmails" color="primary" />}
-                        label="Set for receive inspiration, marketing promotions and updates via email."
-                      />
-                    </Grid>
-                  </Grid>
+              <Grid container>
+                <Grid item xs={8} sm={8}>
+                  <h4>{'Ticket'}</h4>
+                  <p><strong>#{ticket}</strong></p>
                 </Grid>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
-                >
-                  Save changes
-                </Button>
-              </Box>
+                <Grid item xs={4} sm={4} style={{textAlign:"right"}}>
+                  <Button variant="outlined" size="small" onClick={()=>{
+                                                            handleClose();
+                                                            handleAnswerOpen();
+                                                            }}
+                  >
+                    {'New'}
+                  </Button>
+                </Grid>
+              </Grid>
+              <InboxTicketPWA ticket={ticket} />
             </Box>
           </div>
         </Container>

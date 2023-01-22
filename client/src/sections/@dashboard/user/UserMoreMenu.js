@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from 'react';
+import React, { useRef, useState, useEffect, useContext, useCallback } from 'react';
 import { sentenceCase } from 'change-case';
 // material
 import { 
@@ -43,7 +43,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
     event.preventDefault()
     // console.log(`deleting user #${id}`)
     try {
-      await request(`${API_URL}api/user/${id}`, 'patch', null, {
+      await request(`${API_URL}api/deluser/${id}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
       setOpen(false)
@@ -75,18 +75,34 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   }
 
   const [open, setOpen] = useState(false)
-  const handleOpen = () => setOpen(true)
+  const [loyaltyOpen, setLoyaltyOpen] = useState(false)
+  const [loyalty, setLoyalty] = useState({})
+  const handleOpen  = () => setOpen(true)
   const handleClose = () => setOpen(false)
+  const handleLoyaltyOpen  = () => {setLoyaltyOpen(true)}
+  const handleLoyaltyClose = () => {setLoyaltyOpen(false)}
   const handleChangeRole = (event) => {
     event.preventDefault();
     setRole(event.target.value)
     // console.log('role now:', role)
   }
 
+  const getLoyalty = useCallback(async () => {
+    try {
+      const res = await request(`${API_URL}api/client/loyalty/${id}`, 'GET', null, {
+        // Authorization: `Bearer ${token}`
+      })
+      console.warn('Loyalty:', res);
+      setLoyalty(res);
+    } catch (e) { console.log('error:', e)}
+  }, [request])
+  useEffect(() => {getLoyalty()}, [getLoyalty])
+
   const avatar = () => {
-    // console.log('user:', user)
-    // if(user.avatar) return API_URL + 'avatars/' + user.avatar
-    return API_URL + 'blank-avatar.svg'
+    // console.log('user avatar:', user.avatar ? user.avatar : 'none');
+    if(user.avatar && user.avatar?.slice(0,4) === 'http') return user.avatar;
+    if(user.avatar) return API_URL + 'avatars/' + user.avatar;
+    return API_URL + 'blank-avatar.svg';
   }
   const onAvatarChange = (e) => {
     // console.log('E:', e)
@@ -102,6 +118,10 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
     // console.log('start communication');
     navigate(`/admin/user/communication/client/${id}`);
   }
+  const handleInvoice = () => {
+    navigate(`/admin/client/invoice`);
+  }
+
 
   return (
     <>
@@ -133,6 +153,23 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
           <ListItemText primary="Edit" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
+        { role === 3 &&
+          <>
+            <MenuItem sx={{ color: 'text.secondary' }} onClick={handleLoyaltyOpen}>
+              <ListItemIcon>
+                <Iconify icon="material-symbols:loyalty" width={24} height={24} />
+              </ListItemIcon>
+              <ListItemText primary="Loyalty" primaryTypographyProps={{ variant: 'body2' }} />
+            </MenuItem>
+            <MenuItem sx={{ color: 'text.secondary' }} onClick={handleInvoice}>
+              <ListItemIcon>
+                <Iconify icon="fa6-solid:file-invoice" width={24} height={24} />
+              </ListItemIcon>
+              <ListItemText primary="Invoices" primaryTypographyProps={{ variant: 'body2' }} />
+            </MenuItem>
+          </>
+        }
+
         <MenuItem sx={{ color: 'text.secondary' }} onClick={handleDelete}>
           <ListItemIcon>
             <Iconify icon="eva:trash-2-outline" width={24} height={24} />
@@ -140,7 +177,8 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
           <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
       </Menu>
-      {/* edit user */}
+
+      {/* ***edit user*** */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -251,6 +289,51 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                   sx={{ mt: 3, mb: 2 }}
                 >
                   Save changes
+                </Button>
+              </Box>
+            </Box>
+          </div>
+        </Container>
+      </Modal>
+
+      {/* ***loyalty info user*** */}
+      <Modal
+        open={loyaltyOpen}
+        onClose={handleLoyaltyClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Container component="main" maxWidth="md" disableGutters>
+          <div className="login-modal">
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
+              <Typography component="h1" variant="h5">
+                Loyalty program
+              </Typography>
+              <Box sx={{ mt: 3 }}>
+                <Grid container item spacing={2} xs={12} sm={12}>
+                  <Grid item xs={12} sm={12} justifyContent='center'>
+                    <Box sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', mt: 0, mb: 2 }}>
+                      <Typography component="h3" variant="h5" sx={{ mt: 2, mb: 2 }}>{user.firstname} {user.lastname}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={7}>
+                    <Typography>{'By Procedures: '}<strong>2300</strong>{' points'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={5}>
+                    <Typography>{'By Referals: '}<strong>7800</strong> {'points'}</Typography>
+                    <Typography>{'(Count of referals: '}<strong>3</strong>{')'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <Typography component="h3" variant="h5">{'Total: '}<strong>10 100</strong>{' points'}</Typography>
+                  </Grid>
+                </Grid>
+                <Button type="button"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 5, mb: 2 }}
+                  onClick = {()=>setLoyaltyOpen(false)}
+                >
+                  Ok
                 </Button>
               </Box>
             </Box>

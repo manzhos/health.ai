@@ -16,21 +16,26 @@ const navConfig = [
     path: '/admin/user',
     icon: getIcon('eva:people-fill'),
   },
-  // {
-  //   title: 'procedure',
-  //   path: '/admin/procedure',
-  //   icon: getIcon('eva:shopping-bag-fill'),
-  // },
-  // {
-  //   title: 'timetable',
-  //   path: '/admin/timetable',
-  //   icon: getIcon('eva:calendar-fill'),
-  // },
+  {
+    title: 'procedure',
+    path: '/admin/procedure',
+    icon: getIcon('eva:shopping-bag-fill'),
+  },
   {
     title: 'communication',
     path: '/admin/communication',
     // icon: getIcon('eva:email-outline'),
     icon: getIcon('eva:email-fill'),
+  },
+  {
+    title: 'timetable',
+    path: '/admin/timetable',
+    icon: getIcon('eva:calendar-fill'),
+  },
+  {
+    title: 'invoices',
+    path: '/admin/invoices',
+    icon: getIcon('fa6-solid:file-invoice'),
   },
   // {
   //   title: 'blog',

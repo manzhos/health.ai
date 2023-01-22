@@ -34,7 +34,7 @@ export default function ConsultForm(){
   const {request} = useHttp()
   const navigate  = useNavigate()
   const {token}   = useContext(AuthContext)
-
+  
   function parseJwt (token) {
     if(token && token !== ''){
       var base64Url = token.split('.')[1]
@@ -47,7 +47,8 @@ export default function ConsultForm(){
   };
   const pJWT = parseJwt(token)
   const userId = pJWT ? pJWT.userId : null
-  // console.log('userId:', userId);
+  // console.log('userId:', userId, 'end on', pJWT.exp);
+  if(!userId) localStorage.removeItem('userData');
 
   const [files, setFiles] = useState()
   const [age, setAge] = useState(18)
@@ -120,29 +121,42 @@ export default function ConsultForm(){
   }
 
   const handlerFileChange = (files) => {
-    setFiles(files)
+    setFiles(files);
+    console.log('files:', files);
   }
 
   const sendRequest = async () => {
-    // console.log('send request');
+    console.log('send request', userId);
     try {
       const res = await request(`${API_URL}api/message`, 'POST', {
         'clientId': userId,
         'body':{
-          'procedureTypeId': procedureTypeId,
+          'procedureTypeId': procedureId !== 0 ? procedureTypeId : 0,
           'procedureId': procedureId,
-          'detail': detail,
+          'detail': [1,32,33,34,35,36,37,39,40,41,44,55,56].filter(item => item === procedureId).length > 0 ? detail : {},
+          'files': files
         },
         'note':note,
         'age':age,
       })
       // console.log(res);
+      if(files){
+        console.log('userId, files:', userId, files)
+        const formData = new FormData();
+        files.map((item)=>{ formData.append('file', item) });
+        formData.append('user_id', userId);
+        formData.append('client_id', userId);
+        const f = await fetch(`${API_URL}api/file`, {
+          method: 'POST', 
+          body: formData,
+        });
+        console.log('f:', f);
+      }      
       navigate('/thanks')
     } catch (e) {
       console.log('error:', e);
       alert('Something wrong.');
     } 
-
   }
 
   return(
@@ -174,7 +188,7 @@ export default function ConsultForm(){
                   {/* {nameClient} */}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:3 }}>
-                  {'Which procedure are you interested in?'}
+                  {'What are you interested in?'}
                 </Typography>
               </Grid>
             </Grid>
@@ -186,8 +200,16 @@ export default function ConsultForm(){
                   <FormControl>
                     {/* <FormLabel id="surgery-radio-buttons-group">Choose the type of service</FormLabel> */}
                     <RadioGroup row aria-labelledby="surgery-radio-buttons-group" name="surgery" defaultValue="non-surgical">
-                      <FormControlLabel value="surgical"      control={<Radio size="small" />}  label="Medical" onChange={(e)=>{setSurgical(e.target.value)}} />
-                      <FormControlLabel value="non-surgical"  control={<Radio size="small" />}  label="Estetic" onChange={(e)=>{setSurgical(e.target.value)}} sx={{ml: 4}} />
+                      <FormControlLabel value="surgical"      control={<Radio size="small" />}  label="Medical" onChange={(e)=>{setSurgical(e.target.value);
+                                                                                                                                setProcedureId(0);
+                                                                                                                                }} />
+                      <FormControlLabel value="non-surgical"  control={<Radio size="small" />}  label="Estetic" onChange={(e)=>{setSurgical(e.target.value);
+                                                                                                                                setProcedureId(0);
+                                                                                                                                }} sx={{ ml:4, mr:6 }} />
+                      <FormControlLabel value="other"         control={<Radio size="small" />}  label="Other"   onChange={(e)=>{
+                                                                                                                                setSurgical(e.target.value);
+                                                                                                                                setProcedureId(0);
+                                                                                                                                }} />
                     </RadioGroup>
                   </FormControl>
                 </Grid>
@@ -198,10 +220,12 @@ export default function ConsultForm(){
                       {/* procedureType now: {procedureTypeId} */}
                     </Grid>
                   }
-                  <Grid item xs={12} sm={6}>
-                    <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
-                    {/* procedure now: {procedureId} */}
-                  </Grid>
+                  { surgical !== 'other' &&
+                    <Grid item xs={12} sm={6}>
+                      <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
+                      {/* procedure now: {procedureId} */}
+                    </Grid>
+                  }
                 </Grid>
                 { procedureId === 1 &&
                   <Grid container spacing={2} sx={{ mt: 2, mb: 3 }} justifyContent="center">
@@ -293,18 +317,19 @@ export default function ConsultForm(){
                 }
 
                 {/* add file */}
-                { Number(procedureId) !== 0 &&
+                {/* { Number(procedureId) !== 0 && */}
                   <>
                     <Divider sx={{ mt: 4 }} />
                     <Grid container sx={{ mt: 4 }}>
                       { Object.keys(detail).length > 0 &&
                         <>
                           <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:1 }}>
-                            {'For a more detailed calculation, add photos'}
+                            {/* {'For a more detailed calculation, add photos'} */}
+                            {'To receive qualified response please provide more information, add photos or docs.'}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mt:0 }}>
+                          {/* <Typography variant="body2" sx={{ color: 'text.secondary', mt:0 }}>
                             Check out the <a href="#">guide</a> before.
-                          </Typography>
+                          </Typography> */}
                         </>
                       }
                       
@@ -314,16 +339,15 @@ export default function ConsultForm(){
                       </Grid>
                     </Grid>
                   </>
-                }
+                {/* } */}
 
-                { Number(procedureId) !== 0 &&
+                {/* { Number(procedureId) !== 0 && */}
                   <>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb:1 }}>
-                      {'Add some detail about yourself'}
+                      {'Describe your situaltion.'}
                     </Typography>
-
                     <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
-                      <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Medications you are taking" className='cons-input' />
+                      <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Message" className='cons-input' />
                     </Grid>
                     <Grid item xs={12} sm={12}>
                       <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
@@ -357,7 +381,7 @@ export default function ConsultForm(){
                       <Box sx={{ mt: 5, mb: 1 }}>&nbsp;</Box>
                     </Grid>
                   </>
-                }
+                {/* } */}
               </Grid>
               <Grid item xs={1} sm={1}>&nbsp;</Grid>
             </Grid>

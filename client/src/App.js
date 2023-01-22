@@ -12,6 +12,8 @@ import './css/style.css';
 // import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
 import {Loader} from './components/Loader'
 
+import BetaButton from './components/BetaButton';
+
 // const theme = createMuiTheme({
 //   typography: {
 //     fontFamily: [
@@ -27,8 +29,6 @@ export default function App() {
   const isAuthenticated = !!token;
   const routes = useMyRoutes(isAuthenticated);
 
-  console.warn(routes);
-
   if (!ready) {
     return <Loader />
   }
@@ -42,6 +42,7 @@ export default function App() {
         {/* <BaseOptionChartStyle /> */}
         {/* { isAuthenticated && <Navbar /> } */}
         <div className="container">
+          <BetaButton />
           {routes}
         </div>
         {/* <Router /> */}

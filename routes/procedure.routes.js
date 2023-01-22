@@ -14,5 +14,7 @@ router.get('/proceduretypes', procedureController.getProcedureTypes)
 
 router.get('/procedures/:user_id', procedureController.getUserProcedures)
 router.get('/doc_procedures/:doctor_id', procedureController.getDoctorProcedures)
+router.get('/tt_procedures', procedureController.getTimeTableProcedures)
+router.get('/tt_procedures/:id', procedureController.getTimeTableProceduresById)
 
 module.exports = router 

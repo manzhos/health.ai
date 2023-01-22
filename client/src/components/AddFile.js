@@ -42,33 +42,40 @@ export default function AddFile({ onFileChange }){
   }
 
   const onDelButtonClick = async (e, id) => {
-    console.log('E:', e, 'Id:', id);
+    // console.log('E:', e, 'Id:', id);
     setFileURL(fileURL.filter(item => item.id !== id));
   }
 
   return(
     <Grid item xs={12} sm={12}>
+      {/* <div>
+        Upload photos/docs: 
+      </div> */}
       <div>
-        Add Files: 
-      </div>
-      <div>
-        {/* {fileURL.map(item => console.log('item:', item))} */}
-        {fileURL.map(item => 
-          <div key={item.id} style={{margin:"20px", width:"105px", display:"inline-block"}}>
-            {item.type === 'img' &&
-              <img src={item.url} alt=""/>
-            }
-            {item.type === 'mov' &&
-              <img src={API_URL+'video.png'} alt="" />
-            }
-            {item.type === 'file' &&
-              <img src={API_URL+'document.png'} alt="" />
-            }
-            <p style={{fontSize:"10px", lineHeight:"10px", marginTop:"5px"}}>{item.name}</p>
-            <Button id="DelButton" onClick={(e) => onDelButtonClick(e, item.id)} variant="text" color="error" size="small">&#10006; Delete</Button>
-          </div>
-        )}
-        <input id="file" name="file" type="file" onChange={handlerFileChange} />
+        <div>
+          {/* {fileURL.map(item => console.log('item:', item))} */}
+          {fileURL.map(item => 
+            <div key={item.id} style={{margin:"20px", width:"105px", display:"inline-block"}}>
+              {item.type === 'img' &&
+                <img src={item.url} alt=""/>
+              }
+              {item.type === 'mov' &&
+                <img src={API_URL+'video.png'} alt="" />
+              }
+              {item.type === 'file' &&
+                <img src={API_URL+'document.png'} alt="" />
+              }
+              <p style={{fontSize:"10px", lineHeight:"10px", marginTop:"5px"}}>{item.name}</p>
+              <Button id="DelButton" onClick={(e) => onDelButtonClick(e, item.id)} variant="text" color="error" size="small">&#10006; Delete</Button>
+            </div>
+          )}
+        </div>
+        {/* <Button variant="outlined">Upload photos/docs</Button> */}
+        {/* <input id="file" name="file" type="file" onChange={handlerFileChange} /> */}
+        <label htmlFor="file" style={{ width:'100%' }}>
+          <input id="file" name="file" type="file" onChange={handlerFileChange} style={{ display: "none" }}/>
+          <Button variant="outlined" component="span">{'Upload photos/docs'}</Button>
+        </label>
       </div>
     </Grid>
   )

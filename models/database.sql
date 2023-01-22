@@ -6,6 +6,7 @@ create TABLE users(
   "password" TEXT NOT NULL ,
   "ts" TIMESTAMPTZ, 
   "usertype_id" INT2,
+  "ref_id" INT4,
   "promo" BOOLEAN DEFAULT true,
   "avatar" TEXT,
   "confirm" BOOLEAN DEFAULT false,
@@ -40,6 +41,8 @@ create TABLE timetable(
   "time" TEXT, 
   "duration" INT2,
   "consultation" BOOLEAN DEFAULT false,   
+  "final_cost" INT2,
+  "points" INT2,
   "ts" TIMESTAMPTZ
 );
 
@@ -64,6 +67,8 @@ create TABLE notes(
   "archive" BOOLEAN DEFAULT false,  
   "doc_type" INT2,
   "invoice" JSONB,  
+  "bills" JSONB,  
+  "paid" BOOLEAN DEFAULT false,
   "ts" TIMESTAMPTZ
 );
 
@@ -75,6 +80,17 @@ create TABLE messages(
   "body" JSONB, 
   "status" INT2 DEFAULT 0, -- // 0 - not answered, 1 - answered, 2 - closed
   "archive" BOOLEAN DEFAULT false,  
+  "ts" TIMESTAMPTZ
+);
+
+create TABLE loyalty(
+  "id" SERIAL4 PRIMARY KEY,
+  "client_id" INT4,
+  "invoice_id" INT2,
+  "ref" BOOLEAN DEFAULT false,
+  "ref_id" INT4,
+  "multiply" INT2 DEFAULT 1,
+  "points" INT4,
   "ts" TIMESTAMPTZ
 );
 

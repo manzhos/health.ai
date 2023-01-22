@@ -27,9 +27,9 @@ export default function CommunicationPWA(){
   // console.log('clientId:', clientId);
 
   return(
-    <>
+    <div>
       <PWAMenu />
       <InboxPWA clientId={clientId} />
-    </>
+    </div>
   )
 }

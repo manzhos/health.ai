@@ -31,7 +31,6 @@ import {
 // components
 import Page from '../../components/Page';
 // import Label from '../components/Label';
-import Scrollbar from '../../components/Scrollbar';
 import Iconify from '../../components/Iconify';
 import SearchNotFound from '../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../sections/@dashboard/user';
@@ -68,15 +67,18 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function applySortFilter(array, comparator, query) {
+function applySortFilter(array, comparator, query, role) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-  if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+  if(query) {
+    return filter(array, (_user) => (_user.firstname.toLowerCase().indexOf(query.toLowerCase()) !== -1) || _user.lastname.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+  }
+  if(role){
+    return filter(array, (_user) => _user.usertype_id === role);
   }
   return stabilizedThis.map((el) => el[0]);
 }
@@ -88,6 +90,7 @@ export default function User() {
   const [selected, setSelected] = useState([])
   const [orderBy, setOrderBy] = useState('name')
   const [filterName, setFilterName] = useState('')
+  const [filterUserRole, setFilterUserRole] = useState()
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [userList, setUserList] = useState([])
   const [roleList, setRoleList] = useState([])
@@ -158,8 +161,13 @@ export default function User() {
     setPage(0);
   };
 
-  const handleFilterByName = (event) => {
-    setFilterName(event.target.value);
+  const handleFilterByName = (filterString) => {
+    setFilterName(filterString);
+  };
+
+  const handleFilterByUserRole = (userRole) => {
+    // console.log('handleFilterByUserRole', userRole)
+    setFilterUserRole(userRole);
   };
 
   const handleChangeRole = (event) => {
@@ -205,7 +213,7 @@ export default function User() {
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - userList.length) : 0
 
-  const filteredUsers = applySortFilter(userList, getComparator(order, orderBy), filterName)
+  const filteredUsers = applySortFilter(userList, getComparator(order, orderBy), filterName, filterUserRole)
 
   const isUserNotFound = filteredUsers.length === 0
 
@@ -227,7 +235,13 @@ export default function User() {
   }
 
   const handleUpdate = (update) => {
-    getUsers()    
+    getUsers();
+  }
+
+  const getUser = (event, id) => {
+    event.preventDefault()
+    console.log('get User:', id)
+    // navigate(`/admin/client/docs/${id}`)
   }
 
   if (loading) return <Loader/>
@@ -358,75 +372,72 @@ export default function User() {
           </Stack>
   
           <Card>
-            <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-  
-            <Scrollbar>
-              <TableContainer sx={{ minWidth: 800 }}>
-                <Table>
-                  <UserListHead
-                    order={order}
-                    orderBy={orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={userList.length}
-                    numSelected={selected.length}
-                    onRequestSort={handleRequestSort}
-                    onSelectAllClick={handleSelectAllClick}
-                  />
-                  <TableBody>
-                    {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                      // const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                      const { id, firstname, lastname, usertype, usertype_id, email, promo } = row;
-                      const isItemSelected = selected.indexOf(firstname) !== -1;
-  
-                      return (
-                        <TableRow
-                          hover
-                          key={id}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={isItemSelected}
-                          aria-checked={isItemSelected}
-                        >
-                          <TableCell padding="checkbox">
-                            <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
-                          </TableCell>
-                          <TableCell component="th" scope="row" padding="none">
-                            <Stack direction="row" alignItems="center" spacing={2}>
-                              {/* <Avatar alt={firstname} src={avatarUrl} /> */}
-                              <Typography variant="subtitle2" noWrap>
-                                {sentenceCase(firstname)}&nbsp;{sentenceCase(lastname)}
-                              </Typography>
-                            </Stack>
-                          </TableCell>
-                          <TableCell align="left">{email}</TableCell>
-                          <TableCell align="left">{usertype}</TableCell>
-                          <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
-                          {/* <TableCell align="left">{id}</TableCell> */}
-                          <TableCell align="right">
-                            <UserMoreMenu id={id} user={row} roleList={roleList} onChange={handleUpdate} />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-  
-                  {isUserNotFound && (
-                    <TableBody>
-                      <TableRow>
-                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                          <SearchNotFound searchQuery={filterName} />
+            <UserListToolbar numSelected={selected.length} onFilterName={handleFilterByName} onUserRole={handleFilterByUserRole} />
+            <TableContainer sx={{ minWidth: 800 }}>
+              <Table>
+                <UserListHead
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={userList.length}
+                  numSelected={selected.length}
+                  onRequestSort={handleRequestSort}
+                  onSelectAllClick={handleSelectAllClick}
+                />
+                <TableBody>
+                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                    // const { id, name, role, status, company, avatarUrl, isVerified } = row;
+                    const { id, firstname, lastname, usertype, usertype_id, email, promo } = row;
+                    const isItemSelected = selected.indexOf(firstname) !== -1;
+
+                    return (
+                      <TableRow
+                        hover
+                        key={id}
+                        tabIndex={-1}
+                        role="checkbox"
+                        selected={isItemSelected}
+                        aria-checked={isItemSelected}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
+                        </TableCell>
+                        <TableCell component="th" scope="row" padding="none" onClick={(event) => getUser(event, id)}>
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            {/* <Avatar alt={firstname} src={avatarUrl} /> */}
+                            <Typography variant="subtitle2" noWrap>
+                              {sentenceCase(firstname)}&nbsp;{sentenceCase(lastname)}
+                            </Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell align="left" onClick={(event) => getUser(event, id)}>{email}</TableCell>
+                        <TableCell align="left" onClick={(event) => getUser(event, id)}>{usertype}</TableCell>
+                        <TableCell align="left">{promo ? 'Yes' : 'No'}</TableCell>
+                        {/* <TableCell align="left">{id}</TableCell> */}
+                        <TableCell align="right">
+                          <UserMoreMenu id={id} user={row} roleList={roleList} onChange={handleUpdate} />
                         </TableCell>
                       </TableRow>
-                    </TableBody>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
                   )}
-                </Table>
-              </TableContainer>
-            </Scrollbar>
+                </TableBody>
+
+                {isUserNotFound && (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                        <SearchNotFound searchQuery={filterName} />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                )}
+              </Table>
+            </TableContainer>
   
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
