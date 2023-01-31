@@ -254,7 +254,7 @@ export default function Booking(){
                     return(
                       <img 
                         key={item.id} 
-                        src={API_URL + 'avatars/' + item.avatar} 
+                        src={API_URL + 'files/avatars/' + item.avatar} 
                         alt={'Doctor ' + sentenceCase(item.firstname) + ' ' + sentenceCase(item.lastname)} 
                         className="doc-ava" 
                         onClick={()=>{setDoctor(item.id)}}
