@@ -4,13 +4,10 @@ import {
   Grid,
   Button
 } from '@mui/material'
-// -----------------------------------------
-// import { useHttp } from '../hooks/http.hook'
-import { API_URL } from '../config'
+import Iconify from "./Iconify";
+import { URL, API_URL } from '../config'
 
 export default function AddFile({ onFileChange }){
-  // const {request} = useHttp()
-
   const [file, setFile] = useState([])
   const [fileURL, setFileURL] = useState([])
 
@@ -60,21 +57,22 @@ export default function AddFile({ onFileChange }){
                 <img src={item.url} alt=""/>
               }
               {item.type === 'mov' &&
-                <img src={API_URL+'video.png'} alt="" />
+                <img src={URL+'files/video.png'} alt="" />
               }
               {item.type === 'file' &&
-                <img src={API_URL+'document.png'} alt="" />
+                <img src={URL+'files/document.png'} alt="" />
               }
               <p style={{fontSize:"10px", lineHeight:"10px", marginTop:"5px"}}>{item.name}</p>
               <Button id="DelButton" onClick={(e) => onDelButtonClick(e, item.id)} variant="text" color="error" size="small">&#10006; Delete</Button>
             </div>
           )}
         </div>
-        {/* <Button variant="outlined">Upload photos/docs</Button> */}
-        {/* <input id="file" name="file" type="file" onChange={handlerFileChange} /> */}
         <label htmlFor="file" style={{ width:'100%' }}>
           <input id="file" name="file" type="file" onChange={handlerFileChange} style={{ display: "none" }}/>
-          <Button variant="outlined" component="span">{'Upload photos/docs'}</Button>
+          {/* <Button variant="outlined" component="span">{'Upload photos/docs'}</Button> */}
+          <Iconify icon="material-symbols:add-a-photo-outline" className="up-photo" type="button" />
+          <Iconify icon="material-symbols:add-a-photo-outline" className="up-photo" type="button" />
+          <Iconify icon="material-symbols:add-a-photo-outline" className="up-photo" type="button" />
         </label>
       </div>
     </Grid>
