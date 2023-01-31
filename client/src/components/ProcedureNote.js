@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from "react";
 import humanDate from "./HumanDate";
-
 import {
   Box,
   Grid,
@@ -15,16 +14,14 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  Paper,
+  Checkbox,
   TableContainer,
   Table,
   TableHead,
   TableBody,
   TableRow,
   TableCell,
-  tooltipClasses
 } from '@mui/material';
-
 import {API_URL} from '../config';
 import { useHttp } from '../hooks/http.hook'
 
@@ -40,6 +37,8 @@ export default function ProcedureNote({ procedure, onSave }){
   const [zone, setZone] = useState(0);
   const [numberUnits, setNumberUnits] = useState(0);
   const [note, setNote] = useState('');
+  const [medind, setMedind] = useState(false);
+  const [diagnosis, setDiagnosis] = useState('');
   const [checkoutList, setCheckoutList] = useState([]);
   const [total, setTotal] = useState(0);
 
@@ -79,6 +78,8 @@ export default function ProcedureNote({ procedure, onSave }){
         client_id     : procedure.client_id, 
         doctor_id     : procedure.doctor_id, 
         note          : note, 
+        medind        : medind, 
+        diagnosis     : diagnosis, 
         services      : checkoutList,
         cost          : total
       })
@@ -198,17 +199,35 @@ export default function ProcedureNote({ procedure, onSave }){
                 </Grid>
               </Grid>
             }
-            <Grid container>
-              <Grid item xs={12}>
-                <Typography variant="body2" sx={{ color: 'text.secondary', mb:1 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ mt:1 }}>
                   {'Note about procedure'}
                 </Typography>
                 <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
                   <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Note" className='cons-input' />
                 </Grid>
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Checkbox name="medind" value="medind" onChange={()=>{setMedind(!medind)}} color="primary" />}
+                  label="Medical indication"
+                />
+                { medind &&
+                  <Grid item xs={12} sm={12} sx={{ mt: 1 }}>
+                    <TextField 
+                      fullWidth multiline rows={4}
+                      name="diagnosis"
+                      id="diagnosis"
+                      label="Diagnosis"
+                      className='cons-input' style={{ marginTop:"4px" }} 
+                      value={diagnosis} onChange={(e)=>{setDiagnosis(e.target.value)}}
+                    />
+                  </Grid>
+                }
+              </Grid>
             </Grid>
-            <Button variant="contained" sx={{ mt: 3, mb: 8 }} onClick={saveNote}>Save</Button>
+            <Button variant="contained" sx={{ mt: 3 }} onClick={saveNote}>Save</Button>
           </Grid>
         </Grid>
       </Box>

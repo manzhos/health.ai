@@ -116,11 +116,15 @@ class NoteController {
   
   async createDoc(req, res){
     // save to DB
-    let {note, client_id, doctor_id, procedure_id, services, cost} = req.body;
+    let {note, client_id, doctor_id, procedure_id, services, cost, medind, diagnosis} = req.body;
     const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts, doc_type, invoice) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
     let ts = new Date();
-    services.push({'cost': cost});
-    // console.log('createDoc:', 'invoice', note, client_id, doctor_id, procedure_id, JSON.stringify(services), ts);
+    services.push({
+      'cost'      : cost,
+      'medind'    : medind,
+      'diagnosis' : diagnosis
+    });
+    console.log('createDoc:', 'invoice', note, client_id, doctor_id, procedure_id, JSON.stringify(services), ts);
     const newDoc = await DB.query(sql,['invoice', note, client_id, doctor_id, procedure_id, ts, 1, JSON.stringify(services)]);
     // console.log('newDoc:', newDoc.rows);
     res.send(newDoc.rows[0]);
@@ -191,8 +195,10 @@ class NoteController {
         FROM notes n
         JOIN users uc ON (uc.id = n.client_id)
         JOIN users ud ON (ud.id = n.doctor_id)
-        JOIN procedures p ON p.id = n.procedure_id
-        WHERE doc_type = 1;`
+        JOIN timetable tt ON tt.id = n.procedure_id
+        JOIN procedures p ON p.id = tt.procedure_id
+        WHERE doc_type = 1
+        ORDER BY ts DESC;`
       const invoices = await DB.query(sql)
       console.log(invoices.rows)
       return res.send(invoices.rows)

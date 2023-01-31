@@ -24,7 +24,7 @@ import {
 import { AuthContext } from '../../../context/AuthContext'
 import Iconify from '../../../components/Iconify';
 import { useHttp } from '../../../hooks/http.hook'
-import { API_URL } from '../../../config'
+import { URL, API_URL } from '../../../config'
 import { useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
@@ -101,8 +101,8 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   const avatar = () => {
     // console.log('user avatar:', user.avatar ? user.avatar : 'none');
     if(user.avatar && user.avatar?.slice(0,4) === 'http') return user.avatar;
-    if(user.avatar) return API_URL + 'avatars/' + user.avatar;
-    return API_URL + 'blank-avatar.svg';
+    if(user.avatar) return URL + 'files/avatars/' + user.avatar;
+    return URL + 'files/blank-avatar.svg';
   }
   const onAvatarChange = (e) => {
     // console.log('E:', e)

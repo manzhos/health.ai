@@ -80,7 +80,9 @@ export default function Invoices() {
     let inv = invoiceList.find(invoice => invoice.id === invoiceId),
         cost = inv.procedure_cost;
         inv.services.map((service)=>{
-          if(typeof service.cost !== "undefined") inv.cost = service.cost
+          if(typeof service.cost      !== "undefined") inv.cost       = service.cost
+          if(typeof service.medind    !== "undefined") inv.medind     = service.medind
+          if(typeof service.diagnosis !== "undefined") inv.diagnosis  = service.diagnosis
         });
     let d = new Date(inv.ts);
     
@@ -106,9 +108,11 @@ export default function Invoices() {
         'procedure_cost'    : inv.procedure_cost,
         'procedure_id'      : inv.procedure_id,
         'services'          : inv.services,
-        'date'              : d.getDate().length > 1 ? d.getDate() : '0' + d.getDate() + '.' + (d.getMonth() + 1 > 9 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '.' + d.getFullYear(),
+        'date'              : (d.getDate() > 9 ? d.getDate() : '0' + d.getDate()) + '.' + (d.getMonth() + 1 > 9 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '.' + d.getFullYear(),
         'qty'               : 1,
         'cost'              : inv.cost,
+        'medind'            : inv.medind,
+        'diagnosis'         : inv.diagnosis,
       })
     } else setInvoice(inv.bill);
     // console.log('invoice:', invoice);
@@ -120,7 +124,7 @@ export default function Invoices() {
     const inv = invoiceList.find(invoice => invoice.id === id)
     // console.log('invoice:', inv);
     if(!inv.bill) {
-      // console.log('make the bill');
+      alert('Make the bill firstly');
       return;
     }
     try {
@@ -197,13 +201,13 @@ export default function Invoices() {
                         tabIndex={-1}
                         // role="checkbox"
                       >
-                        <TableCell onClick={() => getInvoice(id)}>
+                        <TableCell onClick={() => getInvoice(id)} style={{cursor:"pointer"}}>
                           {humanDate(ts)}
                         </TableCell>
-                        <TableCell onClick={() => getInvoice(id)}>
+                        <TableCell onClick={() => getInvoice(id)} style={{cursor:"pointer"}}>
                           {procedure}
                         </TableCell>
-                        <TableCell onClick={() => getInvoice(id)}>
+                        <TableCell onClick={() => getInvoice(id)} style={{cursor:"pointer"}}>
                           {sentenceCase(client_firstname)} {sentenceCase(client_lastname)}
                         </TableCell>
                         <TableCell onClick={() => setPaid(id)}>
