@@ -37,7 +37,7 @@ export default function Dashboard(){
   const userId = pJWT ? pJWT.userId : null
   // console.log('userId:', userId);
 
-  const url = `${URL}${userId}`
+  const url = `${URL}loginpwa/${userId}`
 
   const generateQRCode = () => {
     QRCode.toDataURL(url, (err, url)=>{

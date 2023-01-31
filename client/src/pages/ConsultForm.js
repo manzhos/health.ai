@@ -54,7 +54,7 @@ export default function ConsultForm(){
   const [age, setAge] = useState(18)
   const [note, setNote] = useState('')
   const [confirm, setConfirm] = useState(true)
-  const [surgical, setSurgical] = useState('non-surgical')
+  const [surgical, setSurgical] = useState('other')
   const [procedureTypeId, setProcedureTypeId] = useState(4)
   const [procedureId, setProcedureId] = useState(0)
   const [botoxWhen, setBotoxWhen] = useState(0)
@@ -174,41 +174,64 @@ export default function ConsultForm(){
       <div className='consult-form'>
         <Box sx={{ mt: 7 }}>
           <Grid container>
-            <Grid item xs={12} sm={12}>
+            {/* <Grid item xs={12} sm={12}>
               <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 1 }}>&nbsp;</Box>
               <Typography variant="body2" sx={{ color: 'text.secondary', mb:3 }}>
                 {'Book the consultation'}
               </Typography>
-            </Grid>
+            </Grid> */}
             <Grid item xs={1}></Grid>
             <Grid container item xs={10} sm={10} spacing={6}>
               <Grid item xs={12} sm={12}>
-                <Typography variant="h2" sx={{ color: 'text.secondary' }}>
-                  Hello
-                  {/* {nameClient} */}
+                <Typography variant="h5" sx={{ color: 'text.secondary' }}>
+                  Tell us you need and we will customize you treatment plan
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:3 }}>
+                {/* <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:3 }}>
                   {'What are you interested in?'}
-                </Typography>
+                </Typography> */}
               </Grid>
             </Grid>
 
             <Grid container spacing={2}>
               <Grid item xs={1} sm={1}>&nbsp;</Grid>
               <Grid item xs={10} sm={10}>
+                {/* add file */}
+                <Divider sx={{ mt: 4, mb: 4 }} />
+                <AddFile onFileChange={handlerFileChange}/>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:1, textAlign:'center'}}>
+                  {'Upload your photos so you can get a more specialized response.'}
+                </Typography>
+                <Grid item xs={12} sm={12}>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
+                </Grid>
+
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb:1 }}>
+                  {'Tell us you need and we will customize you treatment plan.'}
+                </Typography>
+                <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
+                  <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Message" className='cons-input' />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
+                </Grid>                
+
+                {/* details */}
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb:1 }}>
+                  {'If you have questions about a specific procedure, please select.'}
+                </Typography>
                 <Grid item xs={12} sm={12}>
                   <FormControl>
                     {/* <FormLabel id="surgery-radio-buttons-group">Choose the type of service</FormLabel> */}
-                    <RadioGroup row aria-labelledby="surgery-radio-buttons-group" name="surgery" defaultValue="non-surgical">
+                    <RadioGroup row aria-labelledby="surgery-radio-buttons-group" name="surgery" defaultValue="other">
                       <FormControlLabel value="surgical"      control={<Radio size="small" />}  label="Medical" onChange={(e)=>{setSurgical(e.target.value);
                                                                                                                                 setProcedureId(0);
                                                                                                                                 }} />
                       <FormControlLabel value="non-surgical"  control={<Radio size="small" />}  label="Estetic" onChange={(e)=>{setSurgical(e.target.value);
                                                                                                                                 setProcedureId(0);
-                                                                                                                                }} sx={{ ml:4, mr:6 }} />
-                      <FormControlLabel value="other"         control={<Radio size="small" />}  label="Other"   onChange={(e)=>{
+                                                                                                                                }} sx={{ ml:4, mr:6 }} />                                                                                                        
+                      <FormControlLabel value="other"         control={<Radio size="small" />}  label="No specific"   onChange={(e)=>{
                                                                                                                                 setSurgical(e.target.value);
-                                                                                                                                setProcedureId(0);
+                                                                                                                                setProcedureId(0);                                                                                                          
                                                                                                                                 }} />
                     </RadioGroup>
                   </FormControl>
@@ -224,7 +247,7 @@ export default function ConsultForm(){
                     <Grid item xs={12} sm={6}>
                       <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
                       {/* procedure now: {procedureId} */}
-                    </Grid>
+                    </Grid>      
                   }
                 </Grid>
                 { procedureId === 1 &&
@@ -251,7 +274,7 @@ export default function ConsultForm(){
                             <FormControlLabel value="3" control={<Radio size="small" />}  label="Other"         onChange={(e)=>{setBotoxWhat(e.target.value)}} className="cons-radio"/>
                           </RadioGroup>
                         </FormControl>
-                      </Grid>
+                      </Grid>    
                     }
                     
                     {/* headpain */}
@@ -301,87 +324,47 @@ export default function ConsultForm(){
                   </Grid>
                 }
                 { [32,33,34,35,36,37,39,40,41,44].filter(item => item === procedureId).length > 0 &&
-                  <>
+                  <div>
                     <BreastAugmentation onChangeBreastAugmentation={handleBreastAugmentation} />
-                  </>
+                  </div>
                 }
                 { [55].filter(item => item === procedureId).length > 0 &&
-                  <>
+                  <div>
                     <Sculptra onChangeSculptra={handleSculptra} />
-                  </>
+                  </div>
                 }
                 { [56].filter(item => item === procedureId).length > 0 &&
-                  <>
+                  <div>
                     <Co2 onChangeCo2={handleCo2} />
-                  </>
+                  </div>    
                 }
 
-                {/* add file */}
-                {/* { Number(procedureId) !== 0 && */}
-                  <>
-                    <Divider sx={{ mt: 4 }} />
-                    <Grid container sx={{ mt: 4 }}>
-                      { Object.keys(detail).length > 0 &&
-                        <>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mt:2, mb:1 }}>
-                            {/* {'For a more detailed calculation, add photos'} */}
-                            {'To receive qualified response please provide more information, add photos or docs.'}
-                          </Typography>
-                          {/* <Typography variant="body2" sx={{ color: 'text.secondary', mt:0 }}>
-                            Check out the <a href="#">guide</a> before.
-                          </Typography> */}
-                        </>
-                      }
-                      
-                      <AddFile onFileChange={handlerFileChange}/>
-                      <Grid item xs={12} sm={12}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
-                      </Grid>
-                    </Grid>
-                  </>
-                {/* } */}
+                <Grid item xs={12} sm={12}>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
+                </Grid> 
 
-                {/* { Number(procedureId) !== 0 && */}
-                  <>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb:1 }}>
-                      {'Describe your situaltion.'}
-                    </Typography>
-                    <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
-                      <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Message" className='cons-input' />
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 3 }}>&nbsp;</Box>
-                    </Grid>                
-
-                    <Grid container item xs={12} sm={12} spacing={5} alignItems="center" >
-                      <Grid item xs={4} sm={4}>
-                        <TextField fullWidth id="age" label="Age" name="age" type='number' value={age} onChange={(e)=>{setAge(e.target.value)}} className='cons-input' />
-                      </Grid>
-                      <Grid item xs={8} sm={8} style={{ textAlign:"left"}}>
-                        <FormControlLabel
-                          control={<Checkbox name="confirm" value="confirm" onChange={()=>{setConfirm(!confirm)}} color="primary" defaultChecked />}
-                          label="I confirm terms"
-                        />
-                      </Grid>
-                      
-                      {/* <Grid item xs={8} sm={8}>
-                        <FormControl>
-                          <FormLabel id="set-sex-radio-buttons-group">Set your sex</FormLabel>  
-                          <RadioGroup row aria-labelledby="set-sex-radio-buttons-group" name="set_sex" defaultValue="female">
-                            <FormControlLabel value="female"  control={<Radio size="small" />}  label="Female" onChange={(e)=>{setSex(e.target.value)}}/>
-                            <FormControlLabel value="male"    control={<Radio size="small" />}  label="Male"   onChange={(e)=>{setSex(e.target.value)}} />
-                          </RadioGroup>
-                        </FormControl>
-                      </Grid> */}
-
-                    </Grid>
-                    
+                <Grid container item xs={12} sm={12} spacing={3} alignItems="center" >
+                  <Grid xs={4} sm={4}>&nbsp;</Grid>
+                  <Grid item xs={4} sm={4}>
+                    <TextField fullWidth id="age" label="Age" name="age" type='number' value={age} onChange={(e)=>{setAge(e.target.value)}} className='cons-input' />
+                  </Grid>
+                  <Grid xs={4} sm={4}>&nbsp;</Grid>
+                  <Grid item xs={12} sm={12} style={{ textAlign:"center"}}>
+                    <FormControlLabel
+                      control={<Checkbox name="confirm" value="confirm" onChange={()=>{setConfirm(!confirm)}} color="primary" defaultChecked />}
+                      label="I confirm terms"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={12} style={{ textAlign:"center"}}>
                     <Button variant="contained" sx={{ mt: 3, mb: 8 }} onClick={sendRequest}>Send request</Button>
-                    <Grid item xs={12} sm={12}>
-                      <Box sx={{ mt: 5, mb: 1 }}>&nbsp;</Box>
-                    </Grid>
-                  </>
-                {/* } */}
+                  </Grid>
+                </Grid>
+                
+                <Grid item xs={12} sm={12}>
+                  <Box sx={{ mt: 5, mb: 1 }}>&nbsp;</Box>
+                </Grid>
+
+
               </Grid>
               <Grid item xs={1} sm={1}>&nbsp;</Grid>
             </Grid>

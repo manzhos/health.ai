@@ -22,8 +22,8 @@ export const ComponentToPrint = React.forwardRef(({inv, onInvoiceUpdate}, ref) =
               <table style={{ width:"100%" }}>
                 <tbody>
                   <tr><td>{invoice.client_firstname} {invoice.client_lastname}</td></tr>
-                  <tr><td><input className='input-blank' id="adress1"       name="client_adress1" onChange={handleChangeData} value={invoice.client_adress1} placeholder="adress line 1"/></td></tr>
-                  <tr><td><input className='input-blank' id="adress2"       name="client_adress2" onChange={handleChangeData} value={invoice.client_adress2} placeholder="adress line 2"/></td></tr>
+                  <tr><td><input className='input-blank' id="adress1"       name="client_adress1" onChange={handleChangeData} value={invoice.client_adress1} placeholder="Adress line 1"/></td></tr>
+                  <tr><td><input className='input-blank' id="adress2"       name="client_adress2" onChange={handleChangeData} value={invoice.client_adress2} placeholder="Adress line 2"/></td></tr>
                   <tr><td><input className='input-blank' id="adressCountry" name="client_country" onChange={handleChangeData} value={invoice.client_country} placeholder="Country"/></td></tr>
                 </tbody>
               </table>
@@ -160,15 +160,30 @@ export const ComponentToPrint = React.forwardRef(({inv, onInvoiceUpdate}, ref) =
             <td>{'Nettobetrag'}</td>
             <td>{(invoice.qty * invoice.cost).toFixed(2)} &#8364;</td>
           </tr>
-          <tr>
-            <td>{'Umsatzsteuer 19%'}</td>
-            <td>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
-          </tr>
-          <tr><td colSpan={2}><hr/></td></tr>
-          <tr style={{ fontWeight:"bold" }}>
-            <td>{'Rechnungsbetrag'}</td>
-            <td>{(invoice.qty * invoice.cost * 1.19).toFixed(2)} &#8364;</td>
-          </tr>
+          { invoice.medind &&
+            <tr>
+              <td>{'Umsatzsteuer 19%'}</td>
+              <td>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
+            </tr>
+          }
+          { invoice.medind &&
+            <tr><td colSpan={2}><hr/></td></tr>
+          }
+          { invoice.medind &&
+            <tr style={{ fontWeight:"bold" }}>
+              <td>{'Rechnungsbetrag'}</td>
+              <td>{(invoice.qty * invoice.cost * 1.19).toFixed(2)} &#8364;</td>
+            </tr>
+          }
+          { !invoice.medind &&
+            <tr><td colSpan={2}><hr/></td></tr>
+          }
+          { !invoice.medind &&
+            <tr style={{ fontWeight:"bold" }}>
+              <td>{'Rechnungsbetrag'}</td>
+              <td>{(invoice.qty * invoice.cost * 1).toFixed(2)} &#8364;</td>
+            </tr>
+          }
         </tbody>
       </table>
       <p>&nbsp;</p>

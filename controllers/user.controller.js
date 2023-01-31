@@ -20,9 +20,9 @@ class UserController {
       // save the avatar
       const file = req.files.avatar
       // console.log('File:', file)
-      const folderName = process.env.filePath + '\\avatars'
+      const folderName = process.env.filePath + '/avatars'
       try { if (!fs.existsSync(folderName)) fs.mkdirSync(folderName) } catch (e) { console.error(e) }
-      const pathFile = folderName + '\\' + file.name
+      const pathFile = folderName + '/' + file.name
       // console.log('\nPath:', folderName)
       if (fs.existsSync(pathFile)) {
         return res.status(400).json({message: 'File already exist'})
@@ -76,6 +76,8 @@ class UserController {
 
   async loginPwaUser(req, res){
     console.log('loginPwaUser'); 
+    const {email, password, ref_id} = req.body
+    // console.log('email, password, ref_id:', email, password, ref_id);
     const errors = validationResult(req)
     console.log('errors:', errors)
     if (!errors.isEmpty()) {
@@ -85,8 +87,6 @@ class UserController {
       })
     }
       
-    const {email, password, ref_id} = req.body
-    // console.log('email, password, ref_id:', email, password, ref_id);
     try {
       const q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email]);
       let user = q.rows[0];
@@ -199,8 +199,8 @@ class UserController {
       // delete current avatar
       // console.log('avatar:', oldAvatar.rows)
       if(oldAvatar || oldAvatar.rows[0].avatar !== ''){
-        const folderName = process.env.filePath + '\\avatars'
-        const pathFile = folderName + '\\' + oldAvatar.rows[0].avatar
+        const folderName = process.env.filePath + '/avatars'
+        const pathFile = folderName + '/' + oldAvatar.rows[0].avatar
         // console.log('pathFile:', pathFile)
         if (fs.existsSync(pathFile)) fs.unlinkSync(pathFile)
   
@@ -208,7 +208,7 @@ class UserController {
         const file = req.files.avatar
         // console.log('File:', file)
         try { if (!fs.existsSync(folderName)) fs.mkdirSync(folderName) } catch (e) { console.error(e) }
-        const pathNewFile = folderName + '\\' + file.name
+        const pathNewFile = folderName + '/' + file.name
         if (fs.existsSync(pathNewFile)) {
           return res.status(400).json({message: 'File already exist'})
         }
@@ -263,6 +263,7 @@ class UserController {
       FROM users u 
       JOIN user_types ut ON ut.id = u.usertype_id
       WHERE ut.id = 2
+      AND NOT u.archive
       ORDER BY firstname, lastname;`
     const doctors = await DB.query(sql)
     // console.log('doctors.rows', doctors.rows)
