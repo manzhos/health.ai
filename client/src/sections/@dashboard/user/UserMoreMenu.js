@@ -111,7 +111,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   } 
   useEffect(()=>{
     if(!newAvatar) return
-    setAvatarURL(URL.createObjectURL(newAvatar))
+    setAvatarURL(global.URL.createObjectURL(newAvatar))
   }, [newAvatar]) 
 
   const handleCommunicate = () => {
