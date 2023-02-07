@@ -18,10 +18,12 @@ export default function AddFile({ onFileChange }){
     if(type === 'jpg' || type === 'jpeg' || type === 'png' || type === 'gif') type = 'img'
     else if(type === 'mpg' || type === 'mpeg' || type === 'mov' || type === 'avi' || type === 'asf' || type === 'mp4' || type === 'm4v') type = 'mov'
     else type = 'file'
+    
+    console.log('URL:', URL);
 
     let id   = file.length-1,
         name = file[file.length-1].name,
-        url  = URL.createObjectURL(file[file.length-1]);
+        url  = global.URL.createObjectURL(file[file.length-1]);
     setFileURL([...fileURL, {'id':id, 'name':name, 'type':type, 'url':url}])
     onFileChange(file)
     // console.log('fileURL:', fileURL)
