@@ -160,7 +160,7 @@ export default function Client() {
 
   // useEffect(()=>{
   //   if(!newAvatar) return
-  //   setAvatarURL(URL.createObjectURL(newAvatar))
+  //   setAvatarURL(global.URL.createObjectURL(newAvatar))
   // }, [newAvatar])
 
   // const onAvatarChange = (e) => {
