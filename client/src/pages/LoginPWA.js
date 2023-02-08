@@ -46,10 +46,10 @@ export default function LoginPWA() {
 
   const handleSubmit = async () => {
     // console.log('submit:', emailClient, 'pass:', passwordClient, 'check pass:', verifyPasswordClient);
-    if(passwordClient !== verifyPasswordClient) {
-      alert('The entered passwords do not match');
-      return;
-    }
+    // if(passwordClient !== verifyPasswordClient) {
+    //   alert('The entered passwords do not match');
+    //   return;
+    // }
 
     try {
       const res = await request(`${API_URL}api/loginpwa`, 'POST', {
@@ -80,46 +80,45 @@ export default function LoginPWA() {
         </div>
         <div className='consult-form'>
           <Box noValidate sx={{ mt: 7 }}>
+            <Grid container sx={{ mt: 5 }}>
+              <Grid item xs={12} sm={12}>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, mb: 2 }}>&nbsp;</Box>
+                <div style={{ color:"#000", fontSize:"20px", marginBottom:"32px" }} >{"Sign in / Register"}</div>
+              </Grid>
+              <Grid item xs={1}></Grid>
+              <Grid container item xs={10} sm={10} spacing={6}>
+                <Grid item xs={12} sm={12}>
+                  <TextField fullWidth sx={{ mb:1 }} id="email" name="email" value={emailClient} onChange={(e)=>{setEmailClient(e.target.value)}} label="Email" autoFocus className='login-pwa-input'/>
+                  <TextField 
+                    fullWidth sx={{ mb:1 }} 
+                    id="password" 
+                    name="password" 
+                    label="Password" 
+                    type="password"
+                    autoComplete="current-password"
+                    value={passwordClient} 
+                    onChange={(e)=>{setPasswordClient(e.target.value)}} 
+                    className='login-pwa-input'
+                    style={{ textAlign:"center" }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            { (emailClient !== '') &&
+              <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2, mb: 1 }} style={{ padding:"6px 30px", backgroundColor:"#dfbd63" }}>Login</Button>
+            }
             <Grid container>
-              <Grid item xs={12} sm={12} sx={{ mt:5, mb: 5 }}>
-                {/* <div style={{ color:"#000", fontSize:"10px", marginBottom:"32px" }} >{"Please authorize the app for the first time."}</div> */}
-                <div style={{ color:"#000", fontSize:"24px", marginBottom:"32px" }} >{"Sign in."}</div>
+              <Grid item xs={12} sm={12}>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 3, mb: 2 }}>&nbsp;</Box>
+              </Grid>
+            </Grid>  
+            <Grid container>
+              <Grid item xs={12} sm={12} sx={{ mt:0, mb: 5 }}>
+                <div style={{ color:"#000", fontSize:"18px", marginBottom:"32px" }} >{"or connect with"}</div>
                 <AuthSocial onChangeClientEmail={appleReg} />
               </Grid>
             </Grid>
-            <Grid container>
-              <Grid item xs={12} sm={12}>
-                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 1 }}>&nbsp;</Box>
-              </Grid>
-              <Grid item xs={12} sm={12} >
-                <div onClick={() => {setRegEmail(!regEmail); console.log(regEmail)}} style={{ color:"#000", fontSize:"14px", textDecoration:"underline", cursor:"pointer" }}>{"or tap to login pres email"}</div>
-              </Grid>
-            </Grid>  
-            { (regEmail) &&
-                <>
-                  <Grid container sx={{ mt: 5 }}>
-                    {/* <Grid item xs={12} sm={12}>
-                      <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 3 }}>&nbsp;</Box>
-                    </Grid> */}
-                    <Grid item xs={1}></Grid>
-                    <Grid container item xs={10} sm={10} spacing={6}>
-                      <Grid item xs={12} sm={12}>
-                        <TextField fullWidth sx={{ mb:1 }} id="email" name="email" value={emailClient} onChange={(e)=>{setEmailClient(e.target.value)}} label="Email" autoFocus className='login-pwa-input'/>
-                        <TextField fullWidth sx={{ mb:1 }} id="password" name="password" value={passwordClient} onChange={(e)=>{setPasswordClient(e.target.value)}} label="Password" className='login-pwa-input'/>
-                        <TextField fullWidth sx={{ mb:1 }} id="verify_password" name="verify_password" value={verifyPasswordClient} onChange={(e)=>{setVerifyPasswordClient(e.target.value)}} label="Repeat Password" className='login-pwa-input'/>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  { (emailClient !== '') &&
-                    <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2, mb: 1 }} style={{ padding:"6px 30px", backgroundColor:"#dfbd63" }}>Login</Button>
-                  }
-                  <Grid container>
-                    <Grid item xs={12} sm={12}>
-                      <Box sx={{ width:'100%', height:'140px'}}>&nbsp;</Box>
-                    </Grid>
-                  </Grid>
-                </>
-              }
+
           </Box>
         </div>
 
