@@ -107,3 +107,15 @@ create TABLE loyalty(
   "ts" TIMESTAMPTZ
 );
 
+create TABLE mails(
+  "id" SERIAL4 PRIMARY KEY,
+  "subject" TEXT,
+  "body" TEXT,
+  "type" TEXT,
+  "senddate" TIMESTAMPTZ,
+  "sendstate" BOOLEAN DEFAULT false,
+  -- "adressee_id" INT4[],
+  -- "adressee" TEXT[],
+  "ts" TIMESTAMPTZ,
+  "archive" BOOLEAN DEFAULT false
+);

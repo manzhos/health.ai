@@ -17,7 +17,7 @@ const visuallyHidden = {
   clip: 'rect(0 0 0 0)',
 };
 
-UserListHead.propTypes = {
+MailListHead.propTypes = {
   order: PropTypes.oneOf(['asc', 'desc']),
   orderBy: PropTypes.string,
   rowCount: PropTypes.number,
@@ -27,7 +27,7 @@ UserListHead.propTypes = {
   onSelectAllClick: PropTypes.func,
 };
 
-export default function UserListHead({
+export default function MailListHead({
   order,
   orderBy,
   rowCount,
@@ -38,11 +38,6 @@ export default function UserListHead({
 }) {
   const createSortHandler = (property) => (event) => {
     // console.log('property:', property);
-    switch(property){
-      case 'role':
-        property = 'usertype';
-        break;
-    }
     onRequestSort(event, property);
   };
 

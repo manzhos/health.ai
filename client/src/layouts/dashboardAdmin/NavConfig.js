@@ -37,10 +37,14 @@ const navConfig = [
     icon: getIcon('eva:shopping-bag-fill'),
   },
   {
+    title: 'mailing',
+    path: '/admin/mailing',
+    icon: getIcon('eva:email-fill'),
+  },
+  {
     title: 'communication',
     path: '/admin/communication',
-    // icon: getIcon('eva:email-outline'),
-    icon: getIcon('eva:email-fill'),
+    icon: getIcon('ic:round-message'),
   },
   {
     title: 'timetable',

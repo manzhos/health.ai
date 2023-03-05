@@ -1,7 +1,96 @@
 const nodemailer = require('nodemailer');
+const DB = require('../db');
 require('dotenv').config();
+const { faker } = require('@faker-js/faker');
 
 class MailController {
+  async fakeMail(req, res){
+    const subj = ['FB', 'Google Search', 'Instagram', 'Youtube', 'TikTok', 'Landing Botox', 'Botox_SaleAction March 2023'];
+    const type = ['Leads', 'lead_1day', 'lead_3day', 'lead_7day', 'Welcome', 'Clients', 'Staff', 'Botox', 'Botox_SaleAction March 2023', 'Sculptra'];
+    
+    for(let k=0; k<200; k++){
+      const s = Math.floor(Math.random() * subj.length)
+      const t = Math.floor(Math.random() * type.length)
+      const newMail = {
+        'subject'   : subj[s],
+        'body'      : faker.random.words(15),
+        'type'      : type[t],
+        'sendstate' : false,
+        'senddate'  : faker.date.betweens('2023-02-20T00:00:00.000Z', '2023-04-05T00:00:00.000Z', 1)[0],
+        'ts'        : faker.date.betweens('2023-02-20T00:00:00.000Z', '2023-03-05T00:00:00.000Z', 1)[0]
+      }
+  
+      const sql = `
+        INSERT INTO mails 
+          (subject, body, type, sendstate, senddate, ts) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
+        RETURNING *`;
+      
+      const nM = await DB.query(sql, [newMail.subject, newMail.body, newMail.type, newMail.sendstate, newMail.senddate, newMail.ts]);
+      console.log('New Lead:', nM);
+    }
+    // res.status(200).json({lead: newLead});
+    res.status(200).json({stat: 'OK'});    
+  }
+
+  async getMail(req, res){
+    const mails = await DB.query(`
+      SELECT * FROM mails
+      WHERE NOT archive 
+      ORDER BY ts DESC
+    ;`, []);
+    // console.log('mails:', mails);
+    return res.send(mails.rows)
+  }
+
+  async createMail(req, res){
+    const {subject, body, type, date, time, adressee} = req.body;
+    const mailList = adressee.split(',');
+    // console.log('adressee:', typeof(mailList), mailList);
+    let sd = date.split(' ');
+    sd[4] = time + ':00';
+    // console.log('date, time:', ts.join(' '));
+    const sendDate = new Date(sd.join(' '));
+    const ts = new Date();
+    // console.log('sendDate:', sendDate);
+    const sql = `
+      INSERT INTO mails 
+      (subject, body, type, senddate, adressee, ts) 
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`;
+    const newMail = await DB.query(sql, [subject, body, type, sendDate, mailList, ts]);
+    // console.log('NEW MAIL:', newMail);
+    res.send(newMail.rows[0]);
+  }
+
+  async updateMail(req, res){
+    const id = req.params.id
+    const {subject, body, type, senddate, adressee} = req.body;
+    const mailList = adressee.split(',');
+    console.log('adressee:', typeof(mailList), mailList);
+
+    const sql =`
+      UPDATE mails SET
+        subject   = $2,
+        body      = $3,
+        type      = $4,
+        senddate  = $5,
+        adressee  = $6
+      WHERE id = $1;`
+    await DB.query(sql, [id, subject, body, type, senddate, mailList]);
+    
+    res.send(true);
+  }
+
+  async deleteMail(req, res){
+    const id = req.params.id
+    // console.log('delete mail by ID:', id)
+    const sql =`UPDATE mails SET archive = true WHERE id = $1;`    
+    const mailDeleted = await DB.query(sql, [id])
+    // console.log(`mail #${id} with SQL: ${sql}. `, mailDeleted)
+    res.send(mailDeleted)    
+  }
+
   async _sendMail(req, res){
     const transport = nodemailer.createTransport({
       host: process.env.MAIL_HOST,

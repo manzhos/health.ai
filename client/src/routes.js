@@ -16,6 +16,7 @@ import Thanks from './pages/Thanks';
 import DashboardLayoutAdmin from './layouts/dashboardAdmin';
 import DashboardLayoutDoctor from './layouts/dashboardDoctor';
 import DashboardApp from './pages/Admin/DashboardApp';
+import Mailing from './pages/Admin/Mailing';
 import Communication from './pages/Admin/Communication';
 import TimeTable from './pages/Admin/TimeTable';
 import Procedure from './pages/Admin/Procedure';
@@ -58,6 +59,7 @@ export const useMyRoutes = isAuthenticated => {
           <Route path="client" element={<Client />}/>
           <Route path="client/docs/:id" element={<UserDocs />}/>
           <Route path="procedure" element={<Procedure />}/>
+          <Route path="mailing" element={<Mailing />} />
           <Route path="communication" element={<Communication />} />
           <Route path="timetable" element={<TimeTable />} />
           <Route path="user/communication/client/:id" element={<CommunicationClient/>} />
