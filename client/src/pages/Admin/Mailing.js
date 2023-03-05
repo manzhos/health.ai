@@ -398,7 +398,7 @@ const [adressee, setAdressee] = useState([]);
                           </Stack>
                         </TableCell>
                         <TableCell align="left">{type}</TableCell>
-                        <TableCell align="left" style={sendstate ? {color:"green"} : {color:"pink"}}>{sendstate ? 'senе' : 'not sent'}</TableCell>
+                        <TableCell align="left" style={sendstate ? {color:"green"} : {color:"pink"}}>{sendstate ? 'send' : 'not sent'}</TableCell>
                         <TableCell align="left">{humanDate(senddate)}</TableCell>
                         <TableCell align="left">{humanDate(ts)}</TableCell>
                         <TableCell align="right">

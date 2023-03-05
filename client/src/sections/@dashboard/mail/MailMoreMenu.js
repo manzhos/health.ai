@@ -28,6 +28,7 @@ import Iconify from '../../../components/Iconify';
 import { useHttp } from '../../../hooks/http.hook'
 import { URL, API_URL } from '../../../config'
 import { useNavigate } from 'react-router-dom';
+import CalendarOutside from '../../../components/CalendarOutside'
 // ----------------------------------------------------------------------
 
 export default function MailMoreMenu({id, mail, onChange}) {
@@ -36,6 +37,10 @@ export default function MailMoreMenu({id, mail, onChange}) {
   const ref = useRef(null);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [date, setDate] = useState(mail.senddate);
+  const ts = new Date(mail.senddate);
+  const [time, setTime] = useState(ts.getHours() + ':' + ts.getMinutes());
+
   const {request} = useHttp()
 
   const handleDelete = async (event) => {
@@ -59,7 +64,8 @@ export default function MailMoreMenu({id, mail, onChange}) {
       formData.append('subject',  data.get('subject'))
       formData.append('body',     data.get('body'))
       formData.append('type',     data.get('type'))
-      formData.append('senddate', data.get('senddate'))
+      formData.append('date',     date)
+      formData.append('time',     time)
       formData.append('adressee', adressee)
       // console.log('formData:', formData);
 
@@ -76,7 +82,7 @@ export default function MailMoreMenu({id, mail, onChange}) {
   const handleOpen  = () => setOpen(true)
   const handleClose = () => setOpen(false)
 
-  const [adressee, setAdressee] = useState([]);
+  const [adressee, setAdressee] = useState(mail.adressee || []);
   const [adresseeList, setAdresseeList] = useState([]);
 
   const getAdresseeList = async(role) =>{
@@ -94,6 +100,11 @@ export default function MailMoreMenu({id, mail, onChange}) {
     console.log('handleChangeAdreessee');
     event.preventDefault();
     setAdressee([...adressee, event.target.value]);
+  }
+
+  const handleDateChange = (dateValue) => {
+    // console.log('dateValue', dateValue);
+    setDate(dateValue);
   }
 
   return (
@@ -182,15 +193,33 @@ export default function MailMoreMenu({id, mail, onChange}) {
                       defaultValue={mail.type}
                     />
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      fullWidth
-                      name="senddate"
-                      label="Send date/time"
-                      id="senddate"
-                      defaultValue={mail.senddate}
-                    />
-                  </Grid>                          
+                  <Grid item xs={1}>
+                    &nbsp;
+                  </Grid>
+                  <Grid item xs={5}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6} sm={6}>
+                        <CalendarOutside onDateChange={handleDateChange}/>
+                      </Grid>
+                      <Grid item xs={6} sm={6}>
+                        <TextField
+                          fullWidth
+                          name="time"
+                          label="Set time"
+                          id="senddate"
+                          defaultValue={time}
+                          onChange = {(e) => {
+                            setTime(e.target.value); 
+                            const re = /\b[0-2]?[0-9]:[0-5][0-9]\b/;
+                            if(!re.exec(e.target.value)){
+                              alert('Check the time. Need to be from 00:00 to 23:59');
+                              setTime('00:00')
+                            }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>                         
                   <Grid item xs={12}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 1, mb: 1 }}>&nbsp;</Box>
                     {/* <FormControl> */}

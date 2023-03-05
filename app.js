@@ -6,6 +6,7 @@ const fileUpload = require('express-fileupload')
 const app        = express()
 const bcrypt     = require('bcryptjs')
 const jwt        = require('jsonwebtoken')
+const cron       = require('node-cron');
 require('dotenv').config()
 
 
@@ -45,6 +46,33 @@ app.use(express.static('files'))
 
 app.use('/api', require('./routes/cron.routes'))
 app.use('/api', require('./routes/mail.routes'))
+
+// start cron
+// # ┌────────────── second (optional)
+// # │ ┌──────────── minute
+// # │ │ ┌────────── hour
+// # │ │ │ ┌──────── day of month
+// # │ │ │ │ ┌────── month
+// # │ │ │ │ │ ┌──── day of week
+// # │ │ │ │ │ │
+// # │ │ │ │ │ │
+// # * * * * * *
+const sec      = '*', // req.query.sec     
+      min      = '*', // req.query.min     
+      hour     = '*', // req.query.hour    
+      dayMonth = '*', // req.query.dayMonth
+      month    = '*', // req.query.month   
+      dayWeek  = '*'; // req.query.dayWeek 
+
+console.log('CRON:', sec, min, hour, dayMonth, month, dayWeek);
+// cron for mail
+const mailController = require('./controllers/mail.controller');
+const checkMail = cron.schedule(`${min} ${hour} ${dayMonth} ${month} ${dayWeek}`, () => {
+  // console.log('running a task every min:', Date.now());
+  mailController.sendQueueMail();
+}, {
+  scheduled: true,
+});
 
 // start server
 async function start() {

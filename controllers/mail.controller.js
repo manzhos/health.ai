@@ -108,7 +108,7 @@ class MailController {
     try{
       const send = await transport.sendMail({
         from:     process.env.MAIL_FROM,
-        to:       mailTo || 'manzhos@gmail.com',
+        to:       mailTo  || 'manzhos@gmail.com',
         subject:  subject || 'testmail',
         html:     `<div className="email" style="border: 0px solid white; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 16px;">
                     <h2>Hello</h2>
@@ -120,6 +120,64 @@ class MailController {
       console.log('Send:', send);
       return send;
     }catch(err){ console.error(err)}
+  }
+
+  async sendMail(mailTo, subject, text){
+    const transport = nodemailer.createTransport({
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS
+      }
+    });
+    // console.log('transport:', transport);
+    console.log('mailTo, subject, text:', mailTo, subject, text);
+
+    try{
+      const send = await transport.sendMail({
+        from:     process.env.MAIL_FROM,
+        to:       mailTo  || 'manzhos@gmail.com',
+        subject:  subject || 'Stunning You',
+        html:     `<div className="email" style="border: 0px solid white; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 16px;">
+                    <h2>Hello</h2>
+                    <p>${text || 'Welcome'}</p>
+                    <p>&nbsp</p>
+                    <p>Sincerely your,<br/>Health.SY-way.com</p>
+                  </div>`
+      });
+      console.log('Send:', send);
+      return true;
+    }catch(err){ console.error(err)}
+  }
+
+  async sendQueueMail(){
+    const now = Date.now();
+    // console.log('NOW:', now);
+    const queueStart  = Math.trunc(now / 1000 / 60) * 60 * 1000;
+    const queueEnd    = (Math.trunc(now / 1000 / 60) + 1) * 60 * 1000;
+    // console.log('queueTime:', new Date(queueStart), new Date(queueEnd));
+
+    const mailQueue = await DB.query(`
+      SELECT * FROM mails
+      WHERE NOT archive 
+      AND NOT sendstate
+      AND ROUND(extract(EPOCH FROM senddate)*1000, 0) BETWEEN $1 AND $2
+    ;`, [queueStart, queueEnd]);
+
+    // console.log('mailQueue:', mailQueue.rows);
+
+    mailQueue.rows.map(async (mail) => {
+      console.log(mail);
+      if(mail.adressee && (mail.subject || mail.body)){
+        const res = await this.sendMail(mail.adressee.join(', '), mail.subject, mail.body);
+        if(res) {
+          const sql =`UPDATE mails SET sendstate = true WHERE id = $1;`
+          await DB.query(sql, [mail.id]);
+        }
+      }
+    });
   }
 }
 
