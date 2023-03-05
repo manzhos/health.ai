@@ -82,8 +82,8 @@ export default function UserListToolbar({ numSelected, onFilterName, onUserRole 
             }
           />
           <div style={{ width:"20px" }}>&nbsp;</div>
-          <UserRole uRole={userRole} onChangeUserRole={handleChangeUserRole} />
-          <Button variant='outlined' onClick={handleReset} style={{margin:'0 auto 0 20px'}}>Reset</Button>
+          {/* <UserRole uRole={userRole} onChangeUserRole={handleChangeUserRole} /> */}
+          {/* <Button variant='outlined' onClick={handleReset} style={{margin:'0 auto 0 20px'}}>Reset</Button> */}
         </>
       )}
 

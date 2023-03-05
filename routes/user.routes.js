@@ -20,9 +20,12 @@ router.post(
   '/loginpwa', 
   validateFields,  
   userController.loginPwaUser
-)
+  )
+  
+router.post('/restorepass', userController.restorePass)
 
-router.get('/users', userController.getUsers)
+router.get('/user', userController._getUsers)
+// router.get('/users', userController.getUsers)
 router.get('/user/:id', userController.getUser)
 router.post('/user/:id', userController.updateUser)
 router.get('/deluser/:id', userController.deleteUser)

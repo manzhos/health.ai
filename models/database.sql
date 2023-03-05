@@ -3,6 +3,7 @@ create TABLE users(
   "firstname" TEXT,
   "lastname" TEXT,
   "email" TEXT NOT NULL ,
+  "phone" TEXT,
   "password" TEXT NOT NULL ,
   "ts" TIMESTAMPTZ, 
   "usertype_id" INT2,
@@ -10,6 +11,18 @@ create TABLE users(
   "promo" BOOLEAN DEFAULT true,
   "avatar" TEXT,
   "confirm" BOOLEAN DEFAULT false,
+  "archive" BOOLEAN DEFAULT false
+);
+
+create TABLE leads(
+  "id" SERIAL4 PRIMARY KEY,
+  "firstname" TEXT,
+  "lastname" TEXT,
+  "email" TEXT NOT NULL ,
+  "phone" TEXT,
+  "source" TEXT,
+  --"interests" INT2[],
+  "ts" TIMESTAMPTZ, 
   "archive" BOOLEAN DEFAULT false
 );
 

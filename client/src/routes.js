@@ -15,16 +15,19 @@ import Authentication from './pages/Authentication';
 import Thanks from './pages/Thanks';
 import DashboardLayoutAdmin from './layouts/dashboardAdmin';
 import DashboardLayoutDoctor from './layouts/dashboardDoctor';
-// import DashboardApp from './pages/Admin/DashboardApp';
+import DashboardApp from './pages/Admin/DashboardApp';
 import Communication from './pages/Admin/Communication';
 import TimeTable from './pages/Admin/TimeTable';
 import Procedure from './pages/Admin/Procedure';
 import CommunicationClient from './pages/Admin/CommunicationClient';
 import LoyaltyClient from './pages/Admin/LoyaltyClient';
-import User from './pages/Admin/User';
+import Staff from './pages/Admin/Staff';
+import Lead from './pages/Admin/Lead';
+import Client from './pages/Admin/Client';
+// import User from './pages/Admin/User';
 import Invoices from './pages/Admin/Invoices';
 import UserDocs from './pages/Admin/UserDocs';
-import Client from './pages/Doctor/Client';
+import Patient from './pages/Doctor/Client';
 import ClientInvoice from './pages/ClientInvoice';
 
 // ----------------------------------------------------------------------
@@ -48,8 +51,11 @@ export const useMyRoutes = isAuthenticated => {
         <Route path="/thanks" element={<Thanks />} />
 
         <Route path="/admin" element={<DashboardLayoutAdmin />}>
-          {/* <Route path="app" element={<DashboardApp />}/> */}
-          <Route path="user" element={<User />}/>
+          <Route path="app" element={<DashboardApp />}/>
+          {/* <Route path="user" element={<User />}/> */}
+          <Route path="staff" element={<Staff />}/>
+          <Route path="lead" element={<Lead />}/>
+          <Route path="client" element={<Client />}/>
           <Route path="client/docs/:id" element={<UserDocs />}/>
           <Route path="procedure" element={<Procedure />}/>
           <Route path="communication" element={<Communication />} />
@@ -62,7 +68,7 @@ export const useMyRoutes = isAuthenticated => {
 
         <Route path="/doctor" element={<DashboardLayoutDoctor />}>
           {/* <Route path="app"           element={<DashboardApp />}/> */}
-          <Route path="client" element={<Client />}/>
+          <Route path="client" element={<Patient />}/>
           {/* <Route path="procedure"     element={<Procedure />}/> */}
           {/* <Route path="communication" element={<Communication />} /> */}
           <Route path="timetable" element={<TimeTable />} />
@@ -75,10 +81,10 @@ export const useMyRoutes = isAuthenticated => {
 
   return (
     <Routes>
-      <Route path="*" element={<LoginPWA />} />
+      <Route path="*" element={<LoginPWARef />} />
       <Route path="/admin" element={<Login />} />
       <Route path="/doctor" element={<Login />} />
-      <Route path="/loginpwa" element={<LoginPWA />} />
+      <Route path="/loginpwa" element={<LoginPWARef />} />
       <Route path="/loginpwa/:id" element={<LoginPWARef />} />
       <Route path="/successauthentication" element={<Authentication />} />
     </Routes>

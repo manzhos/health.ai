@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import React from "react";
+import { useRef, useState } from 'react';
 // material
 import { 
   Grid,
@@ -16,11 +17,11 @@ import {
   InputLabel,
   Select,
   FormControl,  
- } from '@mui/material'
+ } from '@mui/material';
 // component
-import Iconify from '../../../components/Iconify'
-import { useHttp } from '../../../hooks/http.hook'
-import { API_URL } from '../../../config'
+import Iconify from '../../../components/Iconify';
+import { useHttp } from '../../../hooks/http.hook';
+import { API_URL } from '../../../config';
 // ----------------------------------------------------------------------
 
 export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onChange}) {
@@ -78,7 +79,7 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
   }
 
   return (
-    <>
+    <div>
       <IconButton ref={ref} onClick={() => setIsOpen(true)}>
         <Iconify icon="eva:more-vertical-fill" width={20} height={20} />
       </IconButton>
@@ -192,6 +193,6 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
           </div>
         </Container>
       </Modal>
-    </>
+    </div>
   );
 }

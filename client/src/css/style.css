@@ -209,11 +209,13 @@ body {
   background-color: #fff;
   /* border: solid 1px #fff; */
   border-radius: 10px;
-  text-align: center;
+  text-align: center !important;
   -webkit-box-shadow: 0px 4px 27px -20px rgba(66, 68, 90, 1);
   -moz-box-shadow:    0px 4px 27px -20px rgba(66, 68, 90, 1);
   box-shadow:         0px 4px 27px -20px rgba(66, 68, 90, 1);
 }
+#password {text-align: center;}
+#passwordConf {text-align: center;}
 
 #email {text-align: center;}
 
@@ -269,6 +271,7 @@ body {
   height: 26px;
   margin-bottom: -5px;
   color: #dfbd63;
+  cursor: pointer;
 }
 
 .c-button {
@@ -319,7 +322,6 @@ body {
 .input-blank-fit {
   border: 0;
 }
-
 .up-photo {
   cursor: pointer;
   width: 96px;
@@ -329,4 +331,28 @@ body {
   border-radius: 20px;
   padding: 20px 18px 20px 22px;
   margin: 10px;
+}
+
+.passed-days {
+  border: 0px #fff solid;
+  border-radius: 15px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;  
+}
+
+.day0 {
+  background-color: #fff;
+}
+.day1 {
+  background-color: aquamarine;
+}
+.day2 {
+  background-color: rgb(255, 236, 127);
+}
+.day3 {
+  background-color: rgb(255, 127, 165);
 }

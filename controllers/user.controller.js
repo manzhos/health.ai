@@ -1,11 +1,13 @@
-const DB = require('../db')
-const fs = require('fs')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-// const uuid = require('uuid')
-// const avatar = uuid.v4() + ".jpg"
-const {check, validationResult} = require('express-validator')
-// require('dotenv').config()
+const DB = require('../db');
+const mailController = require('./mail.controller');
+const genPass = require('generate-password');
+const fs = require('fs');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+// const uuid = require('uuid');
+// const avatar = uuid.v4() + ".jpg";
+const {check, validationResult} = require('express-validator');
+// require('dotenv').config();
 
 class UserController {  
   async createUser(req, res){
@@ -56,6 +58,7 @@ class UserController {
       
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
+      console.log('user:', user);
       
       let exp = '7d'
       if(!remember) exp = '24h'
@@ -75,9 +78,9 @@ class UserController {
   }
 
   async loginPwaUser(req, res){
-    console.log('loginPwaUser'); 
-    const {email, password, ref_id} = req.body
-    // console.log('email, password, ref_id:', email, password, ref_id);
+    // console.log('loginPwaUser'); 
+    const {email, password, password_conf, ref_id} = req.body;
+    // console.log('email, password, ref_id:', email, password, password_conf, ref_id);
     const errors = validationResult(req)
     console.log('errors:', errors)
     if (!errors.isEmpty()) {
@@ -86,11 +89,13 @@ class UserController {
         message: 'Check fields data'
       })
     }
-      
+
     try {
       const q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email]);
       let user = q.rows[0];
       if (!user) {
+        if(!password_conf) return  res.status(200).json({ status: 'newuser' })
+        if(password !== password_conf) return  res.status(400).json({ message: 'Passwords not match' })
         // save to DB
         const hashedPassword = await bcrypt.hash(password, 12)
         const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm, ref_id) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING *'
@@ -103,12 +108,11 @@ class UserController {
         user = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, 3, false, ref_id || null]);
       } else {
         const isMatch = await bcrypt.compare(password, user.password)
-        if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
+        if (!isMatch) return res.status(200).json({ status: 'wrong_pass' })
       }     
       // console.log('user:', user);
       
-      // const exp = '200h'
-      const exp = '5m'
+      const exp = '200h'
       const jwtSecret = process.env.jwtSecret
       const token = jwt.sign(
         { userId: user.id },
@@ -121,9 +125,50 @@ class UserController {
     }
   }
 
-  async getUsers(req, res){
-    // console.log('get all users:')    
+  async restorePass(req, res){
+    // console.log('Restore Pass');
+    const {email} = req.body;
+    const q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email]);
+    let user = q.rows[0];
+    // console.log('user:', user);
+    if (!user) {
+      return  res.status(200).json({ status: 'unreg' })
+    }
+
+    const newPass = genPass.generate({
+      length: 10,
+      numbers: true
+    });
+    // console.log('newPass:', newPass);
+    const hashedPassword = await bcrypt.hash(newPass, 12)
+    await DB.query(`UPDATE users SET password = $1 WHERE id = $2`, [hashedPassword, user.id])
+    
+    const sendMailResp = mailController._sendMail({
+      'body':{
+        'text'		:	'You new password for service is: <strong>' + newPass + '</strong>',
+        'mailTo'	:	user.email,
+        'subject' :	'Password restore. Health.sy-way.com.'
+    }})
+    // console.log('User controller send', sendMailResp);
+    res.send(sendMailResp);
+  }
+
+  async _getUsers(req, res){
+    console.log('get users by type:')    
+    const role = req.query.role;
     try{
+      let filter = '';
+      switch (role) {
+        case 'staff':
+          filter = 'AND usertype_id NOT IN (3)'
+          break;
+        case 'client':
+          filter = 'AND usertype_id IN (3)'
+          break;
+        case 'lead':
+          const leads = await DB.query('SELECT * FROM leads WHERE NOT archive ORDER BY firstname, lastname')
+          return res.send(leads.rows)
+      }
       const sql = `
         SELECT 
           u.id AS id,
@@ -134,9 +179,10 @@ class UserController {
           u.usertype_id AS usertype_id,
           ut.usertype AS usertype,
           u.avatar AS avatar
-        FROM users u 
+        FROM users u
         JOIN user_types ut ON ut.id = u.usertype_id
-        WHERE NOT u.archive
+        WHERE NOT u.archive 
+        ${filter}
         ORDER BY firstname, lastname;`
       const users = await DB.query(sql)
       return res.send(users.rows)
@@ -145,6 +191,31 @@ class UserController {
       return res.status(500).json({message: "The connection with DB was lost."})
     }
   }
+
+  // async getUsers(req, res){
+  //   // console.log('get all users:')    
+  //   try{
+  //     const sql = `
+  //       SELECT 
+  //         u.id AS id,
+  //         u.firstname AS firstname,
+  //         u.lastname AS lastname,
+  //         u.email AS email,
+  // --        u.ts,
+  //         u.usertype_id AS usertype_id,
+  //         ut.usertype AS usertype,
+  //         u.avatar AS avatar
+  //       FROM users u 
+  //       JOIN user_types ut ON ut.id = u.usertype_id
+  //       WHERE NOT u.archive
+  //       ORDER BY firstname, lastname;`
+  //     const users = await DB.query(sql)
+  //     return res.send(users.rows)
+  //   } catch(e){
+  //     console.log(`Error: ${e}`)  
+  //     return res.status(500).json({message: "The connection with DB was lost."})
+  //   }
+  // }
 
   async getUser(req, res){
     const id = req.params.id

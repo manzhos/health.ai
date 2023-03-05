@@ -90,7 +90,7 @@ export default function AuthSocial({ onChangeClientEmail }) {
                   variant="contained"
                   sx={{ mt: 3, mb: 2 }}
                 >
-                  Continue
+                  {"Continue"}
                 </Button>
               </Box>
             </Box>

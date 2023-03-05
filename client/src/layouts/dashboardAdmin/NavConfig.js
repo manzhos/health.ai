@@ -6,18 +6,33 @@ import Iconify from '../../components/Iconify';
 const getIcon = (name) => <Iconify icon={name} width={22} height={22} />;
 
 const navConfig = [
-  // {
-  //   title: 'dashboard',
-  //   path: '/admin/app',
-  //   icon: getIcon('eva:pie-chart-2-fill'),
-  // },
   {
-    title: 'user',
-    path: '/admin/user',
+    title: 'dashboard',
+    path: '/admin/app',
+    icon: getIcon('eva:pie-chart-2-fill'),
+  },
+  {
+    title: 'staff',
+    path: '/admin/staff',
     icon: getIcon('eva:people-fill'),
   },
   {
-    title: 'procedure',
+    title: 'leads',
+    path: '/admin/lead',
+    icon: getIcon('eva:people-fill'),
+  },
+  {
+    title: 'clients',
+    path: '/admin/client',
+    icon: getIcon('eva:people-fill'),
+  },
+  // {
+  //   title: 'user',
+  //   path: '/admin/user',
+  //   icon: getIcon('eva:people-fill'),
+  // },
+  {
+    title: 'procedures',
     path: '/admin/procedure',
     icon: getIcon('eva:shopping-bag-fill'),
   },

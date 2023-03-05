@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
-import { sentenceCase } from 'change-case';
+import React from "react";
+import { useRef, useState } from 'react';
 // material
 import { 
   Menu, 
@@ -7,24 +7,12 @@ import {
   IconButton, 
   ListItemIcon, 
   ListItemText,
-  Grid,
-  Button,
-  Box,
-  Modal,
-  Checkbox,
-  Container,
-  Typography,
-  TextField,
-  InputLabel,
-  Select,
-  FormControl,
-  FormControlLabel,
  } from '@mui/material';
 // component
 import Iconify from '../../../components/Iconify';
 import { useHttp } from '../../../hooks/http.hook'
 import { API_URL } from '../../../config'
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
 export default function DocMoreMenu({id, row}) {

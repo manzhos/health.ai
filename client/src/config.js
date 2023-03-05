@@ -1,10 +1,12 @@
 // dev
-//export const API_URL = 'http://45.93.139.145:3300/'
-//export const URL = 'http://45.93.139.145:3000/'
+export const API_URL  = 'http://localhost:3300/'
+export const AUTH_URL = 'https://localhost:3000/auth/'
+export const URL      = 'http://localhost:3000/'
 
-export const API_URL  = 'https://health.sy-way.com/'
-export const AUTH_URL = 'https://health.sy-way.com/auth/'
-export const URL      = 'https://health.sy-way.com/'
+//production
+// export const API_URL  = 'https://health.sy-way.com/'
+// export const AUTH_URL = 'https://health.sy-way.com/auth/'
+// export const URL      = 'https://health.sy-way.com/'
 
 
 export const MONTH = [

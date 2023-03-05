@@ -1,12 +1,11 @@
 const express    = require('express')
-const session = require('express-session');
+const session    = require('express-session');
 const cors       = require('cors')
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
 const app        = express()
-const nodemailer = require('nodemailer')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const bcrypt     = require('bcryptjs')
+const jwt        = require('jsonwebtoken')
 require('dotenv').config()
 
 
@@ -44,38 +43,14 @@ app.use('/api', require('./routes/message.routes'))
 app.use('/api', require('./routes/loyalty.routes'))
 app.use(express.static('files'))
 
-// app.get('/', (req, res)=>{res.send('hello, man')});
-
-app.post('/send_mail', cors(), async (req, res) => {
-  const transport = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS
-    }
-  })
-  let {text, mailTo, subject} = req.body
-
-  await transport.sendMail({
-    from:     process.env.MAIL_FROM,
-    to:       mailTo || 'manzhos@gmail.com',
-    subject:  subject || 'testmail',
-    html:     `<div className="email" style="border: 1px solid black; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 20px;">
-                <h2>Hello!</h2>
-                <p>${text || 'Welcome'}</p>
-                <p>Kind regards, Your Health.AI</p>
-              </div>`
-  })
-})
+app.use('/api', require('./routes/cron.routes'))
+app.use('/api', require('./routes/mail.routes'))
 
 // start server
 async function start() {
   app.listen(PORT, () => console.log(`App has been started on port ${PORT}...`))
 }
 start()
-
-
 
 /*  PASSPORT SETUP  */
 
