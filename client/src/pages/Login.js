@@ -52,7 +52,7 @@ export default function Login() {
     switch (route){
       case 1:
         // window.top.location = `${URL}admin/app`
-        navigate('/admin/user')
+        navigate('/admin/client')
         break
       case 2:
         // window.top.location = `${URL}doctor/procedure`
