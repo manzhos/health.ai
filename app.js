@@ -137,7 +137,7 @@ app.get('/auth/google/callback',
       'email':      req.user.emails[0].value,
       'avatar':     req.user.photos[0].value,
     }
-    console.log('googleUser:', googleUser);
+    // console.log('googleUser:', googleUser);
     let user = await DB.query('SELECT * FROM users WHERE email = $1', [googleUser.email]);
     // console.log('user:', user);
     if(!user || user.rows.length === 0){

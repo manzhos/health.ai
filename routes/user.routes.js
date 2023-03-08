@@ -22,6 +22,7 @@ router.post(
   userController.loginPwaUser
   )
   
+router.get('/leaduser/:id', userController.leadToClient)
 router.post('/restorepass', userController.restorePass)
 
 router.get('/user', userController._getUsers)

@@ -63,11 +63,24 @@ class MailController {
     res.send(newMail.rows[0]);
   }
 
+  async addMail(mailTo, subject, body, type, senddate){
+    // console.log('mailTo, subject, body, type, senddate:', mailTo, subject, body, type, senddate);
+    const ts = new Date();
+    const sql = `
+      INSERT INTO mails 
+      (subject, body, type, senddate, adressee, ts) 
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`;
+    const newMail = await DB.query(sql, [subject, body, type, senddate, mailTo, ts]);
+    // console.log('NEW MAIL:', newMail);
+    return newMail.rows[0];
+  }
+
   async updateMail(req, res){
     const id = req.params.id
     const {subject, body, type, senddate, adressee} = req.body;
     const mailList = adressee.split(',');
-    console.log('adressee:', typeof(mailList), mailList);
+    // console.log('adressee:', typeof(mailList), mailList);
 
     const sql =`
       UPDATE mails SET
@@ -113,11 +126,11 @@ class MailController {
         html:     `<div className="email" style="border: 0px solid white; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 16px;">
                     <h2>Hello</h2>
                     <p>${text || 'Welcome'}</p>
-                    <p>&nbsp</p>
+                    <p>&nbsp;</p>
                     <p>Sincerely your,<br/>Health.SY-way.com</p>
                   </div>`
       });
-      console.log('Send:', send);
+      // console.log('Send:', send);
       return send;
     }catch(err){ console.error(err)}
   }
@@ -133,8 +146,7 @@ class MailController {
       }
     });
     // console.log('transport:', transport);
-    console.log('mailTo, subject, text:', mailTo, subject, text);
-
+    // console.log('mailTo, subject, text:', mailTo, subject, text);
     try{
       const send = await transport.sendMail({
         from:     process.env.MAIL_FROM,
@@ -147,7 +159,7 @@ class MailController {
                     <p>Sincerely your,<br/>Health.SY-way.com</p>
                   </div>`
       });
-      console.log('Send:', send);
+      // console.log('Send:', send);
       return true;
     }catch(err){ console.error(err)}
   }
@@ -169,7 +181,7 @@ class MailController {
     // console.log('mailQueue:', mailQueue.rows);
 
     mailQueue.rows.map(async (mail) => {
-      console.log(mail);
+      // console.log(mail);
       if(mail.adressee && (mail.subject || mail.body)){
         const res = await this.sendMail(mail.adressee.join(', '), mail.subject, mail.body);
         if(res) {

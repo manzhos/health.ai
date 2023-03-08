@@ -49,6 +49,38 @@ class UserController {
     res.send(newUser.rows[0]);
   }
 
+  async leadToClient(req, res){
+    const leadId = req.params.id;
+    if(!leadId) return;
+    const l = await DB.query(`SELECT * FROM leads WHERE id = $1`, [leadId]),
+          lead = l.rows[0];
+    // console.log('LEAD:', lead);
+    const ts = new Date();
+    const newPass = genPass.generate({
+      length: 10,
+      numbers: true
+    });
+    // console.log('newPass:', newPass);
+    const hashedPassword = await bcrypt.hash(newPass, 12);
+    const newClient = await DB.query(`
+      INSERT INTO users 
+        (firstname, lastname, email, password, ts, usertype_id, promo, confirm) 
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, false) RETURNING *
+    `, ['', lead.lastname, lead.email, hashedPassword, ts, 3, true]);
+
+    const sendMailResp = mailController._sendMail({
+      'body':{
+        'text'		:	`<h2>Congratulation. Welcome to club.</h2><p>You password for service is: <strong>' + newPass + '</strong></p>
+                    <p>Also use youe email: ${lead.email}</p>`,
+        'mailTo'	:	lead.email,
+        'subject' :	'Congratulation. Welcome to club.'
+    }})
+    // console.log('User controller send', sendMailResp);
+    await DB.query(`UPDATE leads SET archive=true WHERE id = $1`, [leadId]);
+    res.send(newClient.rows[0]);
+  }
+
   async loginUser(req, res){
     const {email, password, remember} = req.body
     try {
@@ -58,7 +90,7 @@ class UserController {
       
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(400).json({ message: 'Incorrect password' })
-      console.log('user:', user);
+      // console.log('user:', user);
       
       let exp = '7d'
       if(!remember) exp = '24h'
@@ -154,7 +186,7 @@ class UserController {
   }
 
   async _getUsers(req, res){
-    console.log('get users by type:')    
+    // console.log('get users by type:')  
     const role = req.query.role;
     try{
       let filter = '';
@@ -219,7 +251,7 @@ class UserController {
 
   async getUser(req, res){
     const id = req.params.id
-    console.log('get user by ID:', id)
+    // console.log('get user by ID:', id)
     try{
       const sql = `
         WITH 
@@ -252,9 +284,9 @@ class UserController {
         LEFT JOIN loyal l ON l.client_id = u.id
         LEFT JOIN refs ON refs.ref_id = u.id
         WHERE id = $1;`
-      console.log(`sql:\n #${sql}:`)
+      // console.log(`sql:\n #${sql}:`)
       const user = await DB.query(sql, [id])
-      console.log(`user #${id}:`, user.rows[0])
+      // console.log(`user #${id}:`, user.rows[0])
       res.send(user.rows[0])
     }catch(e){
       console.log(`Error: ${e}`)  
@@ -264,7 +296,7 @@ class UserController {
 
   async updateUser(req, res){
     const id = req.params.id
-    console.log(`try to update user ${id}`);
+    // console.log(`try to update user ${id}`);
     const oldAvatar = await DB.query(`SELECT avatar FROM users WHERE id = $1`, [id])
     if(req.files){
       // delete current avatar

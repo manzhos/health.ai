@@ -6,6 +6,7 @@ const { check, validationResult } = require('express-validator');
 const { isFakeDomainOnline, isFakeEmailOnline } = require('fakefilter');
 const { faker } = require('@faker-js/faker');
 const cron = require('node-cron');
+const mailController = require('./mail.controller');
 
 class LoyaltyController {  
   async createLoyalty(req, res){  
@@ -56,7 +57,7 @@ class LoyaltyController {
 
   async addLead(req, res) {
     const {lastname, email, phone, source} = req.body;
-    console.log('query:', lastname, email.split('@')[1], phone.replace(/[^\d]/g, ''), source);
+    // console.log('query:', lastname, email, phone.replace(/[^\d]/g, ''), source);
     // validate email
     const errors = validationResult(req)
     console.log('errors:', errors)
@@ -68,8 +69,8 @@ class LoyaltyController {
     }
 
     // test email for fake
-    console.log('isFakeDomainOnline:', await isFakeDomainOnline(email.split('@')[1]));
-    console.log('isFakeEmailOnline:', await isFakeEmailOnline(email));
+    // console.log('isFakeDomainOnline:', await isFakeDomainOnline(email.split('@')[1]));
+    // console.log('isFakeEmailOnline:', await isFakeEmailOnline(email));
     const isFakeDomain = await isFakeDomainOnline(email.split('@')[1]);
     const isFakeEmail = await isFakeEmailOnline(email);
 
@@ -81,13 +82,62 @@ class LoyaltyController {
     const sql = `
       INSERT INTO leads 
         (lastname, email, phone, source, ts, archive) 
-      VALUES ($1, $2, $3, $4, $5) 
+      VALUES ($1, $2, $3, $4, $5, $6) 
       RETURNING *`;
     const ts = new Date();
     const newLead = await DB.query(sql, [lastname, email, phone.replace(/[^+\d]/g, ''), source, ts, false]);
-    console.log('New Lead:', newLead);
+    // console.log('New Lead:', newLead);
+
+    // mailing
+    // ## email, subject, body, type, senddate
+    let subject, body, type, senddate;
+    // welcome mail
+    subject = 'Welcome to the Stunning you';
+    body    = `Welcome to the beauty club.<br/>
+              You can become a full member of all programs, discounts and bonuses by registering at the link:
+              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              `;
+    type = `Welcome`;
+    // add 5 min after registration for first mail
+    senddate = new Date(ts.getTime() + 5*60*1000);
+
+    mailController.addMail([email], subject, body, type, senddate);
+
+    // 1 day after
+    subject = 'Hello again';
+    body    = `Welcome to the beauty club.<br/>
+              You can become a full member of all programs, discounts and bonuses by registering at the link:
+              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              `;
+    type = `lead_1day`;
+    // add 1 day after registration for first mail
+    senddate = new Date(ts.getTime() + 24*60*60*1000);
+    mailController.addMail([email], subject, body, type, senddate);
+
+    // 3 day after
+    subject = 'We miss you';
+    body    = `Welcome to the beauty club.<br/>
+              You can become a full member of all programs, discounts and bonuses by registering at the link:
+              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              `;
+    type = `lead_3day`;
+    // add 1 day after registration for first mail
+    senddate = new Date(ts.getTime() + 3*24*60*60*1000);
+    mailController.addMail([email], subject, body, type, senddate);
+
+    // 7 day after
+    subject = 'We miss you';
+    body    = `Welcome to the beauty club.<br/>
+              You can become a full member of all programs, discounts and bonuses by registering at the link:
+              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              `;
+    type = `lead_7day`;
+    // add 1 day after registration for first mail
+    senddate = new Date(ts.getTime() + 7*24*60*60*1000);
+    mailController.addMail([email], subject, body, type, senddate);
+
     res.status(200).json({lead: newLead});
-    res.status(200);
+    // res.status(200);
   }
 
   async sumLead(req, res) {
