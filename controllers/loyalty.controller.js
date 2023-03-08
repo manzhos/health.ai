@@ -122,8 +122,7 @@ class LoyaltyController {
     // ## email, subject, body, type, senddate
     let subject, body, type, senddate;
     // mail to clinic
-    const clinicEmail = "manzhos@gmail.com"
-    // const clinicEmail = "info@stunning-you.com"
+    const clinicEmail = "info@stunning-you.com"
     subject = 'New Lead';
     body    = `WOW! We have a new lead:<br/>
               Name: <strong>${firstname}</strong><br/>
@@ -131,7 +130,7 @@ class LoyaltyController {
               `;
     type = `New Lead`;
     // add 5 min after registration for first mail
-    senddate = new Date(ts.getTime() + 1*60*1000);
+    senddate = new Date(ts.getTime() + 5*60*1000);
 
     mailController.addMail([clinicEmail], subject, body, type, senddate);
 
