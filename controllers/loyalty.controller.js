@@ -57,16 +57,45 @@ class LoyaltyController {
   }
 
   async addLead(req, res) {
-    const {lastname, email, phone, source} = req.body;
-    // console.log('query:', lastname, email, phone.replace(/[^\d]/g, ''), source);
+    const {firstname, email, phone, source, message} = req.body;
+    // console.log('query:', firstname, email, phone.replace(/[^\d]/g, ''), source);
     // validate email
     const errors = validationResult(req)
     console.log('errors:', errors)
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-        message: 'Check fields data'
-      })
+      // return res.status(400).json({
+      //   errors: errors.array(),
+      //   message: 'Check fields data'
+      // })
+      const errorMessageHtml = `
+      <html>
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+          <title>Stunning You.</title>
+
+          <style>
+            .text-center{
+              text-align: center;
+              font-size: large;
+              font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+              color: #381d11;
+            }
+          </style>
+
+        </head>
+
+        <body>
+          <div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 400px;  border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
+              <p class="text-center">Somthing was wrong.</p>
+              <p class="text-center">Please return and check the field.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      `
+      return res.status(400).send(errorMessageHtml)
     }
 
     // test email for fake
@@ -82,62 +111,102 @@ class LoyaltyController {
 
     const sql = `
       INSERT INTO leads 
-        (lastname, email, phone, source, ts, archive) 
-      VALUES ($1, $2, $3, $4, $5, $6) 
+        (firstname, email, phone, source, ts, message, archive) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`;
     const ts = new Date();
-    const newLead = await DB.query(sql, [lastname, email, phone.replace(/[^+\d]/g, ''), source, ts, false]);
+    const newLead = await DB.query(sql, [firstname, email, phone?.replace(/[^+\d]/g, '') || null, source, ts, message, false]);
     // console.log('New Lead:', newLead);
 
     // mailing
     // ## email, subject, body, type, senddate
     let subject, body, type, senddate;
-    // welcome mail
-    subject = 'Welcome to the Stunning you';
-    body    = `Welcome to the beauty club.<br/>
-              You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
+    // mail to clinic
+    const clinicEmail = "manzhos@gmail.com"
+    // const clinicEmail = "info@stunning-you.com"
+    subject = 'New Lead';
+    body    = `WOW! We have a new lead:<br/>
+              Name: <strong>${firstname}</strong><br/>
+              Email: <strong>${email}</strong>
               `;
-    type = `Welcome`;
+    type = `New Lead`;
     // add 5 min after registration for first mail
-    senddate = new Date(ts.getTime() + 5*60*1000);
+    senddate = new Date(ts.getTime() + 1*60*1000);
 
-    mailController.addMail([email], subject, body, type, senddate);
+    mailController.addMail([clinicEmail], subject, body, type, senddate);
 
-    // 1 day after
-    subject = 'Hello again';
-    body    = `Welcome to the beauty club.<br/>
-              You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
-              `;
-    type = `lead_1day`;
-    // add 1 day after registration for first mail
-    senddate = new Date(ts.getTime() + 24*60*60*1000);
-    mailController.addMail([email], subject, body, type, senddate);
+    // // welcome mail
+    // subject = 'Welcome to the Stunning you';
+    // body    = `Welcome to the beauty club.<br/>
+    //           You can become a full member of all programs, discounts and bonuses by registering at the link:
+    //           <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
+    //           `;
+    // type = `Welcome`;
+    // // add 5 min after registration for first mail
+    // senddate = new Date(ts.getTime() + 5*60*1000);
 
-    // 3 day after
-    subject = 'We miss you';
-    body    = `Welcome to the beauty club.<br/>
-              You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
-              `;
-    type = `lead_3day`;
-    // add 1 day after registration for first mail
-    senddate = new Date(ts.getTime() + 3*24*60*60*1000);
-    mailController.addMail([email], subject, body, type, senddate);
+    // mailController.addMail([email], subject, body, type, senddate);
 
-    // 7 day after
-    subject = 'We miss you';
-    body    = `Welcome to the beauty club.<br/>
-              You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="${API_URL}/api/leaduser/${newLead.rows[0].id}">Be beauty!</a>
-              `;
-    type = `lead_7day`;
-    // add 1 day after registration for first mail
-    senddate = new Date(ts.getTime() + 7*24*60*60*1000);
-    mailController.addMail([email], subject, body, type, senddate);
+    // // 1 day after
+    // subject = 'Hello again';
+    // body    = `Welcome to the beauty club.<br/>
+    //           You can become a full member of all programs, discounts and bonuses by registering at the link:
+    //           <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
+    //           `;
+    // type = `lead_1day`;
+    // // add 1 day after registration for first mail
+    // senddate = new Date(ts.getTime() + 24*60*60*1000);
+    // mailController.addMail([email], subject, body, type, senddate);
 
-    res.status(200).json({lead: newLead});
+    // // 3 day after
+    // subject = 'We miss you';
+    // body    = `Welcome to the beauty club.<br/>
+    //           You can become a full member of all programs, discounts and bonuses by registering at the link:
+    //           <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
+    //           `;
+    // type = `lead_3day`;
+    // // add 1 day after registration for first mail
+    // senddate = new Date(ts.getTime() + 3*24*60*60*1000);
+    // mailController.addMail([email], subject, body, type, senddate);
+
+    // // 7 day after
+    // subject = 'We miss you';
+    // body    = `Welcome to the beauty club.<br/>
+    //           You can become a full member of all programs, discounts and bonuses by registering at the link:
+    //           <a href="${API_URL}/api/leaduser/${newLead.rows[0].id}">Be beauty!</a>
+    //           `;
+    // type = `lead_7day`;
+    // // add 1 day after registration for first mail
+    // senddate = new Date(ts.getTime() + 7*24*60*60*1000);
+    // mailController.addMail([email], subject, body, type, senddate);
+
+    const thankYouHtml = `
+    <html>
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <title>Stunning You.</title>
+    
+        <style>
+          .text-center{
+            text-align: center;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: #381d11;
+          }
+        </style>
+    
+      </head>
+    
+      <body>
+        <div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 400px;  border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
+            <h1 class="text-center">Your message has&nbsp;been&nbsp;sent.<br/><br/>Thank you!</h1>
+          </div>
+        </div>
+      </body>
+    </html>    
+    `
+    res.status(200).send(thankYouHtml);
     // res.status(200);
   }
 

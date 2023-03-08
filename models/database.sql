@@ -21,6 +21,7 @@ create TABLE leads(
   "email" TEXT NOT NULL ,
   "phone" TEXT,
   "source" TEXT,
+  "message" TEXT,
   --"interests" INT2[],
   "ts" TIMESTAMPTZ, 
   "archive" BOOLEAN DEFAULT false

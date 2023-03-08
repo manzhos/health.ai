@@ -126,7 +126,7 @@ class MailController {
         html:     `<div className="email" style="border: 0px solid white; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 16px;">
                     <h2>Hello</h2>
                     <p>${text || 'Welcome'}</p>
-                    <p>&nbsp;</p>
+                    <p> </p>
                     <p>Sincerely your,<br/>Health.SY-way.com</p>
                   </div>`
       });
