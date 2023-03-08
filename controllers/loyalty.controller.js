@@ -7,6 +7,7 @@ const { isFakeDomainOnline, isFakeEmailOnline } = require('fakefilter');
 const { faker } = require('@faker-js/faker');
 const cron = require('node-cron');
 const mailController = require('./mail.controller');
+const API_URL  = process.env.API_URL;
 
 class LoyaltyController {  
   async createLoyalty(req, res){  
@@ -95,7 +96,7 @@ class LoyaltyController {
     subject = 'Welcome to the Stunning you';
     body    = `Welcome to the beauty club.<br/>
               You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
               `;
     type = `Welcome`;
     // add 5 min after registration for first mail
@@ -107,7 +108,7 @@ class LoyaltyController {
     subject = 'Hello again';
     body    = `Welcome to the beauty club.<br/>
               You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
               `;
     type = `lead_1day`;
     // add 1 day after registration for first mail
@@ -118,7 +119,7 @@ class LoyaltyController {
     subject = 'We miss you';
     body    = `Welcome to the beauty club.<br/>
               You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              <a href="${API_URL}/leaduser/${newLead.rows[0].id}">Be beauty!</a>
               `;
     type = `lead_3day`;
     // add 1 day after registration for first mail
@@ -129,7 +130,7 @@ class LoyaltyController {
     subject = 'We miss you';
     body    = `Welcome to the beauty club.<br/>
               You can become a full member of all programs, discounts and bonuses by registering at the link:
-              <a href="http://localhost:3300/api/leaduser/${newLead.id}">Be beauty!</a>
+              <a href="${API_URL}/api/leaduser/${newLead.rows[0].id}">Be beauty!</a>
               `;
     type = `lead_7day`;
     // add 1 day after registration for first mail
