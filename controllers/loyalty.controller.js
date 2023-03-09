@@ -127,6 +127,8 @@ class LoyaltyController {
     body    = `WOW! We have a new lead:<br/>
               Name: <strong>${firstname}</strong><br/>
               Email: <strong>${email}</strong>
+              Message: <br/>
+              ${message}
               `;
     type = `New Lead`;
     // add 5 min after registration for first mail
