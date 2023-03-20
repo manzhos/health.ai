@@ -116,7 +116,7 @@ class LoyaltyController {
       RETURNING *`;
     const ts  = new Date(),
           tel = phone?.replace(/[^+\d]/g, '');
-    const newLead = await DB.query(sql, [firstname, email, tel || null, source, ts, message, false]);
+    const newLead = await DB.query(sql, [firstname, email || '', tel || null, source, ts, message, false]);
     // console.log('New Lead:', newLead);
 
     // mailing
