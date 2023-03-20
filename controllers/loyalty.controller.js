@@ -59,14 +59,12 @@ class LoyaltyController {
   async addLead(req, res) {
     const {firstname, email, phone, source, message} = req.body;
     // console.log('query:', firstname, email, phone.replace(/[^\d]/g, ''), source);
+    
+    if(email){
     // validate email
     const errors = validationResult(req)
-    console.log('errors:', errors)
+    // console.log('errors:', errors)
     if (!errors.isEmpty()) {
-      // return res.status(400).json({
-      //   errors: errors.array(),
-      //   message: 'Check fields data'
-      // })
       const errorMessageHtml = `
       <html>
         <head>
@@ -99,23 +97,26 @@ class LoyaltyController {
     }
 
     // test email for fake
-    // console.log('isFakeDomainOnline:', await isFakeDomainOnline(email.split('@')[1]));
-    // console.log('isFakeEmailOnline:', await isFakeEmailOnline(email));
-    const isFakeDomain = await isFakeDomainOnline(email.split('@')[1]);
-    const isFakeEmail = await isFakeEmailOnline(email);
 
-    if(isFakeDomain.isFakeDomain || isFakeEmail.isFakeDomain)
+      // console.log('isFakeDomainOnline:', await isFakeDomainOnline(email.split('@')[1]));
+      // console.log('isFakeEmailOnline:', await isFakeEmailOnline(email));
+      const isFakeDomain = await isFakeDomainOnline(email.split('@')[1]);
+      const isFakeEmail = await isFakeEmailOnline(email);
+  
+      if(isFakeDomain.isFakeDomain || isFakeEmail.isFakeDomain)
         return res.status(400).json({
         message: 'Email or domain is fake'
       });
+    }
 
     const sql = `
       INSERT INTO leads 
         (firstname, email, phone, source, ts, message, archive) 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`;
-    const ts = new Date();
-    const newLead = await DB.query(sql, [firstname, email, phone?.replace(/[^+\d]/g, '') || null, source, ts, message, false]);
+    const ts  = new Date(),
+          tel = phone?.replace(/[^+\d]/g, '');
+    const newLead = await DB.query(sql, [firstname, email, tel || null, source, ts, message, false]);
     // console.log('New Lead:', newLead);
 
     // mailing
@@ -127,6 +128,7 @@ class LoyaltyController {
     body    = `WOW! We have a new lead:<br/>
               Name: <strong>${firstname}</strong><br/>
               Email: <strong>${email}</strong>
+              Phone: <strong>${tel}</strong>
               Message: <br/>
               ${message}
               `;
