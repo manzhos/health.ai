@@ -200,9 +200,9 @@ class LoyaltyController {
     
       </head>
     
-      <body>
+      <body style="margin: 0">
         <div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
-          <div style="width: 400px;  border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
+          <div style="width: 400px; border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
             <h1 class="text-center">Your message has&nbsp;been&nbsp;sent.<br/><br/>Thank you!</h1>
           </div>
         </div>
