@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ConsultForm from './pages/ConsultForm';
 import Booking from './pages/Booking';
+import BookingFree from './pages/BookingFree';
 import Calendar from './pages/Calendar';
 import Checkin from './pages/Checkin';
 import BookConsult from './pages/BookConsult';
@@ -49,7 +50,6 @@ export const useMyRoutes = isAuthenticated => {
         <Route path="/bookconsult" element={<BookConsult />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/communicate" element={<CommunicationPWA />} />
-        <Route path="/thanks" element={<Thanks />} />
 
         <Route path="/admin" element={<DashboardLayoutAdmin />}>
           <Route path="app" element={<DashboardApp />}/>
@@ -89,6 +89,8 @@ export const useMyRoutes = isAuthenticated => {
       <Route path="/loginpwa" element={<LoginPWARef />} />
       <Route path="/loginpwa/:id" element={<LoginPWARef />} />
       <Route path="/successauthentication" element={<Authentication />} />
+      <Route path="/bookingfree" element={<BookingFree />} />
+      <Route path="/thanks" element={<Thanks />} />
     </Routes>
   )
 }

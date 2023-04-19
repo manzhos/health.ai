@@ -57,56 +57,57 @@ class LoyaltyController {
   }
 
   async addLead(req, res) {
-    const {firstname, email, phone, source, message} = req.body;
-    // console.log('query:', firstname, email, phone.replace(/[^\d]/g, ''), source);
+    const {firstname, email, phone, source, message, bookfree} = req.body;
+    console.log('query:', firstname, email, phone?.replace(/[^\d]/g, ''), source, bookfree);
     
     if(email){
-    // validate email
-    const errors = validationResult(req)
-    // console.log('errors:', errors)
-    if (!errors.isEmpty()) {
-      const errorMessageHtml = `
-      <html>
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-          <title>Stunning You.</title>
+      // validate email
 
-          <style>
-            .text-center{
-              text-align: center;
-              font-size: large;
-              font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-              color: #381d11;
-            }
-          </style>
+      // const errors = validationResult(req)
+      // console.log('errors:', errors)
+      // if (!errors.isEmpty()) {
+      //   const errorMessageHtml = `
+      //   <html>
+      //     <head>
+      //       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      //       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+      //       <title>Stunning You.</title>
 
-        </head>
+      //       <style>
+      //         .text-center{
+      //           text-align: center;
+      //           font-size: large;
+      //           font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      //           color: #381d11;
+      //         }
+      //       </style>
 
-        <body>
-          <div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
-            <div style="width: 400px;  border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
-              <p class="text-center">Somthing was wrong.</p>
-              <p class="text-center">Please return and check the field.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-      `
-      return res.status(400).send(errorMessageHtml)
-    }
+      //     </head>
 
-    // test email for fake
+      //     <body>
+      //       <div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
+      //         <div style="width: 400px;  border: 1px black solid; border-radius: 30px; padding: 30px 45px; box-shadow: 0px 5px 20px 1px rgba(0, 0, 0, .2);">
+      //           <p class="text-center">Somthing was wrong.</p>
+      //           <p class="text-center">Please return and check the field.</p>
+      //         </div>
+      //       </div>
+      //     </body>
+      //   </html>
+      //   `
+      //   return res.status(400).send(errorMessageHtml)
+      // }
+
+      // test email for fake
 
       // console.log('isFakeDomainOnline:', await isFakeDomainOnline(email.split('@')[1]));
       // console.log('isFakeEmailOnline:', await isFakeEmailOnline(email));
-      const isFakeDomain = await isFakeDomainOnline(email.split('@')[1]);
-      const isFakeEmail = await isFakeEmailOnline(email);
+      // const isFakeDomain = await isFakeDomainOnline(email.split('@')[1]);
+      // const isFakeEmail = await isFakeEmailOnline(email);
   
-      if(isFakeDomain.isFakeDomain || isFakeEmail.isFakeDomain)
-        return res.status(400).json({
-        message: 'Email or domain is fake'
-      });
+      // if(isFakeDomain.isFakeDomain || isFakeEmail.isFakeDomain)
+      //   return res.status(400).json({
+      //   message: 'Email or domain is fake'
+      // });
     }
 
     const sql = `
@@ -117,7 +118,7 @@ class LoyaltyController {
     const ts  = new Date(),
           tel = phone?.replace(/[^+\d]/g, '');
     const newLead = await DB.query(sql, [firstname, email || '', tel || null, source, ts, message, false]);
-    // console.log('New Lead:', newLead);
+    console.log('New Lead:', newLead);
 
     // mailing
     // ## email, subject, body, type, senddate
@@ -209,8 +210,8 @@ class LoyaltyController {
       </body>
     </html>    
     `
-    res.status(200).send(thankYouHtml);
-    // res.status(200);
+    if(bookfree) res.send(newLead.rows[0]);
+    else res.status(200).send(thankYouHtml);
   }
 
   async sumLead(req, res) {
