@@ -234,6 +234,21 @@ class LoyaltyController {
     res.send(true);
   }
 
+  async getTrafficSource(req, res){
+    const {source} = req.body;
+    // console.log('source:', source);
+    if(!source || source === '') return;
+
+    const sql = `
+      INSERT INTO traffic 
+        (source, ts) 
+      VALUES ($1, $2) 
+      RETURNING *`;
+    const ts  = new Date();
+    const newTrafficSource = await DB.query(sql, [source, ts]);
+    // console.log('newTrafficSource:', newTrafficSource);
+  }
+
 }
 
 module.exports = new LoyaltyController()

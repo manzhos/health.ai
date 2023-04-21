@@ -27,6 +27,12 @@ create TABLE leads(
   "archive" BOOLEAN DEFAULT false
 );
 
+create TABLE traffic(
+  "id" SERIAL4 PRIMARY KEY,
+  "source" TEXT,
+  "ts" TIMESTAMPTZ
+);
+
 create TABLE user_types(
   "id" SERIAL4 PRIMARY KEY,
   "usertype" TEXT NOT NULL,

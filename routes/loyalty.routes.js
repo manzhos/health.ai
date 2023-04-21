@@ -25,4 +25,7 @@ router.get('/leadsum', loyaltyController.sumLead);
 // router.post('/loyalty/:id',       loyaltyController.updateLoyalty)
 router.get('/delloyalty/:id',      loyaltyController.deleteLoyalty);
 
+// analitics
+router.post('/gettrafficsource', loyaltyController.getTrafficSource);
+
 module.exports = router
