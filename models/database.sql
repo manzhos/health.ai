@@ -29,6 +29,7 @@ create TABLE leads(
 
 create TABLE traffic(
   "id" SERIAL4 PRIMARY KEY,
+  "page" TEXT,
   "source" TEXT,
   "ts" TIMESTAMPTZ
 );

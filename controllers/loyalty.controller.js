@@ -235,17 +235,17 @@ class LoyaltyController {
   }
 
   async getTrafficSource(req, res){
-    const {source} = req.body;
+    const {page, source} = req.body;
     // console.log('source:', source);
-    if(!source || source === '') return;
+    if(!page || !source || source === '') return;
 
     const sql = `
       INSERT INTO traffic 
-        (source, ts) 
-      VALUES ($1, $2) 
+        (page, source, ts) 
+      VALUES ($1, $2, $3) 
       RETURNING *`;
     const ts  = new Date();
-    const newTrafficSource = await DB.query(sql, [source, ts]);
+    const newTrafficSource = await DB.query(sql, [page, source, ts]);
     // console.log('newTrafficSource:', newTrafficSource);
   }
 
