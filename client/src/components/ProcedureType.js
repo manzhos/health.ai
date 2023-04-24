@@ -12,10 +12,10 @@ import { useHttp } from '../hooks/http.hook'
 import { API_URL } from '../config'
 
 
-export default function ProcedureType({ onChangeProcedureType }) {
+export default function ProcedureType({ procedureTypeId = 1, onChangeProcedureType }) {
   const {request} = useHttp()
 
-  const [procedureType, setProcedureType] = useState(1)
+  const [procedureType, setProcedureType] = useState(procedureTypeId)
   const [procedureTypeList, setProcedureTypeList] = useState([])
 
   const getProcedureTypes = useCallback(async () => {

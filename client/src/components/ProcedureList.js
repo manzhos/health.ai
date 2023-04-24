@@ -11,10 +11,10 @@ import {
 import { useHttp } from '../hooks/http.hook'
 import { API_URL } from '../config'
 
-export default function ProcedureList({ procedureTypeId, onChangeProcedure }) {
+export default function ProcedureList({ procedureTypeId, procedureId = 0, onChangeProcedure }) {
   const {request} = useHttp()
 
-  const [procedure, setProcedure] = useState(0)
+  const [procedure, setProcedure] = useState(procedureId)
   const [procedureList, setProcedureList] = useState([])
   const [url, setUrl] = useState(procedureTypeId ? `${API_URL}api/procedures_bytype/${procedureTypeId}` : `${API_URL}api/procedures`);
 

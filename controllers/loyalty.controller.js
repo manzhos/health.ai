@@ -236,7 +236,7 @@ class LoyaltyController {
 
   async getTrafficSource(req, res){
     const {page, source} = req.body;
-    // console.log('source:', source);
+    console.log('source:', source, page);
     if(!page || !source || source === '') return;
 
     const sql = `

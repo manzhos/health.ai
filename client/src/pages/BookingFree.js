@@ -33,13 +33,20 @@ export default function BookingFree(){
   const navigate  = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams();
   const source  = searchParams.get("source");
+  const procedureTypeIdDefault  = searchParams.get("procedureTypeIdDefault");
+  const procedureIdDefault  = searchParams.get("procedureIdDefault");
+
+  console.log('procedureTypeIdDefault, procedureIdDefault', procedureTypeIdDefault, procedureIdDefault)
 
   const [date, setDate] = useState(new Date())
   const [time, setTime] = useState('__:__')
   const [doctorList, setDoctorList] = useState([])
   const [doctorSelected, setDoctorSelected] = useState([])
-  const [procedureTypeId, setProcedureTypeId] = useState(4)
-  const [procedureId, setProcedureId] = useState(0)
+  const [procedureTypeId, setProcedureTypeId] = useState(procedureTypeIdDefault)
+  const [procedureId, setProcedureId] = useState(procedureIdDefault)
+
+  console.warn('procedureType, procedureId', procedureTypeId, procedureId)
+
   const [doctor, setDoctor] = useState('')
   const [procedure, setProcedure] = useState('')
   const [recordList, setRecordList] = useState([])
@@ -75,7 +82,7 @@ export default function BookingFree(){
       // console.log('tt_bydoctor:', res);
       setRecordList(res);
       busy.length=0;
-    } catch (e) { console.log('error:', e) }
+    } catch(error) { console.log('error:', error) }
   }
   useEffect(() => {getRecordsByDoctor()}, [date, doctor])   
 
@@ -275,11 +282,11 @@ export default function BookingFree(){
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                  <ProcedureType onChangeProcedureType={handleProcedureTypeChange} />
+                  <ProcedureType procedureTypeId={procedureTypeId} onChangeProcedureType={handleProcedureTypeChange} />
                   {/* procedureType now: {procedureTypeId} */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
+                  <ProcedureList procedureTypeId={procedureTypeId} procedureId={procedureId} onChangeProcedure={handleProcedureChange} />
                   {/* procedure now: {procedureId} */}
                 </Grid>
                 
