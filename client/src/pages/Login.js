@@ -55,8 +55,8 @@ export default function Login() {
         navigate('/admin/client')
         break
       case 2:
-        // window.top.location = `${URL}doctor/procedure`
-        navigate('/doctor/procedure')
+        // window.top.location = `${URL}doctor/timetable`
+        navigate('/doctor/timetable')
         break
       case 3:
         // window.top.location = `${URL}user/timetable`

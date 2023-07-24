@@ -135,12 +135,14 @@ body {
 
 .logo-consult-form{
   display: flex;
-  margin: 10vh 0px 0px;
+  /* margin: 10vh 0px 0px; */
   transform: translateX(-50%);
   max-width: 280px;
+  margin-top: 3vh;
 }
 
 .time-btn{
+  background-color: #FCFBFD;
   margin: 5px 10px;
   width: 80px;
 }
@@ -194,6 +196,7 @@ body {
 }
 
 .cons-input {
+  background-color: #FCFBFD;
   -webkit-box-shadow: 0px 4px 27px -20px rgba(66, 68, 90, 1);
   -moz-box-shadow:    0px 4px 27px -20px rgba(66, 68, 90, 1);
   box-shadow:         0px 4px 27px -20px rgba(66, 68, 90, 1);
@@ -355,4 +358,53 @@ body {
 }
 .day3 {
   background-color: rgb(255, 127, 165);
+}
+
+
+/* Booking Widget */
+.book-widget {
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+}
+
+.scroll-none {
+  scrollbar-width: none;
+}
+.scroll-none::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.MuiButton-root {
+  border-radius: 0 !important;
+}
+
+
+/* PARTNER */
+.partner-ms {
+  background: #AA4037;
+}
+
+.partner-top-menu {
+  padding: 3vh 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.partner-count {
+  width: 100%;
+  text-align: center;
+}
+
+.input-partner {
+  background: #FCFBFD;
+  border-radius: 8px;
+}
+
+.chkbx {
+  /* background: #fff; */
+  background: url(http://health.sy-way.com/static/check_bg.png) center center no-repeat
 }

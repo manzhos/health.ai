@@ -2,29 +2,33 @@ import React, { useState, useEffect } from "react"
 import { Container, Button, Typography } from '@mui/material'
 import { SubscriptionsOutlined } from "@mui/icons-material"
 
-export default function Time({onTimeChange, slots}) {
-  const [variant, setVariant] = useState([])
-  let st = []
+export default function Time({onTimeChange, slots, day}) {
   // console.log('Slots in time:', slots);
+  const [variant, setVariant] = useState([])
+  let st = [],
+  slot = [];
+  for(let s in slots) slot.push(slots[s]);
+  // console.log('SlotTT TT TT:', slot);
+
   useEffect(()=>{
-    for(let i=0; i<slots.length; i++) st.push('outlined')
+    for(let i=0; i<slot.length; i++) st.push('outlined')
     setVariant(st)
-  }, [slots])
+  }, [])
 
   const handleClick = (e, key) => {
     st[key]==='outlined' ? st[key]='contained' : st[key]='outlined'
     setVariant(st)
-    onTimeChange(slots[key].time);
+    onTimeChange(slot[key].time, day);
   }
 
-  for(let i=0; i<=slots.length; i++) st.push('outlined')
+  for(let i=0; i<=slot.length; i++) st.push('outlined')
 
-  return(
-    <Container>
+  return (
+    // <Container>
         <div style={{textAlign:"center"}}>
           {/* <Typography variant="h5" gutterBottom>Time</Typography> */}
           <div>
-            {slots.map((item, key) => {
+            {slot.map((item, key) => {
               return(
                 <Button 
                   key={key} name={key} variant={variant[key]} className="time-btn"
@@ -36,6 +40,6 @@ export default function Time({onTimeChange, slots}) {
             })}
           </div>
         </div>
-    </Container>
+    // </Container>
   )
 }

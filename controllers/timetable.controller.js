@@ -82,7 +82,8 @@ class TimeTableController {
 
   async getRecordsByDoctor(req, res){
     const id = req.params.id;
-    console.log('get all records for doctor:', id);
+    // console.log('get all records for doctor:', id ,Number.isInteger(id));
+    if(!id) return;
     const sql = `
       SELECT 
           u.firstname AS client_firstname,

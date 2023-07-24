@@ -16,6 +16,7 @@ export default function ClientInvoice(){
   return(
     <Container style={{textAlign:"center"}}>
       <Grid container>
+        {/* 
         <Grid item xs={12} sm={12}>
           <Card sx={{ mb:3, padding:"30px;" }}>
             <Typography component="h1" variant="h5" style={{paddingTop:"6px"}}>
@@ -34,6 +35,7 @@ export default function ClientInvoice(){
             <Button id='setPoints' onClick={(e) => console.log(e)} variant='contained' sx={{ mt:3, mb:3 }}>Ok</Button>
           </Card>
         </Grid>
+        */}
 
         <Grid item xs={12} sm={12}>
           <Card style={{textAlign:"center", background:'darkgrey' }}>

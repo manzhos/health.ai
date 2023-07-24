@@ -43,7 +43,7 @@ class UserController {
     const hashedPassword = await bcrypt.hash(password, 12)
     const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
     let ts = new Date()
-    // User type:::  1 - Admin, 2 - Doctor, 3 - Client
+    // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Partner
     // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
     const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar])
     res.send(newUser.rows[0]);
@@ -110,12 +110,12 @@ class UserController {
   }
 
   async loginPwaUser(req, res){
-    // console.log('loginPwaUser'); 
-    const {email, password, password_conf, ref_id} = req.body;
-    // console.log('email, password, ref_id:', email, password, password_conf, ref_id);
+    console.log('loginPwaUser'); 
+    const {email, password, password_conf, ref_id, partner_id} = req.body;
+    // console.log('email, password, ref_id:', email, password, password_conf, ref_id, partner_id);
     const errors = validationResult(req)
-    console.log('errors:', errors)
     if (!errors.isEmpty()) {
+      console.log('errors:', errors)
       return res.status(400).json({
         errors: errors.array(),
         message: 'Check fields data'
@@ -126,18 +126,19 @@ class UserController {
       const q = await DB.query(`SELECT * FROM users WHERE email = $1`, [email]);
       let user = q.rows[0];
       if (!user) {
-        if(!password_conf) return  res.status(200).json({ status: 'newuser' })
-        if(password !== password_conf) return  res.status(400).json({ message: 'Passwords not match' })
+        if(!password_conf || password_conf === '') return res.status(200).json({ status: 'newuser' });
+        if(password !== password_conf) return res.status(400).json({ message: 'Passwords not match' });
         // save to DB
         const hashedPassword = await bcrypt.hash(password, 12)
-        const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm, ref_id) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8) RETURNING *'
+        const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, confirm, ref_id, partner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9) RETURNING *'
 
         const ts = new Date(),
               firstName = 'New User',
               lastName = email.split('@')[0];
         // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Staff
-        // console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true, ref_id);
-        user = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, 3, false, ref_id || null]);
+        console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true, ref_id, partner_id);
+        let newUser = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, 3, false, ref_id || null, partner_id || null]);
+        user = newUser.rows[0];
       } else {
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) return res.status(200).json({ status: 'wrong_pass' })
@@ -198,7 +199,7 @@ class UserController {
           filter = 'AND usertype_id IN (3)'
           break;
         case 'lead':
-          const leads = await DB.query('SELECT * FROM leads WHERE NOT archive ORDER BY firstname, lastname')
+          const leads = await DB.query('SELECT * FROM leads WHERE NOT archive ORDER BY firstname, lastname');
           return res.send(leads.rows)
       }
       const sql = `
@@ -278,6 +279,7 @@ class UserController {
             u.email AS email, 
             u.usertype_id AS usertype_id, 
             u.avatar AS avatar,
+            u.bank_acc AS bank_acc,
             l.total_points AS total_points,
             refs.total_refs AS total_refs
         FROM users u
@@ -322,9 +324,9 @@ class UserController {
     }
 
     // save to DB
-    const {firstname, lastname, email, promo, usertype_id, password} = req.body
+    const {firstname, lastname, email, promo, usertype_id, password, bank_acc} = req.body
     const avatar = req.files ? req.files.avatar.name : oldAvatar.rows[0].avatar
-    // console.log(id, firstname, lastname, email, promo, usertype_id, password, avatar);
+    // console.log(id, firstname, lastname, email, promo, usertype_id, password, avatar, bank_acc);
     const sql =`
       UPDATE users SET
         firstname   = $2,
@@ -332,9 +334,10 @@ class UserController {
         email       = $4,
         promo       = $5,
         usertype_id = $6,
-        avatar      = $7
+        avatar      = $7,
+        bank_acc    = $8
       WHERE id = $1;`
-    await DB.query(sql, [id, firstname, lastname, email, (promo ? true : false), usertype_id, avatar])
+    await DB.query(sql, [id, firstname, lastname, email, (promo ? true : false), usertype_id, avatar, (bank_acc ? bank_acc : null)])
     // console.log(`user #${id} was updates`)
     if(password) {
       const hashedPassword = await bcrypt.hash(password, 12)
@@ -445,6 +448,66 @@ class UserController {
       ORDER BY firstname, lastname;`
     const clients = await DB.query(sql)
     // console.log('clients.rows', clients.rows)
+    res.send(clients.rows)    
+  }
+
+  async getPartnerClients(req, res){
+    const partner_id = req.params.id;    
+    const sql = `
+          WITH
+          clients AS (
+            SELECT
+              u.id as id,
+              u.firstname as firstname,
+              u.lastname as lastname,
+              u.email as email,
+              u.ts as ts
+            FROM users u
+            JOIN notes n ON u.id = n.client_id
+            WHERE partner_id = $1
+            AND n.paid
+            GROUP BY u.id
+          ),
+          invoices AS (
+            SELECT
+              client_id,
+              procedure_id,
+              (bill -> 'qty')::int as qty,
+              (bill -> 'cost')::text as cost
+            FROM notes
+            WHERE client_id IN(SELECT id FROM clients)
+            AND paid
+          ),
+          cos_procedure AS (
+            SELECT
+              client_id,
+              SUM(to_number(cost, '9999.99') * qty * 0.01) as cos_cost
+            FROM invoices
+            WHERE procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
+            GROUP BY client_id	
+          ),
+          med_procedure AS (
+            SELECT
+              client_id,
+              SUM(to_number(cost, '9999.99') * qty * 0.005) as med_cost
+            FROM invoices
+            WHERE procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
+            GROUP BY client_id	
+          )
+          SELECT
+            c.id as id,
+            c.firstname as firstname,
+            c.lastname as lastname,
+            c.email as email,
+            c.ts as ts,
+            cp.cos_cost,
+            mp.med_cost
+          FROM clients c
+          FULL JOIN cos_procedure cp ON c.id=cp.client_id
+          FULL JOIN med_procedure mp ON c.id=mp.client_id
+          ORDER BY firstname, lastname;`
+    const clients = await DB.query(sql, [partner_id])
+    console.log('clients.rows', clients.rows)
     res.send(clients.rows)    
   }
 

@@ -44,14 +44,16 @@ class MailController {
   }
 
   async createMail(req, res){
-    const {subject, body, type, date, time, adressee} = req.body;
+    let {subject, body, type, date, time, adressee} = req.body;
     const mailList = adressee.split(',');
     // console.log('adressee:', typeof(mailList), mailList);
+    const ts = new Date();
+    if(!date) return;
     let sd = date.split(' ');
-    sd[4] = time + ':00';
+    console.log('sd', sd);
+    sd[4] = (time ? time : '00') + ':00';
     // console.log('date, time:', ts.join(' '));
     const sendDate = new Date(sd.join(' '));
-    const ts = new Date();
     // console.log('sendDate:', sendDate);
     const sql = `
       INSERT INTO mails 

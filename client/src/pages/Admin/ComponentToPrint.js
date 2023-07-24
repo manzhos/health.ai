@@ -12,7 +12,7 @@ export const ComponentToPrint = React.forwardRef(({inv, onInvoiceUpdate}, ref) =
 
   return (
     <div ref={ref} style={{ width:"800px", padding:"69px 94px 78px", backgroundColor:"white", margin:"0 auto", textAlign:"left", fontSize:"12px" }}>
-      <img src="/static/logo_blank.svg" style={{ width:"270px", margin:"0 auto 69px" }}/>
+      <img src="/static/logo_blank.svg" style={{ width:"270px", margin:"0 auto 58px" }}/>
       <table style={{ width:"100%" }}>
         <tbody>
           <tr>
@@ -194,7 +194,8 @@ export const ComponentToPrint = React.forwardRef(({inv, onInvoiceUpdate}, ref) =
       <p>&nbsp;</p>
       <p>Mit freundlichen Grüßen</p>
       <p>Kamil Akhundov</p>
-      <div style={{ width:"100%", height:"80px" }}>&nbsp;</div>
+      <p>&nbsp;</p>
+      {/* <div style={{ width:"100%", height:"80px" }}>&nbsp;</div> */}
       <p>Bankverbindung: Kamil Akhundov – Deutsche Bank AG – BLZ 300 700 24 – KTO 987654321</p>
     </div>
   );

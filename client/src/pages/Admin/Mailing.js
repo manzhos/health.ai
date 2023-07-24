@@ -176,7 +176,7 @@ const handleSubmit = async (event) => {
     formData.append('date',     date)
     formData.append('time',     time)
     formData.append('adressee', adressee)
-    // console.log('formData:', formData);
+    console.log('formData:', date);
 
     await fetch(`${API_URL}api/newmail`, {
       method: 'POST', 

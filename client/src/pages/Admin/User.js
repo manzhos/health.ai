@@ -191,7 +191,7 @@ export default function User() {
     if(data.get('firstName') && data.get('lastName') && data.get('email') && data.get('password')){
       try {
         const formData = new FormData()
-        formData.append('firstname', data.get('firstName'))
+        formData.append('firstname',  data.get('firstName'))
         formData.append('lastname',   data.get('lastName'))
         formData.append('email',      data.get('email'))
         formData.append('password',   data.get('password'))

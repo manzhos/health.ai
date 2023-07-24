@@ -26,6 +26,10 @@ import Iconify from '../../../components/Iconify';
 import { useHttp } from '../../../hooks/http.hook'
 import { URL, API_URL } from '../../../config'
 import { useNavigate } from 'react-router-dom';
+
+import ProcedureType      from '../../../components/ProcedureType'
+import ProcedureList      from '../../../components/ProcedureList'
+
 // ----------------------------------------------------------------------
 
 export default function UserMoreMenu({id, user, roleList, onChange}) {
@@ -56,14 +60,14 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
     // console.log(`saving user #${id}`)
     const data = new FormData(event.currentTarget)
     try {
-      const formData = new FormData()
-      formData.append('firstname', data.get('firstName'))
-      formData.append('lastname',   data.get('lastName'))
-      formData.append('email',      data.get('email'))
-      formData.append('password',   data.get('password'))
-      formData.append('usertype_id',data.get('usertype_id'))
-      formData.append('promo',      data.get('allowExtraEmails'))
-      formData.append('avatar',     data.get('avatar'))
+      const formData = new FormData();
+      formData.append('firstname', data.get('firstName'));
+      formData.append('lastname',   data.get('lastName'));
+      formData.append('email',      data.get('email'));
+      formData.append('password',   data.get('password'));
+      formData.append('usertype_id',data.get('usertype_id'));
+      formData.append('promo',      data.get('allowExtraEmails'));
+      formData.append('avatar',     data.get('avatar'));
 
       await fetch(`${API_URL}api/user/${id}`, {
         method: 'POST', 
@@ -71,16 +75,88 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
       })
       setOpen(false)
       onChange(true)
-    } catch (e) { console.log('error:', e)}
+    } catch (e) { console.log('error:', e) }
   }
 
-  const [open, setOpen] = useState(false)
-  const [loyaltyOpen, setLoyaltyOpen] = useState(false)
-  const [loyalty, setLoyalty] = useState({})
-  const handleOpen  = () => setOpen(true)
-  const handleClose = () => setOpen(false)
-  const handleLoyaltyOpen  = () => {setLoyaltyOpen(true)}
-  const handleLoyaltyClose = () => {setLoyaltyOpen(false)}
+  const [open, setOpen] = useState(false);
+  const [loyaltyOpen, setLoyaltyOpen] = useState(false);
+  const [loyalty, setLoyalty] = useState({});
+  const handleOpen  = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const handleLoyaltyOpen  = () => {setLoyaltyOpen(true)};
+  const handleLoyaltyClose = () => {setLoyaltyOpen(false)};
+
+  const [doctorList, setDoctorList] = useState([]);
+  const [doctor, setDoctor] = useState('');
+  const [doctorSelected, setDoctorSelected] = useState([]);
+
+  const getDoctors = useCallback(async () => {
+    try {
+      const res = await request(`${API_URL}`+'api/doctors', 'GET', null, {
+        // Authorization: `Bearer ${token}`
+      })
+      setDoctorList(res);
+      setDoctorSelected(res);
+    } catch (e) { console.log('error:', e) }
+  }, [request])
+  useEffect(() => {getDoctors()}, [getDoctors]); 
+  
+  const handleChangeDoctor = (event) => {
+    console.log('setDoctor:', event.target.value);
+    event.preventDefault();
+    setDoctor(event.target.value);
+    const index = doctorList.findIndex((el) => el.id === event.target.value);
+    if(index > -1) {
+      let arr = [];
+      arr.push(doctorList[index]);
+      setDoctorSelected(arr);
+    }
+    // console.log('doctorSelected', doctor)
+  }
+
+  const [invoiceOpen, setInvoiceOpen]  = useState(false);
+
+  const [procedureTypeId, setProcedureTypeId] = useState(4);
+  const [procedureId, setProcedureId] = useState(0);
+  const handleProcedureTypeChange = (newProcedureTypeId) => {
+    setProcedureTypeId(newProcedureTypeId);
+  }
+  const handleProcedureChange = (newProcedureId) => {
+    setProcedureId(newProcedureId);
+  }
+  const handleInvoiceSubmit = async (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    // console.log(
+    //   'title', 'invoice',
+    //   '\ndoc_type', 1,
+    //   '\nclient_id', id,
+    //   '\ndoctor_id', doctor,
+    //   '\nprocedure_id', data.get('procedure_id'),
+    //   '\nquantity',     data.get('quantity'),
+    //   '\ncost',        data.get('cost')
+    // );
+    try {
+      const res = await request(`${API_URL}api/note`, 'POST', {
+        'title':        'invoice',
+        'doc_type':     1,
+        'client_id':    id,
+        'doctor_id':    doctor,
+        'procedure_id': data.get('procedure_id'),
+        'invoice':      {
+          'procedure_id': data.get('procedure_id'),
+          'client_id':    id,
+          'doctor_id':    doctor,
+          'qty':          data.get('quantity'),
+          'cost':         data.get('cost')
+        }
+      });
+
+      setInvoiceOpen(false);
+    } catch (err) { console.log('error:', err) }
+  }
+
+
   const handleChangeRole = (event) => {
     event.preventDefault();
     setRole(event.target.value)
@@ -118,9 +194,9 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
     // console.log('start communication');
     navigate(`/admin/user/communication/client/${id}`);
   }
-  const handleInvoice = () => {
-    navigate(`/admin/client/invoice`);
-  }
+  // const handleInvoice = () => {
+  //   navigate(`/admin/client/invoice`);
+  // }
 
 
   return (
@@ -161,11 +237,11 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
               </ListItemIcon>
               <ListItemText primary="Loyalty" primaryTypographyProps={{ variant: 'body2' }} />
             </MenuItem>
-            <MenuItem sx={{ color: 'text.secondary' }} onClick={handleInvoice}>
+            <MenuItem sx={{ color: 'text.secondary' }} onClick={()=>{setInvoiceOpen(true)}}>
               <ListItemIcon>
                 <Iconify icon="fa6-solid:file-invoice" width={24} height={24} />
               </ListItemIcon>
-              <ListItemText primary="Invoices" primaryTypographyProps={{ variant: 'body2' }} />
+              <ListItemText primary="Invoice" primaryTypographyProps={{ variant: 'body2' }} />
             </MenuItem>
           </>
         }
@@ -289,6 +365,98 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
                   sx={{ mt: 3, mb: 2 }}
                 >
                   Save changes
+                </Button>
+              </Box>
+            </Box>
+          </div>
+        </Container>
+      </Modal>
+
+      {/* ***make invoice*** */}
+      <Modal
+        open={invoiceOpen}
+        onClose={()=>{setInvoiceOpen(false)}}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Container component="main" maxWidth="md" disableGutters>
+          <div className="login-modal">
+            <Box
+              sx={{
+                // marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Typography component="h1" variant="h5">
+                New Invoice
+              </Typography>
+              <Box component="form" noValidate onSubmit={handleInvoiceSubmit} sx={{ mt: 3 }}>
+              {/* <Box component="form" noValidate onSubmit={handleClose} sx={{ mt: 3 }}> */}
+                <Grid container spacing={2}>
+                  <Grid container item spacing={2} xs={12} sm={12}>
+                    <Grid item xs={12} sm={6}>
+                      <ProcedureType onChangeProcedureType={handleProcedureTypeChange} />
+                      {/* procedureType now: {procedureTypeId} */}
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
+                      {/* procedure now: {procedureId} */}
+                    </Grid>
+                    <Grid item container spacing={2} xs={12} sm={12}>
+                      <Grid item xs={3} sm={3}>&nbsp;</Grid>
+                      <Grid item xs={3} sm={3}>
+                        <TextField
+                          required
+                          fullWidth
+                          id="quantity"
+                          name="quantity"
+                          label="Quantity"
+                          type="number"
+                        />
+                      </Grid>
+                      <Grid item xs={3} sm={3}>
+                        <TextField
+                          required
+                          fullWidth
+                          id="cost"
+                          name="cost"
+                          label="Cost per unit"
+                          type="number"
+                        />
+                      </Grid>  
+                      <Grid item xs={3} sm={3}>&nbsp;</Grid>                      
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                      <FormControl sx={{ width: 1 }}>
+                        <InputLabel id="doctor-select">Doctor</InputLabel>
+                        <Select
+                          labelId="doctor-select"
+                          id="doctor-select"
+                          name="doctor_id"
+                          value={doctor}
+                          label="Doctor"
+                          onChange={handleChangeDoctor} 
+                          className='cons-input'
+                        >
+                          {doctorList.map((item)=>{
+                            return(
+                              <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                            )
+                          })}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  Save invoice
                 </Button>
               </Box>
             </Box>

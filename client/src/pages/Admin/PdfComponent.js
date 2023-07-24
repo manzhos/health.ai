@@ -26,6 +26,8 @@ const PdfComponent = ({invoice, onClose}) => {
   });
 
   const handleInvoiceSave = async() => {
+    // invs.total_sum = invs.qty * invs.cost;
+    // console.log('invs:', invs);
     try {
       const res = await request(`${API_URL}api/bill`, 'POST', {
         'invoice': invs
@@ -45,7 +47,6 @@ const PdfComponent = ({invoice, onClose}) => {
       <Grid item xs={12} sm={12}>
         <Card style={{textAlign:"center", background:'darkgrey' }}>
           <Box style={{ padding:"2vw" }}>
-            {/* <img src="/static/docs/inv_proc_2---08-01-2023.jpg" /> */}
             <Grid container spacing={2}>
               <Grid item xs={10} sm={10}>
                 <ComponentToPrint ref={componentRef} inv={invoice} onInvoiceUpdate={handleInvoiceUpdate} />

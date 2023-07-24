@@ -69,14 +69,12 @@ export default function LoginPWA() {
     <div className='authpage'>
       <Container style={{textAlign:"center"}}>
         <div style={{ height:'20vh', maxHeight:'110px', position:'relative' }}>
-          {/* <div className='logo-consult-form' > */}
-            <img
-              src="../static/sy_logo.svg"
-              alt="Stunning You"
-              loading="lazy"
-              style={{ height: '20vh', maxWidth:'80vw', margin:'5vh auto'}}
-            />
-          {/* </div> */}
+          <img
+            src="../static/sy_logo.svg"
+            alt="Stunning You"
+            loading="lazy"
+            style={{ height: '20vh', maxHeight:'110px', maxWidth:'80vw', margin:'5vh auto'}}
+          />
         </div>
         <div className='consult-form'>
           <Box noValidate sx={{ mt: 7 }}>

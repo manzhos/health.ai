@@ -85,7 +85,7 @@ export default function TimeTable(){
           'end'             : end,
         }
       })
-      // console.log('p:', procedures)
+      console.log('p:', procedures)
       setProcedureList(procedures)
     } catch (e) { console.log('error:', e)}
   }, [token, request])

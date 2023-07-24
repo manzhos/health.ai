@@ -16,11 +16,11 @@ const navConfig = [
     path: '/doctor/client',
     icon: getIcon('eva:people-fill'),
   },
-  // {
-  //   title: 'procedure',
-  //   path: '/admin/procedure',
-  //   icon: getIcon('eva:shopping-bag-fill'),
-  // },
+  {
+    title: 'Reception hours',
+    path: '/doctor/reception',
+    icon: getIcon('mdi:timetable'),
+  },
   // {
   //   title: 'communication',
   //   path: '/admin/communication',

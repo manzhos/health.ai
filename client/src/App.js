@@ -42,7 +42,7 @@ export default function App() {
         {/* <BaseOptionChartStyle /> */}
         {/* { isAuthenticated && <Navbar /> } */}
         <div className="container">
-          <BetaButton />
+          {/* <BetaButton /> */}
           {routes}
         </div>
         {/* <Router /> */}

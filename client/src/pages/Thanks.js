@@ -16,7 +16,7 @@ export default function Thanks(){
         <Typography variant="h4" gutterBottom style={{ color:"#4b66ac", marginTop:"15vh"}}>
           Thank you for request.
         </Typography>
-        <Box style={{ maxWidth:"76vw", marginLeft:"8vw"}}>
+        <Box style={{ maxWidth:"76vw", margin:"0 8vw"}}>
           <p>&nbsp;</p>
           <p><strong>Check you mailbox</strong></p>
           <p><br/>

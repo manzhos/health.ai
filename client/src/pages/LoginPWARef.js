@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams,useNavigate } from 'react-router-dom'
 import { 
   Button,
   Grid,
@@ -23,8 +23,11 @@ import { AuthContext } from '../context/AuthContext'
 
 export default function LoginPWARef() {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const refId = params.id || null;
+  const partnerId = searchParams.get("partner_id") || null;
   // console.log('refId:', refId);
+  console.log('partnerId:', partnerId);
 
   const {request} = useHttp()
   const navigate  = useNavigate()
@@ -65,8 +68,10 @@ export default function LoginPWARef() {
         email:          emailClient,
         password:       passwordClient,
         password_conf:  passwordClientConf,
-        ref_id:         refId
-      })
+        ref_id:         refId,
+        partner_id:     partnerId
+      });
+      console.log(777, res);
       switch (res.status) {
         case 'newuser':
           setNewUser(true);
@@ -114,7 +119,7 @@ export default function LoginPWARef() {
               src="../static/sy_logo.svg"
               alt="Stunning You"
               loading="lazy"
-              style={{ height: '20vh', maxWidth:'80vw', margin:'5vh auto'}}
+              style={{ height: '20vh', maxHeight:'110px', maxWidth:'80vw', margin:'5vh auto'}}
             />
           {/* </div> */}
         </div>
@@ -123,7 +128,7 @@ export default function LoginPWARef() {
           <Box noValidate sx={{ mt: 7 }}>
             <Grid container sx={{ mt: 5 }}>
               <Grid item xs={12} sm={12}>
-                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, mb: 2 }}>&nbsp;</Box>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mb: 1 }}>&nbsp;</Box>
                 <div style={{ color:"#000", fontSize:"20px", marginBottom:"32px" }} >{"Sign in / Register"}</div>
               </Grid>
               <Grid item xs={1}></Grid>
@@ -176,7 +181,7 @@ export default function LoginPWARef() {
             }
             <Grid container>
               <Grid item xs={12} sm={12}>
-                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 3, mb: 2 }}>&nbsp;</Box>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 3 }}>&nbsp;</Box>
               </Grid>
             </Grid>  
             <Grid container>

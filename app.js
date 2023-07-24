@@ -42,6 +42,7 @@ app.use('/api', require('./routes/timetable.routes'))
 app.use('/api', require('./routes/note.routes'))
 app.use('/api', require('./routes/message.routes'))
 app.use('/api', require('./routes/loyalty.routes'))
+app.use('/api', require('./routes/reception.routes'))
 app.use(express.static('files'))
 
 app.use('/api', require('./routes/cron.routes'))

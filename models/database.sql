@@ -67,6 +67,14 @@ create TABLE timetable(
   "ts" TIMESTAMPTZ
 );
 
+create TABLE reception_hours(
+  "id" SERIAL4 PRIMARY KEY,
+  "doctor_id" INT4,
+  "date" DATE,
+  "time" JSONB,
+  "ts" TIMESTAMPTZ
+)
+
 create TABLE files(
   "id" SERIAL4 PRIMARY KEY,
   "filename" TEXT NOT NULL, 

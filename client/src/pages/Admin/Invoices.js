@@ -26,13 +26,14 @@ import { AuthContext } from '../../context/AuthContext'
 import {API_URL} from '../../config'
 import humanDate from '../../components/HumanDate';
 import Scrollbar from '../../components/Scrollbar';
+import Iconify from '../../components/Iconify';
 // ----------------------------------------------------------------------
 const TABLE_HEAD = [
   { id: 'date', label: 'Date', alignRight: false },
   { id: 'procedure', label: 'Procedure', alignRight: false },
   { id: 'client', label: 'Client', alignRight: false },
   { id: 'paid', label: 'Paid' },
-  // { id: '' },
+  { id: 'del' },
 ];
 // ----------------------------------------------------------------------
 
@@ -117,6 +118,7 @@ export default function Invoices() {
     } else setInvoice(inv.bill);
     // console.log('invoice:', invoice);
 
+    getInvoices();
     handleOpen();
   }
 
@@ -153,6 +155,15 @@ export default function Invoices() {
       }
       getInvoices();
     } catch (e) {console.log('error:', e)}
+  }
+
+  const delInvoice = async (invoiceId) => {
+    try {
+      const res = await request(`${API_URL}api/note/${invoiceId}`, 'PATCH', null, {
+        Authorization: `Bearer ${token}`
+      })
+      getInvoices();
+    } catch (e) {console.log('error:', e)}    
   }
 
 
@@ -214,9 +225,9 @@ export default function Invoices() {
                           {paid ? <span style={{color:"green", cursor:"pointer"}}>{'Yes'}</span> : <span style={{color:"pink", cursor:"pointer"}}>{'No'}</span>}
                         </TableCell>
 
-                        {/* <TableCell align="right">
-                          <InvoiceMoreMenu id={id} invoice={row} onChange={handleUpdate} />
-                        </TableCell> */}
+                        <TableCell align="right">
+                          <Iconify icon="eva:trash-2-outline" width={20} height={20} onClick = {() => {delInvoice(id)}} style={{ cursor:"pointer", color:"darkgoldenrod" }} />
+                        </TableCell>
                       </TableRow>
                     );
                   })}

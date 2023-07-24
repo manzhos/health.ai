@@ -59,61 +59,63 @@ export default function Dashboard(){
   // console.log('currentUser:', currentUser)
 
   return(
-    <Container style={{textAlign:"center"}} className='authpage'>
-      {/* <BetaButton /> */}
-      <PWAMenu />
-      <div className='logo-block'>
-        <div className='logo-consult-form'>
-          <img
-            src="../static/sy_logo.svg"
-            alt="Stunning You"
-            loading="lazy"
-          />
+    <div className='authpage'>
+      <Container style={{ textAlign:"center" }}>
+        {/* <BetaButton /> */}
+        <PWAMenu />
+        <div className='logo-block'>
+          <div className='logo-consult-form'>
+            <img
+              src="../static/sy_logo.svg"
+              alt="Stunning You"
+              loading="lazy"
+            />
+          </div>
         </div>
-      </div>
-      <div className='consult-form'>
-        <Box sx={{ mt: 7 }}>
-          <Grid container>
-            <Grid item xs={12} sm={12}>
-              <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 1 }}>&nbsp;</Box>
-              <div className='dash-block'>
-                <Typography variant="body" sx={{ color: 'text.secondary' }}>
-                  <strong>Loyalty program</strong>
-                </Typography>
-                <p className='points'>
-                  {currentUser.total_points ? currentUser.total_points : '0'}
-                </p>
-                <Typography variant="body" sx={{ color: 'text.secondary' }}>
-                  points
-                </Typography>
-              </div>
-              <div className='dash-block qr-block' sx={{ mt:3 }}>
-                <Typography variant="body" sx={{ color: 'text.secondary' }}>
-                  <strong>Referral link</strong>
-                </Typography>
-                
-                <Grid sx={{ mt:3, mb: 3, ml:3, mr:3 }}>
-                  {/* <img src="../static/qr/qr_botox.svg" /> */}
-                  <img src={qrcode} style={{width:"100%"}}/>
-                  <p style={{ margin:"20px 0 0", fontSize:"14px" }}>
-                    or share this link:<br />
-                    <strong style={{fontDecoration:"underline"}}>{url}</strong>
+        <div className='consult-form'>
+          <Box sx={{ mt: 4 }}>
+            <Grid container>
+              <Grid item xs={12} sm={12}>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 0, mb: 1 }}>&nbsp;</Box>
+                <div className='dash-block'>
+                  <Typography variant="body" sx={{ color: 'text.secondary' }}>
+                    <strong>Loyalty program</strong>
+                  </Typography>
+                  <p className='points'>
+                    {currentUser.total_points ? currentUser.total_points : '0'}
                   </p>
-                </Grid>
-                
-                <Typography variant="body" sx={{ color: 'text.secondary' }}>
-                  Followers: <strong>{currentUser.total_refs ? currentUser.total_refs : '0'}</strong>
-                </Typography>
-              </div>
+                  <Typography variant="body" sx={{ color: 'text.secondary' }}>
+                    points
+                  </Typography>
+                </div>
+                <div className='dash-block qr-block' sx={{ mt:3 }}>
+                  <Typography variant="body" sx={{ color: 'text.secondary' }}>
+                    <strong>Referral link</strong>
+                  </Typography>
+                  
+                  <Grid sx={{ mt:3, mb: 3, ml:3, mr:3 }}>
+                    {/* <img src="../static/qr/qr_botox.svg" /> */}
+                    <img src={qrcode} style={{width:"100%"}}/>
+                    <p style={{ margin:"20px 0 0", fontSize:"14px" }}>
+                      or share this link:<br />
+                      <strong style={{ fontDecoration:"underline", wordBreak: "break-all "}}>{url}</strong>
+                    </p>
+                  </Grid>
+                  
+                  <Typography variant="body" sx={{ color: 'text.secondary' }}>
+                    Followers: <strong>{currentUser.total_refs ? currentUser.total_refs : '0'}</strong>
+                  </Typography>
+                </div>
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={12} sm={12}>
-              <Box sx={{ height:'140px' }}>&nbsp;</Box>
+            <Grid container>
+              <Grid item xs={12} sm={12}>
+                <Box sx={{ height:'140px' }}>&nbsp;</Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </div>
-    </Container>
+          </Box>
+        </div>
+      </Container>
+    </div>
   )
 }

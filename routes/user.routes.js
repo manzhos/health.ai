@@ -35,6 +35,8 @@ router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)
 router.get('/roles', userController.getRoles)
 
+router.get('/partnerclients/:id', userController.getPartnerClients)
+
 router.get('/clients_by_doctor/:id', userController.getClientsByDoctor)
 router.get('/client/loyalty/:id', userController.getLoyaltyClient)
 

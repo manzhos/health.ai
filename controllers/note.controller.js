@@ -7,11 +7,12 @@ require('dotenv').config()
 class NoteController {  
   async createNote(req, res){
     // save to DB
-    const {title, note, client_id, doctor_id, procedure_id, } = req.body
-    const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts, doc_type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
-    let ts = new Date()
-    // console.log('try to save: ', title, note, client_id, doctor_id, procedure_id, ts)
-    const newNote = await DB.query(sql,[title ? title : '', note, client_id, doctor_id, procedure_id, ts, 0])
+    const { title, note, client_id, doctor_id, procedure_id, doc_type, invoice } = req.body;
+    const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts, doc_type, invoice) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *'
+    let ts = new Date(),
+        services = [invoice];
+    // console.log('try to save: ', title, note, client_id, doctor_id, procedure_id, doc_type, JSON.stringify(services), ts);
+    const newNote = await DB.query(sql, [title ? title : '', note ? note : '', client_id, doctor_id, procedure_id, ts, doc_type ? doc_type : 0, invoice ? JSON.stringify(services) : null])
     // console.log('newNote:', newNote.rows)
     res.send(newNote.rows[0]);
   }
@@ -102,7 +103,7 @@ class NoteController {
   }
   
   async deleteNote(req, res){
-    // console.log('delete note by ID', req.param.id)
+    console.log('delete note by ID', req.param.id)
     const id = req.params.id
     // const sql = `DELETE FROM notes WHERE id = $1 RETURNING firstname, lastname;`
     const sql = `UPDATE notes SET archive = true WHERE id = $1;`    
@@ -171,7 +172,7 @@ class NoteController {
   }
 
   async getInvoices(req, res){
-    console.log('get Invoices:')
+    // console.log('get Invoices:')
     // invoice:: doc_type = 1
     try{
       const sql = `
@@ -195,12 +196,12 @@ class NoteController {
         FROM notes n
         JOIN users uc ON (uc.id = n.client_id)
         JOIN users ud ON (ud.id = n.doctor_id)
-        JOIN timetable tt ON tt.id = n.procedure_id
-        JOIN procedures p ON p.id = tt.procedure_id
+        JOIN procedures p ON p.id = n.procedure_id
         WHERE doc_type = 1
+        AND NOT n.archive
         ORDER BY ts DESC;`
       const invoices = await DB.query(sql)
-      console.log(invoices.rows)
+      // console.log(invoices.rows)
       return res.send(invoices.rows)
     } catch(e){
       console.log(`Error: ${e}`)  
@@ -209,7 +210,7 @@ class NoteController {
   }
 
   async updateInvoices(req, res){
-    const {invoice} = req.body;
+    const { invoice } = req.body;
     // console.log('save invoice data:', invoice);
     const sql =`UPDATE notes SET bill = $2 WHERE id = $1 RETURNING *;`
     const note = await DB.query(sql, [invoice.id, invoice]);
