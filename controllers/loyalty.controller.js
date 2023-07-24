@@ -58,7 +58,7 @@ class LoyaltyController {
 
   async addLead(req, res) {
     const {firstname, email, phone, source, message, bookfree} = req.body;
-    let p;
+    let p='';
     if(phone) p = phone.replace(/[^\d]/g, '')
     console.log('query:', firstname, email, p, source, bookfree);
     
@@ -118,7 +118,7 @@ class LoyaltyController {
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *`;
     const ts  = new Date(),
-          tel = phone?.replace(/[^+\d]/g, '');
+          tel = phone.replace(/[^+\d]/g, '');
     const newLead = await DB.query(sql, [firstname, email || '', tel || null, source, ts, message, false]);
     console.log('New Lead:', newLead);
 
