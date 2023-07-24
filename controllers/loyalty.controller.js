@@ -58,6 +58,12 @@ class LoyaltyController {
 
   async addLead(req, res) {
     const {firstname, email, phone, source, message, bookfree} = req.body;
+<<<<<<< HEAD
+=======
+    let p;
+    if(phone) p = phone.replace(/[^\d]/g, '')
+    console.log('query:', firstname, email, p, source, bookfree);
+>>>>>>> refs/remotes/origin/main
     
     if(email){
       // validate email

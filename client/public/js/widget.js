@@ -48,16 +48,6 @@ bookFrame.innerHTML = `
     </iframe>
   </div>
 `;
-// bookFrame.innerHTML = `
-//   <div style=\" display:flex; align-items: center; justify-content: end; margin:1vh; \">
-//     <div id=\"closeFrame\" style=\" width: 2vh; cursor:pointer; font-size: 2vh; color: #381D11; \">&#10006;</div>
-//   </div>
-//   <div style=\" display: block; width:100vw; height:92%; overflow: hidden; \">
-//     <iframe src="http://localhost:3000/book?procedureId=${procedureId}&windowWidth=${windowWidth}&windowHeight=${windowHeight}"
-//           width="100%" height="100%" frameborder="0" class="scroll-none">
-//     </iframe>
-//   </div>
-// `;
 
 window.onload = function(){ 
   document.getElementById("bookButton").onclick = function () {
@@ -74,9 +64,12 @@ window.onload = function(){
       left: 50%;
       transform: translate(-50%, 0); 
       overflow: hidden;
-      background: #FCFBFD; 
       box-shadow: 0 3px 20px 1px rgba(0, 0, 0, .3); 
+<<<<<<< HEAD
       background: #FFF url(https://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
+=======
+      background: #FCFBFD url(https://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
+>>>>>>> refs/remotes/origin/main
       background-size: cover;
     `;
   };
@@ -90,4 +83,8 @@ window.onload = function(){
 document.body.append(bookButton);
 document.body.append(fade);
 document.body.append(bookFrame);
+<<<<<<< HEAD
 console.log('Health.AI widget added');
+=======
+console.log('Health.AI widget added...');
+>>>>>>> refs/remotes/origin/main
