@@ -63,7 +63,7 @@ export default function Reception(){
 
   const workHour = [],
         recTime = {};
-  for(let i=8; i<18; i++){
+  for(let i=8; i<21; i++){
     workHour[workHour.length] = i;
     recTime[i] = false;
   }
@@ -72,11 +72,17 @@ export default function Reception(){
   const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const [receptionList, setReceptionList] = useState([])
-  const [date, setDate] = useState(new Date());
+  const [date, setCurrDate] = useState(new Date());
+  const [mDate, setMDate] = useState(new Date());
   const [time, setTime] = useState(recTime);
+  const [repeat, setRepeat] = useState({
+    week    : false,
+    twoWeek : false,
+    month   : false,
+  });
 
   const getReceptions = useCallback(async () => {
-    console.log('try to take receptions');
+    // console.log('try to take receptions');
     try {
       const reception = await request(`${API_URL}api/reception_bydoctor/${userId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
@@ -106,19 +112,33 @@ export default function Reception(){
       receptionList.map(el => {
         if(String(new Date(el.date)) === String(event.start)) setTime(el.time);
       });
-      
-      setDate(event.start);
+
+      // timezone magic
+      let magicDate = event.start;
+      console.log(magicDate)
+      console.log(magicDate.getHours())
+      console.log(magicDate.getTimezoneOffset() / 60)
+      console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
+      magicDate.setHours(magicDate.getHours() - magicDate.getTimezoneOffset() / 60);
+      setMDate(magicDate)
+
+      setCurrDate(event.start);
       setOpen(true);
     }
   )
 
   const handleSubmit = async () => {
     // console.log(userId, date, time);
+    // console.log('repeat:', repeat);
+    let whenRepeat;
+    for(let r in repeat) if(repeat[r]) whenRepeat = r;
+    // console.log('whenRepeat:', whenRepeat);
     try {
       const reception = await request(`${API_URL}api/reception`, 'POST', {
         doctor_id : userId,
-        date      : date,
+        date      : mDate,
         time      : time,
+        repeat    : whenRepeat
       })
       setReceptionList(reception);
     } catch (e) {console.log('error:', e)}
@@ -169,58 +189,101 @@ export default function Reception(){
               </Typography>
               <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: 1 }} style={{ textAlign:'center'}}>
                 <Grid container spacing={2}>
-                  <Grid container spacing={2} item xs={12} sm={12}>
-                    <Grid item xs={12} sm={12}>
-                      <Box style={{ maxWidth:"160px", margin:"0 auto" }}>
-                        <h3>{dayOfWeek[date.getDay()]}, {date.getDate()}&nbsp;{month[date.getMonth()]}</h3>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography sx={{mb:3, width:1}}>Check the boxes if you ready for visits in:</Typography>
-                      <Box sx={{mt:3}}>
-                        <Grid container>
-                          <Grid item xs={12} sm={6}>
-                            {workHour.map((val, key)=>{
-                              if(key < workHour.length/2) return(
-                                <FormControlLabel
-                                  key={'checkHourId' + key}
-                                  control={
-                                    <Checkbox 
-                                      name={'checkHour' + val} 
-                                      checked={time[val]} 
-                                      color="primary" 
-                                      onChange={handleChangeRecTime} 
-                                    />
-                                  }
-                                  label={val + ':00 - '+ (val + 1) +':00'}
-                                  style={{width:'100%', paddingLeft:"30px"}}
-                                />
-                              )
-                            })}
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            {workHour.map((val, key)=>{
-                              if(key >= workHour.length/2) return(
-                                <FormControlLabel
-                                  key={'checkHourId' + key}
-                                  control={
-                                    <Checkbox 
-                                      name={'checkHour' + val} 
-                                      checked={time[val]} 
-                                      color="primary" 
-                                      onChange={handleChangeRecTime} 
-                                    />
-                                  }
-                                  label={val + ':00 - '+ (val + 1) +':00'}
-                                  style={{width:'100%', paddingLeft:"30px"}}
-                                />
-                              )
-                            })}
-                          </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <Box style={{ maxWidth:"160px", margin:"0 auto" }}>
+                      <h3>{dayOfWeek[date.getDay()]}, {date.getDate()}&nbsp;{month[date.getMonth()]}</h3>
+                    </Box>
+                  </Grid>
 
+                  <Grid item xs={12}>
+                    <Typography sx={{mb:3, width:1}}>Check the boxes if you ready for visits in:</Typography>
+                    <Box sx={{mt:3}}>
+                      <Grid container>
+                        <Grid item xs={12} sm={6}>
+                          {workHour.map((val, key)=>{
+                            if(key < workHour.length/2) return(
+                              <FormControlLabel
+                                key={'checkHourId' + key}
+                                control={
+                                  <Checkbox 
+                                    name={'checkHour' + val} 
+                                    checked={time[val]} 
+                                    color="primary" 
+                                    onChange={handleChangeRecTime} 
+                                  />
+                                }
+                                label={val + ':00 - '+ (val + 1) +':00'}
+                                style={{width:'100%', paddingLeft:"30px"}}
+                              />
+                            )
+                          })}
                         </Grid>
-                      </Box>
-                    </Grid>
+                        <Grid item xs={12} sm={6}>
+                          {workHour.map((val, key)=>{
+                            if(key >= workHour.length/2) return(
+                              <FormControlLabel
+                                key={'checkHourId' + key}
+                                control={
+                                  <Checkbox 
+                                    name={'checkHour' + val} 
+                                    checked={time[val]} 
+                                    color="primary" 
+                                    onChange={handleChangeRecTime} 
+                                  />
+                                }
+                                label={val + ':00 - '+ (val + 1) +':00'}
+                                style={{width:'100%', paddingLeft:"30px"}}
+                              />
+                            )
+                          })}
+                        </Grid>
+
+                      </Grid>
+                    </Box>
+                  </Grid>
+                  
+                  <Box sx={{ width: '100%', fontWeight:'600', padding:'10px 0 0', borderTop: 1, borderColor: 'divider', mt: 2, mb: 1, marginLeft: '15px' }}>Repeat settings</Box>
+
+                  <Grid>
+                    <FormControlLabel
+                      key={'checkEveryWeek'}
+                      control={
+                        <Checkbox 
+                          name={'setEveryWeek'} 
+                          checked={repeat.week} 
+                          color="primary" 
+                          onChange={() => {setRepeat({...repeat, 'week': !repeat.week, 'twoWeek': false, 'month': false})}} 
+                        />
+                      }
+                      label='Every week'
+                      style={{width:'50%', paddingLeft:"30px"}}
+                    />
+                    <FormControlLabel
+                      key={'checkEveryTwoWeek'}
+                      control={
+                        <Checkbox 
+                          name={'setEveryTwoWeek'} 
+                          checked={repeat.twoWeek} 
+                          color="primary" 
+                          onChange={() => {setRepeat({...repeat, 'week':false, 'twoWeek': !repeat.twoWeek, 'month': false})}} 
+                        />
+                      }
+                      label='Every two week'
+                      style={{width:'47%', paddingLeft:"30px"}}
+                    />
+                    <FormControlLabel
+                      key={'checkEveryMonth'}
+                      control={
+                        <Checkbox 
+                          name={'setEveryMonth'} 
+                          checked={repeat.month} 
+                          color="primary" 
+                          onChange={() => {setRepeat({...repeat,  'week':false, 'twoWeek':false, 'month': !repeat.month})}} 
+                        />
+                      }
+                      label='Every Month'
+                      style={{width:'100%', paddingLeft:"30px"}}
+                    />
                   </Grid>
                 </Grid>
                 <Button

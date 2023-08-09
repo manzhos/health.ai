@@ -8,26 +8,69 @@ const jwt = require('jsonwebtoken');
 class ReceptionController {  
   async createReception(req, res){
     // save to DB
-    const {doctor_id, date, time} = req.body;
-    console.log(doctor_id, date, time);
-    const reception = await DB.query(`SELECT * FROM reception_hours WHERE date = $1`, [date]);
-    console.log('reception', reception);
-    if (reception.rows && reception.rows.length) {
-      console.warn('\n\n\nalarm\n\n\n');
-      return res.status(400).json({ message: 'Reception already exist' });
-      // this.updateReception(req, res);
+    const {doctor_id, time, repeat} = req.body;
+    let date = new Date(req.body.date);
+    console.log(doctor_id, date, time, repeat);
+    // console.log('reception', reception.rows[0]);
+    const ts = new Date();
+    const arrDate = [];
+    arrDate.push(new Date(Object.assign(date)));
+
+    if(repeat){
+      switch(repeat){
+        case 'week':
+          while (date.getFullYear() <= ts.getFullYear()){
+            const insDate = Object.assign(date.setDate(date.getDate() + 7));
+            // console.log('added date:', date);
+            arrDate.push(new Date(insDate));
+          }
+          break;
+          case 'twoWeek':
+          while (date.getFullYear() <= ts.getFullYear()){
+            const insDate = Object.assign(date.setDate(date.getDate() + 14));
+            // console.log('added date:', date);
+            arrDate.push(Object.assign(insDate));
+          }
+          break;
+          case 'month':
+          while (date.getFullYear() <= ts.getFullYear()){
+            const insDate = Object.assign(date.setMonth(date.getMonth() + 1));
+            // console.log('added date:', date);
+            arrDate.push(Object.assign(insDate));
+          }
+          break;
+      }
     }
-    const sql = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *';
-    let ts = new Date();
-    try{
-      console.log('try');
-      const newReception = await DB.query(sql, [doctor_id, date, time, ts]);
-      console.log('new reception', newReception);
-      return res.send(newReception.rows[0]);
-    } catch (err) {
-      console.log(`Error: ${err}`)  
-      return res.status(500).json({message: "The connection with DB was lost."})
+    // console.log('arrDate:', arrDate);
+
+    const sqlUpd = `UPDATE reception_hours SET time = $1 WHERE id = $2;`;
+    const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *';
+
+    for(const d of arrDate){
+      // console.log('Date:', d)
+      const reception = await DB.query(`SELECT * FROM reception_hours WHERE date = $1`, [d]);
+      // console.log('RECEPTION', reception.rows[0]);
+      if (reception.rows && reception.rows.length) {
+        const id  = reception.rows[0].id;
+        // console.warn('already exist, update reception id:', id);
+        try{
+          DB.query(sqlUpd, [time, id]);
+          console.log(`reception #${id} was updates`)
+        } catch (err) {
+          console.log(`Error: ${err}`)  
+          return res.status(500).json({message: "The connection with DB was lost."})
+        }
+      }
+  
+      try{
+        // console.log('try insert:', doctor_id, d, time, ts);
+        DB.query(sqlIns, [doctor_id, d, time, ts]);
+      } catch (err) {
+        console.log(`Error: ${err}`)  
+        return res.status(500).json({message: "The connection with DB was lost."})
+      }
     }
+    return res.status(200).json({message: "All receipt hours are filled."})
   }
 
   async getReception(req, res){
@@ -46,8 +89,9 @@ class ReceptionController {
   }
 
   async updateReception(req, res){
+    console.log('req:', req);
     const id = req.params.id;
-    // console.log(`try to update reception ${id}`);
+    console.log(`try to update reception ${id}`);
 
     // save to DB
     const {doctor_id, date, time} = req.body;

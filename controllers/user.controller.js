@@ -35,18 +35,19 @@ class UserController {
     }
 
     // save to DB
-    const {firstname, lastname, email, password, promo, usertype_id} = req.body
+    const {firstname, lastname, email, password, promo, usertype_id, phone} = req.body
     const avatar = req.files ? req.files.avatar.name : null
-    // console.log(firstname, lastname, email, password, promo, usertype_id);
+    // console.log(firstname, lastname, email, password, promo, usertype_id, phone);
     const newuser = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
     if (newuser.rows && newuser.rows.length) return res.status(400).json({ message: 'User already exist' })
     const hashedPassword = await bcrypt.hash(password, 12)
-    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
+    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm, phone) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9) RETURNING *'
     let ts = new Date()
     // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Partner
-    // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
-    const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar])
-    res.send(newUser.rows[0]);
+    // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar, phone)
+    const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar, phone])
+    console.log('New User:', newUser.rows[0])
+    res.send(newUser.rows[0])
   }
 
   async leadToClient(req, res){

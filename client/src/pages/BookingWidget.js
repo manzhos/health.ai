@@ -53,7 +53,10 @@ export default function BookingFree(){
   const [procedure, setProcedure] = useState('')
   const [recordList, setRecordList] = useState([])
   const [slots, setSlots] = useState([]);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [lead, setLead] = useState({});
   const [user, setUser] = useState({});
   const [receptionList, setReceptionList] = useState([])
@@ -204,47 +207,50 @@ export default function BookingFree(){
   const newClient = async() => {
     try {
       const res = await request(`${API_URL}`+'api/user', 'POST', {
-        firstname : '__New Lead__',
-        lastname  : lead.id,
-        email     : lead.email,
+        firstname : firstName,
+        lastname  : lastName,
+        email     : email,
+        phone     : phone,
         password  : '00000000',
         promo     : true
       })
-      // console.log('User', res);
+      console.log('User', res);
       setUser(res);
+      bookProcedure(res.id);
     } catch (e) {
       console.log('error:', e);
       alert('Something goes wrong. Check all & repeat, please.');
     } 
   }
   // book the procedure
-  const bookProcedure = async() => {
+  const bookProcedure = async(user_id) => {
     const vd = new Date(visitDate);
     try {
       const res = await request(`${API_URL}`+'api/timetable', 'POST', {
         procedure_id  : procedureId,
-        user_id       : user.id,
+        user_id       : user_id,
         doctor_id     : doctor,
         date          : vd,
         time          : time,
       })
       setProcedure(res);
-      // console.log('res:', procedure)
+      console.log('res:', procedure)
+      window.top.location = `${URL}thanks`
     } catch (e) {console.log('error:', e)} 
   }
   
   const handleRecord = async () => {
     if(email === '') {
-      alert('Fill all field, please.');
+      alert('Fill in the Email field, please.');
       return;
     }
-    setLead({});
-    await newLead();
+    // setLead({});
+    // await newLead();
+    // console.log('Lead:', lead);
     setUser({});
-    if(lead && Object.keys(lead).length) await newClient();
-    if(user && Object.keys(user).length) await bookProcedure();
-    if(procedure && Object.keys(procedure).length) window.top.location = `${URL}thanks`
-    navigate('/thanks')
+    await newClient();
+    // if(user && Object.keys(user).length) await bookProcedure();
+    // navigate('/thanks')
   }
 
   const handleDateChange = (dateValue) => {
@@ -339,8 +345,32 @@ export default function BookingFree(){
                 <ProcedureList procedureTypeId={procedureTypeId} procedureId={procedureId} onChangeProcedure={handleProcedureChange} />
                 {/* procedure now: {procedureId} */}
               </Grid>
-              
             </Grid>
+            <Grid item xs={1}></Grid>
+          </Grid>
+
+          <Grid container sx={{mt: 3}}>
+            <Grid item xs={1}></Grid>
+            <Grid item xs={10} sm={10}>
+                <FormControl sx={{ width: 1 }}>
+                  <InputLabel id="doctor-select">Doctor</InputLabel>
+                  <Select
+                    labelId="doctor-select"
+                    id="doctor-select"
+                    name="doctor_id"
+                    value={doctor}
+                    label="Doctor"
+                    onChange={handleChangeDoctor} 
+                    className='cons-input'
+                  >
+                    {doctorList.map((item)=>{
+                      return(
+                        <MenuItem key={item.id + '_' + item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                      )
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
             <Grid item xs={1}></Grid>
           </Grid>
 
@@ -377,26 +407,6 @@ export default function BookingFree(){
           <Grid container sx={{mt: 3}}>
             <Grid item xs={1}></Grid>
             <Grid container item xs={10} sm={10} spacing={3}>
-              <Grid item xs={12} sm={12}>
-                <FormControl sx={{ width: 1 }}>
-                  <InputLabel id="doctor-select">Doctor</InputLabel>
-                  <Select
-                    labelId="doctor-select"
-                    id="doctor-select"
-                    name="doctor_id"
-                    value={doctor}
-                    label="Doctor"
-                    onChange={handleChangeDoctor} 
-                    className='cons-input'
-                  >
-                    {doctorList.map((item)=>{
-                      return(
-                        <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
-              </Grid>
 
               {/* <Grid item xs={12} sm={12} spasing={2} direction="row" justifyContent="center" alignItems="center">
                 {doctorSelected.map((item, key)=>{
@@ -419,12 +429,48 @@ export default function BookingFree(){
                       margin="normal"
                       required
                       fullWidth
+                      id="firstname"
+                      label="Name"
+                      name="firstname"
+                      autoComplete="firstname"
+                      autoFocus
+                      onChange={(e)=>{setFirstName(e.target.value)}}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sx={12} >
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      id="lastname"
+                      label="Surname"
+                      name="lastname"
+                      autoComplete="lastname"
+                      onChange={(e)=>{setLastName(e.target.value)}}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sx={12} >
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
                       id="email"
                       label="Email Address"
                       name="email"
                       autoComplete="email"
-                      autoFocus
                       onChange={(e)=>{setEmail(e.target.value)}}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sx={12} >
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      id="phone"
+                      label="Phone"
+                      name="phone"
+                      autoComplete="phone"
+                      onChange={(e)=>{setPhone(e.target.value)}}
                     />
                   </Grid>
                   <Grid>
