@@ -31,11 +31,13 @@ router.get('/user/:id', userController.getUser)
 router.post('/user/:id', userController.updateUser)
 router.get('/deluser/:id', userController.deleteUser)
 
+router.get('/partners', userController.getPartners)
 router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)
 router.get('/roles', userController.getRoles)
 
 router.get('/partnerclients/:id', userController.getPartnerClients)
+router.get('/paidout/:id', userController.partnerPaidOut)
 
 router.get('/clients_by_doctor/:id', userController.getClientsByDoctor)
 router.get('/client/loyalty/:id', userController.getLoyaltyClient)

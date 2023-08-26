@@ -44,7 +44,7 @@ export default function DashboardLayoutPartner() {
         Authorization: `Bearer ${token}`
       })
       // console.log('USERS:', res);
-      const sumTotal = res.reduce((acc, curr) => (acc + (Number(curr.cos_cost) + Number(curr.med_cost))), 0);
+      const sumTotal = res.reduce((acc, curr) => (acc + (Number(curr.total_cos_cost) + Number(curr.total_med_cost))), 0);
       // console.log(sumTotal);
       setSum(sumTotal.toFixed(2).split('.'));
     } catch (e) { console.log('error:', e)}

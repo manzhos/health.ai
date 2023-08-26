@@ -35,18 +35,19 @@ class UserController {
     }
 
     // save to DB
-    const {firstname, lastname, email, password, promo, usertype_id} = req.body
+    const {firstname, lastname, email, password, promo, usertype_id, phone} = req.body
     const avatar = req.files ? req.files.avatar.name : null
-    // console.log(firstname, lastname, email, password, promo, usertype_id);
+    // console.log(firstname, lastname, email, password, promo, usertype_id, phone);
     const newuser = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
     if (newuser.rows && newuser.rows.length) return res.status(400).json({ message: 'User already exist' })
     const hashedPassword = await bcrypt.hash(password, 12)
-    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true) RETURNING *'
+    const sql = 'INSERT INTO users (firstname, lastname, email, password, ts, usertype_id, promo, avatar, confirm, phone) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, $9) RETURNING *'
     let ts = new Date()
     // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Partner
-    // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar)
-    const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar])
-    res.send(newUser.rows[0]);
+    // console.log('try to save: ', firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar, phone)
+    const newUser = await DB.query(sql, [firstname, lastname, email, hashedPassword, ts, (usertype_id ? usertype_id : 3), (promo ? true : false), avatar, phone])
+    console.log('New User:', newUser.rows[0])
+    res.send(newUser.rows[0])
   }
 
   async leadToClient(req, res){
@@ -110,9 +111,8 @@ class UserController {
   }
 
   async loginPwaUser(req, res){
-    console.log('loginPwaUser'); 
-    const {email, password, password_conf, ref_id, partner_id} = req.body;
-    // console.log('email, password, ref_id:', email, password, password_conf, ref_id, partner_id);
+    const {email, password, password_conf, ref_id, partner_id, usertype_id} = req.body;
+    console.log('email, password, ref_id, partner_id, usertype_id:', email, password, password_conf, ref_id, partner_id, usertype_id);
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       console.log('errors:', errors)
@@ -135,10 +135,11 @@ class UserController {
         const ts = new Date(),
               firstName = 'New User',
               lastName = email.split('@')[0];
-        // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Staff
-        console.log('try to save: ', hashedPassword, firstName, lastName, email, hashedPassword, ts, 3, true, ref_id, partner_id);
-        let newUser = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, 3, false, ref_id || null, partner_id || null]);
+        // User type:::  1 - Admin, 2 - Doctor, 3 - Client, 4 - Staff, 5 - Partner
+        console.log('try to save: ', firstName, lastName, email, hashedPassword, ts, usertype_id, true, ref_id, partner_id);
+        let newUser = await DB.query(sql, [firstName, lastName, email, hashedPassword, ts, usertype_id || 3, true, ref_id || null, partner_id || null]);
         user = newUser.rows[0];
+        console.log('New User:', user);
       } else {
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) return res.status(200).json({ status: 'wrong_pass' })
@@ -451,64 +452,279 @@ class UserController {
     res.send(clients.rows)    
   }
 
-  async getPartnerClients(req, res){
-    const partner_id = req.params.id;    
+  async getPartners(req, res){
     const sql = `
-          WITH
-          clients AS (
-            SELECT
-              u.id as id,
-              u.firstname as firstname,
-              u.lastname as lastname,
-              u.email as email,
-              u.ts as ts
-            FROM users u
-            JOIN notes n ON u.id = n.client_id
-            WHERE partner_id = $1
-            AND n.paid
-            GROUP BY u.id
-          ),
-          invoices AS (
-            SELECT
-              client_id,
-              procedure_id,
-              (bill -> 'qty')::int as qty,
-              (bill -> 'cost')::text as cost
-            FROM notes
-            WHERE client_id IN(SELECT id FROM clients)
-            AND paid
-          ),
-          cos_procedure AS (
-            SELECT
-              client_id,
-              SUM(to_number(cost, '9999.99') * qty * 0.01) as cos_cost
-            FROM invoices
-            WHERE procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
-            GROUP BY client_id	
-          ),
-          med_procedure AS (
-            SELECT
-              client_id,
-              SUM(to_number(cost, '9999.99') * qty * 0.005) as med_cost
-            FROM invoices
-            WHERE procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
-            GROUP BY client_id	
-          )
-          SELECT
-            c.id as id,
-            c.firstname as firstname,
-            c.lastname as lastname,
-            c.email as email,
-            c.ts as ts,
-            cp.cos_cost,
-            mp.med_cost
-          FROM clients c
-          FULL JOIN cos_procedure cp ON c.id=cp.client_id
-          FULL JOIN med_procedure mp ON c.id=mp.client_id
-          ORDER BY firstname, lastname;`
+WITH
+  clients AS (
+    SELECT
+      u.id as id,
+    u.partner_id as partner_id,
+      u.firstname as firstname,
+      u.lastname as lastname,
+      u.email as email,
+      u.phone as phone,
+      u.ts as ts
+    FROM users u
+    JOIN notes n ON u.id = n.client_id
+    WHERE n.paid
+    AND NOT n.paid_to_partner
+    GROUP BY u.id
+  ),
+  first_cos_invoices AS (
+    SELECT DISTINCT ON (client_id)
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.09 as total_sum_first_cos_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
+    AND paid
+  ),
+  first_med_invoices AS (
+    SELECT DISTINCT ON (client_id)
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.045 as total_sum_first_med_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
+    AND paid
+  ),
+  cos_invoices AS (
+    SELECT
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.01 as total_sum_cos_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
+    AND paid
+  ),
+  med_invoices AS (
+    SELECT
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.005 as total_sum_med_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
+    AND paid
+  ),
+  total_cos AS (
+    SELECT
+      ci.client_id,
+      SUM(CASE WHEN ci.total_sum_cos_invoice IS NOT NULL
+          THEN ci.total_sum_cos_invoice 
+          ELSE 0
+        END
+        +
+        CASE WHEN fci.total_sum_first_cos_invoice IS NOT NULL
+          THEN fci.total_sum_first_cos_invoice 
+          ELSE 0
+        END
+      ) AS total_cos
+    FROM cos_invoices ci
+    FULL JOIN first_cos_invoices fci ON ci.invoice_id = fci.invoice_id
+    JOIN clients c ON ci.client_id = c.id
+    GROUP BY ci.client_id
+  ),
+  total_med AS (
+    SELECT
+      mi.client_id,
+      SUM(CASE WHEN mi.total_sum_med_invoice IS NOT NULL
+          THEN mi.total_sum_med_invoice 
+          ELSE 0
+        END
+        +
+        CASE WHEN fmi.total_sum_first_med_invoice IS NOT NULL
+          THEN fmi.total_sum_first_med_invoice 
+          ELSE 0
+        END
+      ) AS total_med
+    FROM med_invoices mi
+    FULL JOIN first_med_invoices fmi ON mi.invoice_id = fmi.invoice_id
+    JOIN clients c ON mi.client_id = c.id
+    GROUP BY mi.client_id
+  ),
+  client_payments AS (
+  SELECT 
+    c.id as id,
+    c.partner_id as partner_id,
+    c.firstname as firstname,
+    c.lastname as lastname,
+    c.email as email,
+    c.phone as phone,
+    c.ts as ts,
+    tm.total_med AS total_med_cost,
+    tc.total_cos AS total_cos_cost
+  FROM clients c
+  JOIN total_cos tc ON c.id=tc.client_id
+  JOIN total_med tm ON c.id=tm.client_id
+  )
+SELECT 
+  u.id,
+  u.firstname as firstname,
+  u.lastname as lastname,
+  u.email as email,
+  u.phone as phone,
+  u.ts as ts,
+  SUM(cp.total_med_cost) AS total_med_cost,
+  SUM(cp.total_cos_cost) AS total_cos_cost,
+  SUM(cp.total_med_cost + cp.total_cos_cost) AS total
+FROM users u
+JOIN client_payments cp ON u.id = cp.partner_id
+WHERE u.usertype_id = 5
+GROUP BY u.id
+ORDER BY u.firstname, u.lastname;`
+    const partners = await DB.query(sql)
+    console.log('partners.rows', partners.rows)
+    res.send(partners.rows)    
+  }
+
+  async getPartnerClients(req, res){
+    const partner_id = req.params.id;
+    console.log('Get clients for partner:', partner_id);
+    const sql = `
+WITH
+  clients AS (
+    SELECT
+      u.id as id,
+      u.firstname as firstname,
+      u.lastname as lastname,
+      u.email as email,
+      u.ts as ts
+    FROM users u
+    JOIN notes n ON u.id = n.client_id
+    WHERE partner_id = $1
+    AND n.paid
+    AND NOT n.paid_to_partner
+    GROUP BY u.id
+  ),
+  first_cos_invoices AS (
+    SELECT DISTINCT ON (client_id)
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.09 as total_sum_first_cos_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
+    AND paid
+  ),
+  first_med_invoices AS (
+    SELECT DISTINCT ON (client_id)
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.045 as total_sum_first_med_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
+    AND paid
+  ),
+  cos_invoices AS (
+    SELECT
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.01 as total_sum_cos_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id = 4)
+    AND paid
+  ),
+  med_invoices AS (
+    SELECT
+      id AS invoice_id,
+      client_id,
+      procedure_id,
+      to_number((bill -> 'qty')::text, '9999.99') as qty_first_invoice,
+      to_number((bill -> 'cost')::text, '9999.99') as cost_first_invoice,
+      to_number((bill -> 'qty')::text, '9999.99') * to_number((bill -> 'cost')::text, '9999.99') * 0.005 as total_sum_med_invoice
+    FROM notes
+    WHERE client_id IN(SELECT id FROM clients)
+    AND procedure_id IN (SELECT id FROM procedures WHERE proceduretype_id != 4)
+    AND paid
+  ),
+  total_cos AS (
+    SELECT
+      ci.client_id,
+      SUM(CASE WHEN ci.total_sum_cos_invoice IS NOT NULL
+          THEN ci.total_sum_cos_invoice 
+          ELSE 0
+        END
+        +
+        CASE WHEN fci.total_sum_first_cos_invoice IS NOT NULL
+          THEN fci.total_sum_first_cos_invoice 
+          ELSE 0
+        END
+      ) AS total_cos
+    FROM cos_invoices ci
+    FULL JOIN first_cos_invoices fci ON ci.invoice_id = fci.invoice_id
+    JOIN clients c ON ci.client_id = c.id
+    GROUP BY ci.client_id
+  ),
+  total_med AS (
+    SELECT
+      mi.client_id,
+      SUM(CASE WHEN mi.total_sum_med_invoice IS NOT NULL
+          THEN mi.total_sum_med_invoice 
+          ELSE 0
+        END
+        +
+        CASE WHEN fmi.total_sum_first_med_invoice IS NOT NULL
+          THEN fmi.total_sum_first_med_invoice 
+          ELSE 0
+        END
+      ) AS total_med
+    FROM med_invoices mi
+    FULL JOIN first_med_invoices fmi ON mi.invoice_id = fmi.invoice_id
+    JOIN clients c ON mi.client_id = c.id
+    GROUP BY mi.client_id
+  )
+SELECT 
+  c.id as id,
+  c.firstname as firstname,
+  c.lastname as lastname,
+  c.email as email,
+  c.ts as ts,
+  tm.total_med AS total_med_cost,
+  tc.total_cos AS total_cos_cost
+FROM clients c
+JOIN total_cos tc ON c.id=tc.client_id
+JOIN total_med tm ON c.id=tm.client_id
+-- 	GROUP BY c.id, c.firstname, c.lastname, c.email, c.ts
+ORDER BY c.firstname, c.lastname;`
     const clients = await DB.query(sql, [partner_id])
     console.log('clients.rows', clients.rows)
     res.send(clients.rows)    
+  }
+
+  async partnerPaidOut(req, res){
+    const partner_id = req.params.id;
+    console.log('Paid out for partner:', partner_id);
+    const sql = `UPDATE notes SET paid_to_partner = true WHERE client_id IN (SELECT id FROM users WHERE partner_id = $1)`
+    const client = await DB.query(sql, [partner_id])
+    console.log('client', client.rows[0])
+    res.send(client.rows)    
   }
 
   async getRoles(req, res){

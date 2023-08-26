@@ -98,6 +98,7 @@ create TABLE notes(
   "invoice" JSONB,  
   "bills" JSONB,  
   "paid" BOOLEAN DEFAULT false,
+  "paid_to_partner" BOOLEAN DEFAULT false,
   "ts" TIMESTAMPTZ
 );
 

@@ -39,7 +39,7 @@ export default function LoginPartner() {
   const [agreement, setAgreement] = useState(false);
 
   const handleSubmit = async () => {
-    if(!agreement) alert('Please confirm that you agree to the terms and services.')
+    if(passwordClientConf && !agreement) alert('Please confirm that you agree to the terms and services.')
     // console.log('submit:', emailClient, 'pass:', passwordClient, 'check pass:', passwordClientConf);
     if(newUser && passwordClient !== passwordClientConf) {
       alert('The entered passwords do not match');
@@ -51,7 +51,7 @@ export default function LoginPartner() {
         email:          emailClient,
         password:       passwordClient,
         password_conf:  passwordClientConf,
-        usertype_id:    4
+        usertype_id:    5
       })
       switch (res.status) {
         case 'newuser':

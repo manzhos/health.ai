@@ -110,8 +110,8 @@ export default function Invoices() {
         'procedure_id'      : inv.procedure_id,
         'services'          : inv.services,
         'date'              : (d.getDate() > 9 ? d.getDate() : '0' + d.getDate()) + '.' + (d.getMonth() + 1 > 9 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '.' + d.getFullYear(),
-        'qty'               : 1,
-        'cost'              : inv.cost,
+        'qty'               : inv.services[0].qty,
+        'cost'              : inv.services[0].cost,
         'medind'            : inv.medind,
         'diagnosis'         : inv.diagnosis,
       })

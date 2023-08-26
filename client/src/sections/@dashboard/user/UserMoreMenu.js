@@ -102,7 +102,7 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
   useEffect(() => {getDoctors()}, [getDoctors]); 
   
   const handleChangeDoctor = (event) => {
-    console.log('setDoctor:', event.target.value);
+    // console.log('setDoctor:', event.target.value);
     event.preventDefault();
     setDoctor(event.target.value);
     const index = doctorList.findIndex((el) => el.id === event.target.value);
@@ -129,12 +129,12 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
     const data = new FormData(event.currentTarget);
     // console.log(
     //   'title', 'invoice',
-    //   '\ndoc_type', 1,
-    //   '\nclient_id', id,
-    //   '\ndoctor_id', doctor,
-    //   '\nprocedure_id', data.get('procedure_id'),
-    //   '\nquantity',     data.get('quantity'),
-    //   '\ncost',        data.get('cost')
+    //   '\n doc_type', 1,
+    //   '\n client_id', id,
+    //   '\n doctor_id', doctor,
+    //   '\n procedure_id', data.get('procedure_id'),
+    //   '\n quantity',     data.get('quantity'),
+    //   '\n cost',        data.get('cost')
     // );
     try {
       const res = await request(`${API_URL}api/note`, 'POST', {
