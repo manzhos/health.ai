@@ -26,6 +26,11 @@ const navConfig = [
     path: '/admin/client',
     icon: getIcon('eva:people-fill'),
   },
+  {
+    title: 'partners',
+    path: '/admin/partner',
+    icon: getIcon('eva:people-fill'),
+  },
   // {
   //   title: 'user',
   //   path: '/admin/user',

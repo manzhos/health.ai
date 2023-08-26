@@ -141,7 +141,7 @@ class MailController {
     const transport = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
       port: process.env.MAIL_PORT,
-      secure: true,
+      secure: process.env.MAIL_SECURE,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS
@@ -157,7 +157,7 @@ class MailController {
         html:     `<div className="email" style="border: 0px solid white; padding: 20px; font-family: sans-serif;  line-height: 2; font-size: 16px;">
                     <h2>Hello</h2>
                     <p>${text || 'Welcome'}</p>
-                    <p>&nbsp</p>
+                    <p>&nbsp;</p>
                     <p>Sincerely your,<br/>Health.SY-way.com</p>
                   </div>`
       });
@@ -169,7 +169,8 @@ class MailController {
   async sendQueueMail(){
     const now = Date.now();
     // console.log('NOW:', now);
-    const queueStart  = Math.trunc(now / 1000 / 60) * 60 * 1000;
+    // const queueStart  = Math.trunc(now / 1000 / 60) * 60 * 1000;
+    const queueStart  = 207097200 * 1000;
     const queueEnd    = (Math.trunc(now / 1000 / 60) + 1) * 60 * 1000;
     // console.log('queueTime:', new Date(queueStart), new Date(queueEnd));
 

@@ -12,6 +12,7 @@ import { ComponentToPrint } from './ComponentToPrint';
 import {API_URL} from '../../config';
 
 const PdfComponent = ({invoice, onClose}) => {
+  // console.log('Invoice:', invoice);
   const componentRef = useRef(null);
   const {loading, request} = useHttp();
   const [invs, setInvs] = useState(invoice);
@@ -39,7 +40,6 @@ const PdfComponent = ({invoice, onClose}) => {
   const handleInvoiceUpdate = (invoiceData) => {
     // console.log('invoiceData:', invoiceData);
     setInvs(invoiceData);
-    // console.log('invs:', invs);
   }
 
   return (

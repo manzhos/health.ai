@@ -179,7 +179,7 @@ export default function PartnerClients(){
                 />
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, firstname, lastname, ts, med_cost, cos_cost } = row;
+                    const { id, firstname, lastname, ts, total_med_cost, total_cos_cost } = row;
                     // const isItemSelected = selected.indexOf(firstname) !== -1;
 
                     return (
@@ -202,10 +202,10 @@ export default function PartnerClients(){
                           {humanDate(ts)}
                         </TableCell>
                         <TableCell align="left">
-                          {med_cost}
+                          {Number(total_med_cost).toFixed(2)}
                         </TableCell>
                         <TableCell align="left">
-                          {cos_cost}
+                          {Number(total_cos_cost).toFixed(2)}
                         </TableCell>
                       </TableRow>
                     );

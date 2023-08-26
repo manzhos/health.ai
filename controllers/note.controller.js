@@ -13,7 +13,7 @@ class NoteController {
         services = [invoice];
     // console.log('try to save: ', title, note, client_id, doctor_id, procedure_id, doc_type, JSON.stringify(services), ts);
     const newNote = await DB.query(sql, [title ? title : '', note ? note : '', client_id, doctor_id, procedure_id, ts, doc_type ? doc_type : 0, invoice ? JSON.stringify(services) : null])
-    // console.log('newNote:', newNote.rows)
+    // console.log('newNote:', newNote.rows[0])
     res.send(newNote.rows[0]);
   }
 

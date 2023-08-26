@@ -43,12 +43,9 @@ bookFrame.innerHTML = `
     <div id=\"closeFrame\" style=\" width: 2vh; cursor:pointer; font-size: 2vh; color: #381D11; \">&#10006;</div>
   </div>
   <div style=\" display: block; width:100vw; height:92%; overflow: hidden; \">
-    <iframe src="https://health.sy-way.com/book?procedureId=${procedureId}&windowWidth=${windowWidth}&windowHeight=${windowHeight}"
+    <iframe src="http://health.sy-way.com/book?procedureId=${procedureId}&windowWidth=${windowWidth}&windowHeight=${windowHeight}"
           width="100%" height="100%" frameborder="0" class="scroll-none">
     </iframe>
-    // <iframe src="http://localhost:3000/book?procedureId=${procedureId}&windowWidth=${windowWidth}&windowHeight=${windowHeight}"
-    //       width="100%" height="100%" frameborder="0" class="scroll-none">
-    // </iframe>
   </div>
 `;
 
@@ -68,8 +65,7 @@ window.onload = function(){
       transform: translate(-50%, 0); 
       overflow: hidden;
       box-shadow: 0 3px 20px 1px rgba(0, 0, 0, .3); 
-      background: #FCFBFD url(https://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
-      // background: #FCFBFD url(http://localhost:3000/static/elegance_bg.jpg) center center no-repeat;
+      background: #FCFBFD url(http://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
       background-size: cover;
     `;
   };

@@ -37,6 +37,7 @@ import Staff from './pages/Admin/Staff';
 import Lead from './pages/Admin/Lead';
 import Client from './pages/Admin/Client';
 // import User from './pages/Admin/User';
+import Partner from './pages/Admin/Partner';
 import Invoices from './pages/Admin/Invoices';
 import UserDocs from './pages/Admin/UserDocs';
 import Patient from './pages/Doctor/Client';
@@ -78,6 +79,7 @@ export const useMyRoutes = isAuthenticated => {
         <Route path="/admin" element={<DashboardLayoutAdmin />}>
           <Route path="app" element={<DashboardApp />}/>
           {/* <Route path="user" element={<User />}/> */}
+          <Route path="partner" element={<Partner />}/>
           <Route path="staff" element={<Staff />}/>
           <Route path="lead" element={<Lead />}/>
           <Route path="client" element={<Client />}/>

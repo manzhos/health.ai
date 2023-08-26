@@ -136,6 +136,9 @@ export default function TimeTable(){
     },
     [setProcedureList]
   )
+  // const handleSelectSlot = () => {
+  //   setOpenNewProcedure(true);
+  // }
 
   const handleSelectProcedure = (event) => {
     // console.log(event)
@@ -170,6 +173,8 @@ export default function TimeTable(){
     []
   )
 
+  const [openNewProcedure, setOpenNewProcedure] = useState(false);
+
 
   return(
     <Container>
@@ -179,6 +184,48 @@ export default function TimeTable(){
         </Typography>
       </Stack>
       
+      {/* NEW PROCEDURE */}
+      <Modal
+        open={openNewProcedure}
+        onClose={()=>{setOpenNewProcedure(false)}}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Container component="main" maxWidth="md" disableGutters>
+          <div className="modal-tt">
+            <Box  sx={{ margin: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Grid container>
+                <Grid item xs={12} sm={9}>
+                  <Box className='tt_title'> 
+                    Procedure:<br /><strong>{procedure.title}</strong> <br /> <br /> 
+                    Patient:<br /><strong>{procedure.client_firstname}&nbsp;{procedure.client_lastname}</strong> <br /> <br /> 
+                    Start:<br /><strong>{humanDate(procedure.start)}</strong> <br /> 
+                    End:<br /><strong>{humanDate(procedure.end)}</strong>
+                  </Box>            
+                </Grid>
+                {/* <Grid item xs={12} sm={3}>
+                  <Button fullWidth variant={status === 0 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(1)}}>
+                    Check In
+                  </Button>
+                  <Button fullWidth variant={status === 1 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(2)}}>
+                    Log In
+                  </Button>
+                  <Button fullWidth variant={status === 2 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(3)}}>
+                    Log Out
+                  </Button>
+                  <Button fullWidth variant={status === 3 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(4)}}>
+                    Check Out
+                  </Button>
+                </Grid> */}
+                <Button fullWidth variant={status === 3 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{console.log('click')}}>
+                  Save
+                </Button>
+              </Grid>
+            </Box>
+          </div>
+        </Container>
+      </Modal>
+
       {/* Event window for Admin*/}
       {/* <Modal
         open={open}

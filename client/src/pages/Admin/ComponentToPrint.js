@@ -1,14 +1,18 @@
-import React, {useState} from "react";
+import React, {useState, forwardRef, useEffect} from "react";
 
-export const ComponentToPrint = React.forwardRef(({inv, onInvoiceUpdate}, ref) => {
+export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
   // console.log('invoice2:', inv);
   const [invoice, setInvoice] = useState(inv);
 
   const handleChangeData = async(e) => {
     // console.warn(e.target.name, ':', e.target.value);
     setInvoice(prevState => ({...prevState, [e.target.name]: e.target.value}));
-    onInvoiceUpdate(invoice); 
   }
+      // onInvoiceUpdate(invoice); 
+  useEffect(() => {
+    // console.log('PDF CHANGED INVOICE:', invoice);
+    onInvoiceUpdate(invoice)
+  }, [invoice]);
 
   return (
     <div ref={ref} style={{ width:"800px", padding:"69px 94px 78px", backgroundColor:"white", margin:"0 auto", textAlign:"left", fontSize:"12px" }}>
