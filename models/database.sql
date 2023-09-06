@@ -45,6 +45,7 @@ create TABLE procedures(
   "proceduretype_id" INT2, 
   "duration" INT2, 
   "cost" INT2, 
+  "online" BOOLEAN DEFAULT true,
   "ts" TIMESTAMPTZ
 );
 

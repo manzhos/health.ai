@@ -108,12 +108,8 @@ export default function Booking(){
   useEffect(() => {getRecordsByDoctor()}, [date, doctor])   
 
   const filterRecordsByDate = () => {
-    // console.log('date:', date);
     recordList.map(item => {
       const rd = new Date(item.date);
-      // console.log('item:', item);
-      // console.log('r:', rd, date);
-      // console.log('r:', rd.getDate(), date.getDate());
       if(rd.getFullYear() === date.getFullYear() && rd.getMonth() === date.getMonth() && rd.getDate() === date.getDate()) {
         busy.push({
           'from'  : item.time,
@@ -121,16 +117,16 @@ export default function Booking(){
         })
       }
     })
-    // console.log('final busy:', busy);
     busy.forEach((item)=>{
       item.fromMin = Number(item.from.slice(0, 2))*60 + Number(item.from.slice(3));
       for(let i=item.fromMin; i<=(item.fromMin + item.total); i+=30) t.push(i);
       // console.log('busy time:', t);
     })
+    // console.log('final busy:', busy);
     s.length=0;
     // slots = [{'time':'10:00'}, {'time':'11:00'}, {'time':'12:00'}, {'time':'13:00'}, {'time':'14:00'}, {'time':'15:00'}]
-    // working hours 10:00 - 17:00 (time interval 30 minutes)
-    for(let i=10*60; i<17*60; i+=30){
+    // working hours 10:00 - 21:00 (time interval 60 minutes)
+    for(let i = 10*60; i < 21*60; i+=60){
       if(t.includes(i)) continue;
       let h = Math.trunc(i/60);
       let m = '00';
@@ -268,7 +264,7 @@ export default function Booking(){
                   {/* procedureType now: {procedureTypeId} */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} />
+                  <ProcedureList procedureTypeId={procedureTypeId} onChangeProcedure={handleProcedureChange} online={true} />
                   {/* procedure now: {procedureId} */}
                 </Grid>
                 

@@ -24,6 +24,7 @@ import parse from 'date-fns/parse'
 import startOfWeek from 'date-fns/startOfWeek'
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import ScheduleNewProcedure from '../../components/ScheduleNewProcedure'
 // import DatePicker from 'react-datepicker'
 // import 'react-datepicker/dist/react-datepicker.css'
 // ----------------------------------------------------------------------
@@ -61,8 +62,10 @@ export default function TimeTable(){
 
   const [procedureList, setProcedureList] = useState([])
   const [procedure, setProcedure] = useState({})
+  const [date, setDate] = useState(new Date());
 
   const getProcedures = useCallback(async () => {
+    if(!token || !userId) return;
     try {
       const res = await request(`${API_URL}api/tt_procedures/${userId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
@@ -80,12 +83,14 @@ export default function TimeTable(){
           'client_firstname': el.client_firstname,
           'client_lastname' : el.client_lastname,
           'doctor_id'       : el.doctor_id,
+          'doctor_firstname': el.doctor_firstname,
+          'doctor_lastname' : el.doctor_lastname,
           'procedure_id'    : el.procedure_id,
           'start'           : start,
           'end'             : end,
         }
       })
-      console.log('p:', procedures)
+      // console.log('procedures:', procedures)
       setProcedureList(procedures)
     } catch (e) { console.log('error:', e)}
   }, [token, request])
@@ -129,10 +134,13 @@ export default function TimeTable(){
 
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
-      const title = window.prompt('New Procedure')
-      if (title) {
-        setProcedureList((prev) => [...prev, { start, end, title }])
-      }
+      // const title = window.prompt('New Procedure')
+      // if (title) {
+      //   setProcedureList((prev) => [...prev, { start, end, title }])
+      // }
+      // console.log('start, end', start, end);
+      setDate(start);
+      setOpenNewProcedure(true);
     },
     [setProcedureList]
   )
@@ -141,7 +149,7 @@ export default function TimeTable(){
   // }
 
   const handleSelectProcedure = (event) => {
-    // console.log(event)
+    console.log(event)
     setProcedure({
       'id'              : event.id,
       'title'           : event.title, 
@@ -149,6 +157,8 @@ export default function TimeTable(){
       'client_firstname': event.client_firstname,
       'client_lastname' : event.client_lastname,
       'doctor_id'       : event.doctor_id,
+      'doctor_firstname': event.doctor_firstname,
+      'doctor_lastname' : event.doctor_lastname,
       'procedure_id'    : event.procedure_id,
       'start'           : event.start,
       'end'             : event.end,
@@ -183,89 +193,9 @@ export default function TimeTable(){
           Time Table
         </Typography>
       </Stack>
-      
-      {/* NEW PROCEDURE */}
-      <Modal
-        open={openNewProcedure}
-        onClose={()=>{setOpenNewProcedure(false)}}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Container component="main" maxWidth="md" disableGutters>
-          <div className="modal-tt">
-            <Box  sx={{ margin: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Grid container>
-                <Grid item xs={12} sm={9}>
-                  <Box className='tt_title'> 
-                    Procedure:<br /><strong>{procedure.title}</strong> <br /> <br /> 
-                    Patient:<br /><strong>{procedure.client_firstname}&nbsp;{procedure.client_lastname}</strong> <br /> <br /> 
-                    Start:<br /><strong>{humanDate(procedure.start)}</strong> <br /> 
-                    End:<br /><strong>{humanDate(procedure.end)}</strong>
-                  </Box>            
-                </Grid>
-                {/* <Grid item xs={12} sm={3}>
-                  <Button fullWidth variant={status === 0 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(1)}}>
-                    Check In
-                  </Button>
-                  <Button fullWidth variant={status === 1 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(2)}}>
-                    Log In
-                  </Button>
-                  <Button fullWidth variant={status === 2 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(3)}}>
-                    Log Out
-                  </Button>
-                  <Button fullWidth variant={status === 3 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(4)}}>
-                    Check Out
-                  </Button>
-                </Grid> */}
-                <Button fullWidth variant={status === 3 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{console.log('click')}}>
-                  Save
-                </Button>
-              </Grid>
-            </Box>
-          </div>
-        </Container>
-      </Modal>
+      <ScheduleNewProcedure openNewProcedure={openNewProcedure} currDate={date} onClose={()=>{setOpenNewProcedure(false)}} />
 
-      {/* Event window for Admin*/}
-      {/* <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Container component="main" maxWidth="md" disableGutters>
-          <div className="modal-tt">
-            <Box  sx={{ margin: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Grid container>
-                <Grid item xs={12} sm={9}>
-                  <Box className='tt_title'> 
-                    Procedure:<br /><strong>{procedure.title}</strong> <br /> <br /> 
-                    Patient:<br /><strong>{procedure.client_firstname}&nbsp;{procedure.client_lastname}</strong> <br /> <br /> 
-                    Start:<br /><strong>{humanDate(procedure.start)}</strong> <br /> 
-                    End:<br /><strong>{humanDate(procedure.end)}</strong>
-                  </Box>            
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <Button fullWidth variant={status === 0 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(1)}}>
-                    Check In
-                  </Button>
-                  <Button fullWidth variant={status === 1 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(2)}}>
-                    Log In
-                  </Button>
-                  <Button fullWidth variant={status === 2 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(3)}}>
-                    Log Out
-                  </Button>
-                  <Button fullWidth variant={status === 3 ? 'contained' : 'outlined'} sx={{mb:3}} onClick={()=>{setStatus(4)}}>
-                    Check Out
-                  </Button>
-                </Grid>
-              </Grid>
-            </Box>
-          </div>
-        </Container>
-      </Modal> */}
-
-      {/* Event window for Doctor*/}
+      {/* Event window for Invoicing*/}
       <Modal
         open={open}
         onClose={handleClose}

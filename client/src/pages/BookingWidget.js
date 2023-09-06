@@ -98,8 +98,8 @@ export default function BookingFree(){
   const filterRecordsByDate = () => {
     // console.log('currentDate:', currentDate);
     recordList.map(item => {
-      const rd = new Date(item.currentDate);
       // console.log('item:', item);
+      const rd = new Date(item.date);
       // console.log('r:', rd, currentDate);
       // console.log('r:', rd.getDate(), currentDate.getDate());
       if(rd.getFullYear() === currentDate.getFullYear() && rd.getMonth() === currentDate.getMonth() && rd.getDate() === currentDate.getDate()) {
@@ -118,7 +118,7 @@ export default function BookingFree(){
     s.length=0;
     // slots = [{'time':'10:00'}, {'time':'11:00'}, {'time':'12:00'}, {'time':'13:00'}, {'time':'14:00'}, {'time':'15:00'}]
     // working hours 10:00 - 17:00 (time interval 30 minutes)
-    for(let i = 10*60; i < 14*60; i+=30){
+    for(let i = 10*60; i < 21*60; i+=30){
       if(t.includes(i)) continue;
       let h = Math.trunc(i/60);
       let m = '00';
@@ -167,9 +167,9 @@ export default function BookingFree(){
       const recordDate = getOnlyDate(record.date);
       console.log('REC:', record);
       for(let day in s) {
-        console.log(day);
+        // console.log(day);
         const sDate = getOnlyDate(Number(day));
-        console.log(sDate, recordDate)
+        // console.log(sDate, recordDate)
         if (sDate === recordDate){
           console.log(s[day])
           s[day] = s[day].filter(el => el.time !== record.time)
@@ -250,11 +250,11 @@ export default function BookingFree(){
     setUser({});
     await newClient();
     // if(user && Object.keys(user).length) await bookProcedure();
-    // navigate('/thanks')
+    navigate('/thanks')
   }
 
   const handleDateChange = (dateValue) => {
-    // console.log('dateValue', dateValue);
+    console.log('handleDateChange >>> dateValue:', dateValue);
     setCurrentDate(dateValue);
   }
   
@@ -291,13 +291,14 @@ export default function BookingFree(){
 
   const setPeriod = () => {
     let period = Math.floor(windowWidth/100);
-    // console.log(period);
+    let newDays = []
+    console.log('setPeriod:', period);
     for(let i=0; i<period; i++){
-      days[i] = new Date(currentDate);
-      days[i] = days[i].setDate(days[i].getDate() + i);
+      newDays[i] = new Date(currentDate);
+      newDays[i] = newDays[i].setDate(newDays[i].getDate() + i);
     }
-    setDays(days);
-    // console.log('SP days:', days);
+    setDays(newDays);
+    console.log('setPeriod >>> days:', newDays);
   }
   useEffect(()=>{setPeriod()},[currentDate])
 
@@ -306,6 +307,7 @@ export default function BookingFree(){
     let d = new Date(dateValue)
     return d.getDate() + ' ' + MONTH[Number(d.getMonth())];
   }
+
   const getOnlyDate = (d) => {
     if(!d) return ' '
     d = new Date(d);
@@ -342,7 +344,7 @@ export default function BookingFree(){
                 {/* procedureType now: {procedureTypeId} */}
               {/* </Grid> */}
               <Grid item xs={12} sm={12} >
-                <ProcedureList procedureTypeId={procedureTypeId} procedureId={procedureId} onChangeProcedure={handleProcedureChange} />
+                <ProcedureList procedureTypeId={procedureTypeId} procedureId={procedureId} onChangeProcedure={handleProcedureChange} online={true} />
                 {/* procedure now: {procedureId} */}
               </Grid>
             </Grid>

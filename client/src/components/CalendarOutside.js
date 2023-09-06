@@ -6,14 +6,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker'
 
-export default function Calendar ({onDateChange}) {
-  const [dateValue, setDateValue] = useState(
-    new Date()
-  )
+export default function Calendar ({onDateChange, dValue}) {
+  const [dateValue, setDateValue] = useState(dValue || new Date());
 
   const handleChange = (dateValue) => {
     setDateValue(dateValue);
-    onDateChange(dateValue)
+onDateChange(dateValue)
   }
 
   return (

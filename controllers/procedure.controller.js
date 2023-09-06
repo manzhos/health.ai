@@ -2,11 +2,11 @@ const DB = require('../db')
 
 class ProcedureController {
   async createProcedure(req, res){
-    const {procedure, proceduretype_id, duration, cost} = req.body
-    const sql = 'INSERT INTO procedures (procedure, proceduretype_id, duration, cost, ts) VALUES ($1, $2, $3, $4, $5) RETURNING *'
+    const {procedure, proceduretype_id, duration, cost, online} = req.body
+    const sql = 'INSERT INTO procedures (procedure, proceduretype_id, duration, cost, online, ts) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
     const ts = new Date()
     // console.log(procedure, proceduretype_id, duration, cost, ts)    
-    const newProcedure = await DB.query(sql, [procedure, proceduretype_id, duration, cost, ts])
+    const newProcedure = await DB.query(sql, [procedure, proceduretype_id, duration, cost, online, ts])
     // console.log('newProcedure:', newProcedure)
     res.send(newProcedure.rows[0])
   }
@@ -19,6 +19,7 @@ class ProcedureController {
         p.procedure AS procedure,
         p.duration AS duration,
         p.cost AS cost,
+        p.online AS online,
         pt.id AS proceduretype_id,
         pt.proceduretype AS proceduretype
       FROM procedures p
@@ -27,7 +28,29 @@ class ProcedureController {
     `
     // console.log('SQL:', sql);
     const procedures = await DB.query(sql)
-    // console.log(procedures.rows)
+    console.log('Procedures:', procedures.rows)
+    res.send(procedures.rows)
+  }
+
+  async getOnlineProcedures(req, res){
+    // console.log('get all procedures:');
+    const sql = `
+      SELECT 
+        p.id AS id,
+        p.procedure AS procedure,
+        p.duration AS duration,
+        p.cost AS cost,
+        p.online AS online,
+        pt.id AS proceduretype_id,
+        pt.proceduretype AS proceduretype
+      FROM procedures p
+      JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      WHERE p.online
+      ORDER BY procedure 
+    `
+    // console.log('SQL:', sql);
+    const procedures = await DB.query(sql)
+    console.log('Online procedures:', procedures.rows)
     res.send(procedures.rows)
   }
 
@@ -95,16 +118,17 @@ class ProcedureController {
   async updateProcedure(req, res){
     const id = req.params.id
     // save to DB
-    const {procedure, proceduretype_id, duration, cost} = req.body
-    // console.log(id, procedure, proceduretype_id, duration, cost);
+    const {procedure, proceduretype_id, duration, cost, online} = req.body
+    // console.log(id, procedure, proceduretype_id, duration, cost, online);
     const sql =`
       UPDATE procedures SET
         procedure        = $2,
         duration         = $3,
         cost             = $4,
-        proceduretype_id = $5
+        proceduretype_id = $5,
+        online           = $6
       WHERE id = $1;`
-    await DB.query(sql, [id, procedure, duration, cost, proceduretype_id])
+    await DB.query(sql, [id, procedure, duration, cost, proceduretype_id, online])
     // console.log(`procudure #${id} was updates`)
     res.send(true) 
   }
@@ -207,10 +231,12 @@ class ProcedureController {
       SELECT 
         tt.id,
         tt.procedure_id AS procedure_id,
-        tt.user_id AS client_id,
-        uc.firstname AS client_firstname,
-        uc.lastname AS client_lastname,
-        tt.doctor_id AS doctor_id,
+        tt.user_id    AS client_id,
+        uc.firstname  AS client_firstname,
+        uc.lastname   AS client_lastname,
+        tt.doctor_id  AS doctor_id,
+        ud.firstname  AS doctor_firstname,
+        ud.lastname   AS doctor_lastname,
         p.procedure,
         tt.duration,
         date,
@@ -220,12 +246,13 @@ class ProcedureController {
       JOIN procedures p ON p.id = tt.procedure_id
       JOIN procedure_types pt ON pt.id = p.proceduretype_id
       JOIN users uc ON uc.id = tt.user_id
+      JOIN users ud ON ud.id = tt.doctor_id
       ${isDoc === 2 ? `WHERE tt.doctor_id = ${id}` : ``}
       ;`
     // console.log('sql:', sql);
-    const proceduretypes = await DB.query(sql)
-    // console.log('procedures:', proceduretypes.rows)
-    res.send(proceduretypes.rows)    
+    const procedures = await DB.query(sql)
+    // console.log('procedures:', procedures.rows)
+    res.send(procedures.rows)    
   }
 
 }
