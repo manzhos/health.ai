@@ -3,17 +3,16 @@ const bcrypt = require('bcryptjs')
 
 class TimeTableController {
   async createRecord(req, res){
-    console.log('Create Procedure:', req.body)
+    // console.log('Create Procedure:', req.body)
     const {procedure_id, user_id, doctor_id, date, time} = req.body
-    console.log(procedure_id, user_id, doctor_id, date, time)
-    // if(!procedure_id || !user_id || !date || !time) return res.status(400).json({message: 'Set all parametrs'});
+    // console.log(procedure_id, user_id, doctor_id, date, time)
+    if(!procedure_id || !user_id || !date || !time) return res.status(400).json({message: 'Set all parametrs'});
 
-    // const duration = await DB.query('SELECT duration FROM procedures WHERE id=$1', [procedure_id])
-    // const sql = 'INSERT INTO timetable (procedure_id, user_id, doctor_id, date, time, ts, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
-    // let ts = new Date()
-    // const newProcedure = await DB.query(sql,[procedure_id, user_id, doctor_id, date, time, ts, duration.rows[0].duration])
-    // res.send(newProcedure.rows[0])
-    res.send('ok')
+    const duration = await DB.query('SELECT duration FROM procedures WHERE id=$1', [procedure_id])
+    const sql = 'INSERT INTO timetable (procedure_id, user_id, doctor_id, date, time, ts, duration) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *'
+    let ts = new Date()
+    const newProcedure = await DB.query(sql,[procedure_id, user_id, doctor_id, date, time, ts, duration.rows[0].duration])
+    res.send(newProcedure.rows[0])
   }
 
   async createConsult(req, res){
