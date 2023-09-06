@@ -150,37 +150,40 @@ export default function BookingFree(){
       receptionList.map((el) => {
         let recDate = getOnlyDate(el.date);
         let dayDate = getOnlyDate(day);
+        // console.log('recDate:', recDate);
+        // console.log('dayDate:', dayDate);
         if(recDate === dayDate) {
           for (let t in el.time) {
+            console.log(`el.time[${t}]:`, el.time[t]);
             if(el.time[t]) {
               tmpSlots.push({'time' : (t + ':00')});
             }
           }
         }
       });
+      // console.log('tmpSlots:', tmpSlots);
       s[day] = tmpSlots//.length ? tmpSlots : [{}];
     });
 
-    console.log('pre   S:', s);
+    // console.log('pre   S:', s);
     
     recordList.map((record) => {
       const recordDate = getOnlyDate(record.date);
-      console.log('REC:', record);
+      // console.log('REC:', record);
       for(let day in s) {
         // console.log(day);
         const sDate = getOnlyDate(Number(day));
         // console.log(sDate, recordDate)
         if (sDate === recordDate){
-          console.log(s[day])
+          // console.log(s[day])
           s[day] = s[day].filter(el => el.time !== record.time)
         }
       }
     })
-    console.log('after S:', s);
+    // console.log('after S:', s);
 
     setSlots(s);
     // console.log('SP slots:', slots);        
-    // return tmpSlots;
   }
   useEffect(() => {getSlots()}, [receptionList]);
 

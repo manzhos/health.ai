@@ -115,10 +115,10 @@ export default function Reception(){
 
       // timezone magic
       let magicDate = event.start;
-      console.log(magicDate)
-      console.log(magicDate.getHours())
-      console.log(magicDate.getTimezoneOffset() / 60)
-      console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
+      // console.log(magicDate)
+      // console.log(magicDate.getHours())
+      // console.log(magicDate.getTimezoneOffset() / 60)
+      // console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
       magicDate.setHours(magicDate.getHours() - magicDate.getTimezoneOffset() / 60);
       setMDate(magicDate)
 
