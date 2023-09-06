@@ -43,7 +43,7 @@ class ReceptionController {
     }
     // console.log('arrDate:', arrDate);
 
-    const sqlUpd = `UPDATE reception_hours SET time = $1 WHERE id = $2;`;
+    const sqlUpd = `UPDATE reception_hours SET time = $2 WHERE date = $1;`;
     const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *';
 
     for(const d of arrDate){
@@ -51,23 +51,21 @@ class ReceptionController {
       const reception = await DB.query(`SELECT * FROM reception_hours WHERE date = $1`, [d]);
       // console.log('RECEPTION', reception.rows[0]);
       if (reception.rows && reception.rows.length) {
-        const id  = reception.rows[0].id;
-        // console.warn('already exist, update reception id:', id);
         try{
-          DB.query(sqlUpd, [time, id]);
-          console.log(`reception #${id} was updates`)
+          DB.query(sqlUpd, [d, time]);
+          // console.log(`reception on ${d} was updates`)
         } catch (err) {
           console.log(`Error: ${err}`)  
           return res.status(500).json({message: "The connection with DB was lost."})
         }
-      }
-  
-      try{
-        // console.log('try insert:', doctor_id, d, time, ts);
-        DB.query(sqlIns, [doctor_id, d, time, ts]);
-      } catch (err) {
-        console.log(`Error: ${err}`)  
-        return res.status(500).json({message: "The connection with DB was lost."})
+      } else {
+        try{
+          // console.log('try insert:', doctor_id, d, time, ts);
+          DB.query(sqlIns, [doctor_id, d, time, ts]);
+        } catch (err) {
+          console.log(`Error: ${err}`)  
+          return res.status(500).json({message: "The connection with DB was lost."})
+        }
       }
     }
     return res.status(200).json({message: "All receipt hours are filled."})
