@@ -38,6 +38,18 @@ let bookFrame = document.createElement('div');
 bookFrame.className = "book-frame";
 bookFrame.id = "bookFrame";
 bookFrame.style = "display: none";
+//dev
+// bookFrame.innerHTML = `
+//   <div style=\" display:flex; align-items: center; justify-content: end; margin:1vh; \">
+//     <div id=\"closeFrame\" style=\" width: 2vh; cursor:pointer; font-size: 2vh; color: #381D11; \">&#10006;</div>
+//   </div>
+//   <div style=\" display: block; width:100vw; height:92%; overflow: hidden; \">
+//     <iframe src="http://localhost:3000/book?procedureId=${procedureId}&windowWidth=${windowWidth}&windowHeight=${windowHeight}"
+//           width="100%" height="100%" frameborder="0" class="scroll-none">
+//     </iframe>
+//   </div>
+// `;
+// production
 bookFrame.innerHTML = `
   <div style=\" display:flex; align-items: center; justify-content: end; margin:1vh; \">
     <div id=\"closeFrame\" style=\" width: 2vh; cursor:pointer; font-size: 2vh; color: #381D11; \">&#10006;</div>

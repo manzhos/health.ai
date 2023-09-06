@@ -4,6 +4,7 @@ const router = Router()
 
 router.post('/procedure', procedureController.createProcedure)
 router.get('/procedures', procedureController.getProcedures)
+router.get('/onlineprocedures', procedureController.getOnlineProcedures)
 router.get('/procedures_bytype/:id', procedureController.getProceduresByType)
 router.get('/procedures_inf', procedureController.getProceduresInf)
 router.get('/procedure/:id', procedureController.getProcedure)

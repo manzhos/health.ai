@@ -16,7 +16,9 @@ import {
   TextField,
   InputLabel,
   Select,
-  FormControl,  
+  FormControl,
+  FormControlLabel,
+  Checkbox
  } from '@mui/material';
 // component
 import Iconify from '../../../components/Iconify';
@@ -32,6 +34,7 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
   
   const [procedureType, setProcedureType] = useState(procedure.proceduretype_id)
   const [open, setOpen] = useState(false)
+  const [checkOnline, setCheckOnline] = useState(procedure.online)
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   const handleChangeProcedureType = (event) => {
@@ -55,6 +58,7 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
       formData.append('duration',         data.get('duration'))
       formData.append('cost',             data.get('cost'))
       formData.append('proceduretype_id', data.get('proceduretype_id'))
+      formData.append('online',           procedure.online)
 
       const res = await fetch(`${API_URL}api/procedure/${id}`, {
         method: 'PATCH', 
@@ -130,7 +134,7 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
               </Typography>
               <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12}>
+                  <Grid item xs={12} sm={8}>
                     <TextField
                       name="procedure"
                       required
@@ -139,6 +143,23 @@ export default function ProcedureMoreMenu({id, procedure, procedureTypeList, onC
                       label="Procedure"
                       autoFocus
                       defaultValue={procedure.procedure}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox 
+                          name="online" 
+                          value={procedure.online} 
+                          defaultValue={procedure.online} 
+                          checked={checkOnline} 
+                          onChange={() => {
+                            procedure.online = !procedure.online;
+                            setCheckOnline(procedure.online);
+                          }} color="primary"
+                        />
+                      }
+                      label="Online booking."
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>

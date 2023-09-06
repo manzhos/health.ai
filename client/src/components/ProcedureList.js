@@ -11,12 +11,12 @@ import {
 import { useHttp } from '../hooks/http.hook'
 import { API_URL } from '../config'
 
-export default function ProcedureList({ procedureTypeId, procedureId = 0, onChangeProcedure }) {
+export default function ProcedureList({ procedureTypeId, procedureId = 0, onChangeProcedure, online = false }) {
   const {request} = useHttp()
 
   const [procedure, setProcedure] = useState(procedureId)
   const [procedureList, setProcedureList] = useState([])
-  const [url, setUrl] = useState(procedureTypeId ? `${API_URL}api/procedures_bytype/${procedureTypeId}` : `${API_URL}api/procedures`);
+  const [url, setUrl] = useState(procedureTypeId ? `${API_URL}api/procedures_bytype/${procedureTypeId}` : (online ? `${API_URL}api/onlineprocedures` : `${API_URL}api/procedures`));
 
   const getProcedures = useCallback(async () => {
     // console.log('request with', procedureTypeId, url);

@@ -40,10 +40,11 @@ import { API_URL } from '../../config'
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Procedure', alignRight: false },
-  { id: 'proceduretype', label: 'Type', alignRight: false },
-  { id: 'duration', label: 'Duration', alignRight: false },
-  { id: 'cost', label: 'Cost', alignRight: false },
+  { id: 'name',           label: 'Procedure', alignRight: false },
+  { id: 'proceduretype',  label: 'Type',      alignRight: false },
+  { id: 'duration',       label: 'Duration',  alignRight: false },
+  { id: 'cost',           label: 'Cost',      alignRight: false },
+  { id: 'online',         label: 'Online',    alignRight: false },
   // { id: 'status', label: '', alignRight: false },
   { id: '' },
 ];
@@ -182,6 +183,7 @@ export default function Procedure() {
           duration:         data.get('duration'),
           cost:             data.get('cost'),
           proceduretype_id: data.get('proceduretype_id'),
+          online:           data.get('online'),
         })
         setOpen(false)
         getProcedures()
@@ -226,7 +228,7 @@ export default function Procedure() {
                   </Typography>
                   <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={12}>
+                      <Grid item xs={12} sm={8}>
                         <TextField
                           name="procedure"
                           required
@@ -234,6 +236,18 @@ export default function Procedure() {
                           id="procedure"
                           label="Procedure"
                           autoFocus
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox 
+                              name="online"
+                              vlaue="online"
+                              color="primary"
+                            />
+                          }
+                          label="Online booking."
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -305,7 +319,7 @@ export default function Procedure() {
               />
               <TableBody>
                 {filteredProcedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                  const { id, procedure, duration, cost, proceduretype, proceduretype_id } = row;
+                  const { id, procedure, duration, cost, proceduretype, proceduretype_id, online } = row;
                   const isItemSelected = selected.indexOf(procedure) !== -1;
 
                   return (
@@ -331,6 +345,9 @@ export default function Procedure() {
                       <TableCell align="left">{sentenceCase(proceduretype)}</TableCell>
                       <TableCell align="left">{duration}</TableCell>
                       <TableCell align="left">{cost}</TableCell>
+                      <TableCell align="left">
+                        <Checkbox checked={online} />
+                      </TableCell>
                       <TableCell align="right">
                         <ProcedureMoreMenu id={id} procedure={row} procedureTypeList={procedureTypeList} onChange={handleUpdate} />
                       </TableCell>

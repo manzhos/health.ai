@@ -16,139 +16,83 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
 
   return (
     <div ref={ref} style={{ width:"800px", padding:"69px 94px 78px", backgroundColor:"white", margin:"0 auto", textAlign:"left", fontSize:"12px" }}>
-      <img src="/static/logo_blank.svg" style={{ width:"270px", margin:"0 auto 58px" }}/>
       <table style={{ width:"100%" }}>
-        <tbody>
-          <tr>
-            <td style={{verticalAlign: "top"}}>
-              <p style={{textDecoration:"underline"}}>Kamil Akhundov - Gertraudenstraße 18 - 10178 Berlin</p>
-              <br/>
-              <table style={{ width:"100%" }}>
-                <tbody>
-                  <tr><td>{invoice.client_firstname} {invoice.client_lastname}</td></tr>
-                  <tr><td><input className='input-blank' id="adress1"       name="client_adress1" onChange={handleChangeData} value={invoice.client_adress1} placeholder="Adress line 1"/></td></tr>
-                  <tr><td><input className='input-blank' id="adress2"       name="client_adress2" onChange={handleChangeData} value={invoice.client_adress2} placeholder="Adress line 2"/></td></tr>
-                  <tr><td><input className='input-blank' id="adressCountry" name="client_country" onChange={handleChangeData} value={invoice.client_country} placeholder="Country"/></td></tr>
-                </tbody>
-              </table>
-            </td>
-            <td style={{verticalAlign: "top", width:"230px" }}>
-              <p style={{textDecoration:"underline"}}><strong>So erreichen Sie uns</strong></p>
-              <br/>
-              <table style={{ width:"100%" }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'Internet'}
-                    </td>
-                    <td>
-                      {'stunning-you.com'}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {'Email'}
-                    </td>
-                    <td>
-                      {'info@stunning-you.com'}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {'Telefon'}
-                    </td>
-                    <td>
-                      {'+49 (0)30 - 92 12 38 93'}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {'Mobil'}
-                    </td>
-                    <td>
-                      {'+49 172 - 754 54 11'}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p>&nbsp;</p>
-              <table style={{ width:"100%" }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'Steuer-Nr.'}
-                    </td>
-                    <td>
-                      <strong><input className='input-blank' id="steuer" name="steuer" onChange={handleChangeData} value={invoice.steuer} /></strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'USt-IDNr.'}
-                    </td>
-                    <td>
-                    <strong><input className='input-blank' id="USt" name="USt" onChange={handleChangeData} value={invoice.USt} /></strong>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p>&nbsp;</p>
-              <table style={{ width:"100%" }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'Datum'}
-                    </td>
-                    <td>
-                      <strong><input className='input-blank' id="date" name="date" onChange={handleChangeData} value={invoice.date}/></strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'Rechnung'}
-                    </td>
-                    <td>
-                    <strong><input className='input-blank' id="rechnung" name="title" onChange={handleChangeData} value={invoice.title}/></strong>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ width:"90px" }}>
-                      {'Kunde'}
-                    </td>
-                    <td>
-                      <strong><input className='input-blank' id="Kunde" name="kunde" onChange={handleChangeData} value={invoice.kunde} /></strong>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
+        <tr>
+          <td width={250}>
+            <img src="/static/logo_blank.svg" style={{ width:"100%" }}/>
+          </td>
+          <td style={{ textAlign:"right"}}>
+            <p>Plastische & Ästhetische Chirurgie</p>
+            <p>Dr. med. univ. Kamil Akhundov</p>
+            <p>Gertraudenstrahe IS 1017S Berlin</p>
+            <br/>
+            <p>Tel:+49 (0) 30 92123893</p>
+            <p>Mob.:+49 (0) 172 7545411</p>
+            <p>Fax.: +49 (0)30 25097547</p>
+            <p>E-Mail: info@3tunning-you.com</p>
+            <p>Web:www.stunning-you.com
+            </p>
+          </td>
+        </tr>
       </table>
-      <p>&nbsp;</p>
-      <p>Sehr geehrte {invoice.client_firstname} {invoice.client_lastname},</p>
-      <p>nachfolgend berechnen wir Ihnen wie vorab besprochen:</p>
-      <p>&nbsp;</p>
-      <p>&nbsp;</p>
-      <h2><strong>{'Rechnung'} <input className='input-blank-fit' id="title" name="title" onChange={handleChangeData} value={invoice.title} /></strong></h2>
-      <p>{'Das Rechnungsdatum entspricht dem Leistungsdatum'}</p>
-      <p>&nbsp;</p>
-      <hr/>
+
+      <h1 style={{ width:"100%", textAlign:"center", margin:"30px auto"}}>RECHNUNG</h1>
+
       <table style={{ width:"100%" }}>
-        <thead>
+        <tr>
+          <td>
+            <p>Rechnungsadresse</p>
+            <h2>18.07.1982</h2>
+            <p>{invoice.client_firstname} {invoice.client_lastname}</p>
+            <p><input className='input-blank' id="street"        name="client_adressStreet"   onChange={handleChangeData} value={invoice.client_adressStreet} placeholder="street & building"/></p>
+            <p><input className='input-blank' id="city"          name="client_adressCity"     onChange={handleChangeData} value={invoice.client_adressCity}   placeholder="city"/></p>
+            <p><input className='input-blank' id="index"         name="client_adressIndex"    onChange={handleChangeData} value={invoice.client_adressIndex}  placeholder="index"/></p>
+            <p><input className='input-blank' id="adressCountry" name="client_adressCountry"  onChange={handleChangeData} value={invoice.client_adressCountry} placeholder="DE"/></p>
+          </td>
+          <td>
+            <div style={{width:"100%", display:"flex", justifyContent:"right"}}>
+              <table style={{ fontSize:"14px", borderCollapse:"collapse" }}>
+                <tr>
+                  <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Rechnungsnummer</td>
+                  <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
+                    <input className='input-blank' id="steuer" name="steuer" onChange={handleChangeData} value={invoice.steuer} />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Rechnungsdatum</td>
+                  <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
+                    <input className='input-blank' id="date" name="date" onChange={handleChangeData} value={invoice.date}/>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Fälligkeitsdatum</td>
+                  <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
+                    <input className='input-blank' id="date" name="date" onChange={handleChangeData} value={invoice.payDate}/>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+      <hr/>
+      <table style={{ width:"100%", borderCollapse:"collapse" }}>
+        <thead style={{ background:"lightgray" }}>
           <tr style={{height:"44px"}}>
-            <th>Pos</th>
-            <th style={{width:"30px"}}>Id</th>
-            <th style={{width:"300px"}}>Bezeichnung</th>
-            <th>Menge</th>
-            <th>Einzelpreis</th>
-            <th>Betrag</th>
+            <th style={{ width:"24px", textAlign:"center" }}>#</th>
+            {/* <th style={{width:"30px"}}>Id</th> */}
+            <th style={{width:"300px"}}>{'Beschreibung'}</th>
+            <th>{'Anzahl'}</th>
+            <th>{'Einzelpreis'}</th>
+            <th>{'Gesamtpreis'}</th>
           </tr>
         </thead>
         <tbody>
           <tr style={{height:"44px"}}>
-            <td>1</td>
-            <td>{invoice.procedure_id}</td>
+            <td style={{ width:"24px", textAlign:"center" }}>1</td>
+            {/* <td>{invoice.procedure_id}</td> */}
             <td>{invoice.procedure}</td>
             <td><input className='input-blank' id="title" name="qty"  onChange={handleChangeData} value={invoice.qty} /></td>
             <td><input className='input-blank' id="title" name="cost" onChange={handleChangeData} value={invoice.cost} /></td>
@@ -158,7 +102,54 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
       </table>
       <hr/>
       <p>&nbsp;</p>
-      <table style={{width:"240px", margin:"0 0 0 auto"}}>
+      <table style={{ width:"100%" }}>
+        <tr>
+          <td>
+            <div style={{ paddingRight:"30px"}}>
+              <p>
+                Liebe Patientin, lieber Patient,
+              </p>
+              <p>
+                bitte überweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt auf folgendes Konto:
+              </p>
+              <p>&nbsp;</p>
+              <p>
+                Kontoinhaber: <b>Kamil Akhundov</b> <br/>
+                Kreditinstitut: <b>Berliner Sparkasse</b> <br/>
+                IBAN: <b>DE46 1005 0000 0190 9438 23</b> <br/>
+                BIC: <b>BELADEBEXXX</b>
+              </p>
+              <p>&nbsp;</p>
+              <p>
+                bitte uberweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt auf folgendes Konto:
+              </p>
+              <p>&nbsp;</p>
+              <p>
+                Kontoinhaber: <b>Kamil Akhundov</b> <br/>
+                Kreditinstitut: <b>Berliner Sparkasse</b> <br/>
+                IBAN: <b>DE46 1005 0000 0190 9438 23</b> <br/>
+                BIC: <b>BELADEBEXXX</b>
+              </p>
+            </div>
+          </td>
+          <td style={{ textAlign:"right", verticalAlign:"top" }}>
+            <div style={{width:"100%", display:"flex", justifyContent:"right"}}>
+              <table>
+                <tr>
+                  <td>{'MWST (19%)'}</td>
+                  <td style={{ width:"80px" }}>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
+                </tr>
+                <tr>
+                  <td><b>{'Rechnungsbetrag'}</b></td>
+                  <td style={{ width:"80px" }}><b>{(invoice.qty * invoice.cost * 1).toFixed(2)} &#8364;</b></td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      {/* <table style={{width:"240px", margin:"0 0 0 auto"}}>
         <tbody>
           <tr>
             <td>{'Nettobetrag'}</td>
@@ -166,7 +157,7 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
           </tr>
           { invoice.medind &&
             <tr>
-              <td>{'Umsatzsteuer 19%'}</td>
+              <td>{'MWST 19%'}</td>
               <td>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
             </tr>
           }
@@ -189,18 +180,8 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
             </tr>
           }
         </tbody>
-      </table>
-      <p>&nbsp;</p>
-      <p>&nbsp;</p>
-      <p>Vielen Dank für Ihren Auftrag!</p>
-      <p>Bitte begleichen Sie den offenen Betrag bis zum {invoice.date} an die unten aufgeführte</p>
-      <p>Bankverbindung.</p>
-      <p>&nbsp;</p>
-      <p>Mit freundlichen Grüßen</p>
-      <p>Kamil Akhundov</p>
-      <p>&nbsp;</p>
-      {/* <div style={{ width:"100%", height:"80px" }}>&nbsp;</div> */}
-      <p>Bankverbindung: Kamil Akhundov – Deutsche Bank AG – BLZ 300 700 24 – KTO 987654321</p>
+      </table> */}
+      
     </div>
   );
 });
