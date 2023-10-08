@@ -1,18 +1,42 @@
 import React, {useState, forwardRef, useEffect} from "react";
 
-export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
-  // console.log('invoice2:', inv);
+export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdate, onProcedureUpdate}, ref) => {
+  // console.log('ComponentToPrint >>> inv:', inv);
+  // console.log('ComponentToPrint >>> perfProcedures:', perfProcedures);
   const [invoice, setInvoice] = useState(inv);
+  const [procedures, setProcedures] = useState(perfProcedures);
 
-  const handleChangeData = async(e) => {
-    // console.warn(e.target.name, ':', e.target.value);
-    setInvoice(prevState => ({...prevState, [e.target.name]: e.target.value}));
+  const handleChangeProcedures = async(event, id) => {
+    const {name, value} = event.target;
+    // console.warn(name, ':', value, 'id:', id);
+    let tmpProcedures = [...procedures];
+    tmpProcedures.map((tp)=>{
+      if(tp.bill.id === id) {
+        if(name === 'mwst') tp.bill[name] = tp.bill[name] === 'on' ? false : 'on';
+        else tp.bill[name] = value;
+      }
+    });
+    // console.log('tmpProcedures:', tmpProcedures);
+    setProcedures(tmpProcedures);
   }
-      // onInvoiceUpdate(invoice); 
+
+  const handleChangeInvoice = (event) => {
+    const { name, value } = event.target;
+    // console.log('Event >> name, value:', name, value);
+    let title = invoice.title;
+    title[name] = value;
+    setInvoice(prevState => ({...prevState, ['title']:title}))
+  }
+
   useEffect(() => {
     // console.log('PDF CHANGED INVOICE:', invoice);
-    onInvoiceUpdate(invoice)
+    onInvoiceUpdate(invoice);
   }, [invoice]);
+
+  useEffect(() => {
+    // console.log('PDF CHANGED PROCEDURES:', procedures);
+    onProcedureUpdate(procedures);
+  }, [procedures]);
 
   return (
     <div ref={ref} style={{ width:"800px", padding:"69px 94px 78px", backgroundColor:"white", margin:"0 auto", textAlign:"left", fontSize:"12px" }}>
@@ -41,13 +65,15 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
       <table style={{ width:"100%" }}>
         <tr>
           <td>
-            <p>Rechnungsadresse</p>
-            <h2>18.07.1982</h2>
-            <p>{invoice.client_firstname} {invoice.client_lastname}</p>
-            <p><input className='input-blank' id="street"        name="client_adressStreet"   onChange={handleChangeData} value={invoice.client_adressStreet} placeholder="street & building"/></p>
-            <p><input className='input-blank' id="city"          name="client_adressCity"     onChange={handleChangeData} value={invoice.client_adressCity}   placeholder="city"/></p>
-            <p><input className='input-blank' id="index"         name="client_adressIndex"    onChange={handleChangeData} value={invoice.client_adressIndex}  placeholder="index"/></p>
-            <p><input className='input-blank' id="adressCountry" name="client_adressCountry"  onChange={handleChangeData} value={invoice.client_adressCountry} placeholder="DE"/></p>
+            <h2>Rechnungsadresse</h2>
+            {/* <h2>18.07.1982</h2> */}
+            {/* <p>{invoice.title?.client_firstname} {invoice.title?.client_lastname}</p> */}
+            <p><input className='input-blank' id="client_firstname" name="client_firstname" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_firstname} placeholder="firstname"/></p>
+            <p><input className='input-blank' id="client_lastname"  name="client_lastname"  onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_lastname}  placeholder="lastname"/></p>
+            <p><input className='input-blank' id="street" name="client_adress1" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_adress1} placeholder="street & building"/></p>
+            <p><input className='input-blank' id="city"   name="client_adress2" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_adress2} placeholder="city"/></p>
+            {/* <p><input className='input-blank' id="index" name="client_adressIndex" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_adressIndex} placeholder="index"/></p> */}
+            <p><input className='input-blank' id="country" name="client_country" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.client_country} placeholder="DE"/></p>
           </td>
           <td>
             <div style={{width:"100%", display:"flex", justifyContent:"right"}}>
@@ -55,19 +81,20 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
                 <tr>
                   <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Rechnungsnummer</td>
                   <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
-                    <input className='input-blank' id="steuer" name="steuer" onChange={handleChangeData} value={invoice.steuer} />
+                    {/* <input className='input-blank' id="steuer" name="steuer" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.number} /> */}
+                    {invoice.number}
                   </td>
                 </tr>
                 <tr>
                   <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Rechnungsdatum</td>
                   <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
-                    <input className='input-blank' id="date" name="date" onChange={handleChangeData} value={invoice.date}/>
+                    <input className='input-blank' id="date" name="date" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.date}/>
                   </td>
                 </tr>
                 <tr>
                   <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Fälligkeitsdatum</td>
                   <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
-                    <input className='input-blank' id="date" name="date" onChange={handleChangeData} value={invoice.payDate}/>
+                    <input className='input-blank' id="date" name="date" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.payDate}/>
                   </td>
                 </tr>
               </table>
@@ -84,20 +111,32 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
             <th style={{ width:"24px", textAlign:"center" }}>#</th>
             {/* <th style={{width:"30px"}}>Id</th> */}
             <th style={{width:"300px"}}>{'Beschreibung'}</th>
-            <th>{'Anzahl'}</th>
-            <th>{'Einzelpreis'}</th>
-            <th>{'Gesamtpreis'}</th>
+            <th style={{ textAlign:"center" }}>{'Anzahl'}</th>
+            <th style={{ textAlign:"center" }}>{'Einzelpreis'}</th>
+            <th style={{ textAlign:"center" }}>{'MWST (19%)' }</th>
+            <th style={{ textAlign:"center" }}>{'Gesamtpreis'}</th>
           </tr>
         </thead>
         <tbody>
-          <tr style={{height:"44px"}}>
-            <td style={{ width:"24px", textAlign:"center" }}>1</td>
-            {/* <td>{invoice.procedure_id}</td> */}
-            <td>{invoice.procedure}</td>
-            <td><input className='input-blank' id="title" name="qty"  onChange={handleChangeData} value={invoice.qty} /></td>
-            <td><input className='input-blank' id="title" name="cost" onChange={handleChangeData} value={invoice.cost} /></td>
-            <td>{invoice.qty * invoice.cost}</td>
-          </tr>
+          {procedures.map((procedure)=>{
+            procedure.bill.mwst = procedure.bill.mwst ? procedure.bill.mwst : false;
+            procedure.bill.qty  = procedure.bill.qty   ? procedure.bill.qty : 1;
+            const mwst = 1.19;
+            return(
+              <tr style={{height:"44px"}}>
+                <td style={{ width:"24px", textAlign:"center" }}>1</td>
+                {/* <td>{procedure.procedure_id}</td> */}
+                <td>{procedure.bill?.procedure}</td>
+                <td><input className='input-blank' style={{ textAlign:"center" }} id={"qty_procedure_" + procedure.bill?.id}  name="qty"  onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.qty} /></td>
+                <td><input className='input-blank' style={{ textAlign:"center" }} id={"cost_procedure_" + procedure.bill?.id} name="cost" onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.procedure_cost} /></td>
+                <td style={{ textAlign:"center" }}>
+                  <input type="checkbox" id={"MWST19_procedure_" + procedure.bill?.id} name="mwst" checked={procedure.bill?.mwst} onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} />
+                  {/* <Checkbox checked={procedure.bill.mwst} value={procedure.bill.mwst} onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} /> */}
+                </td>
+                <td style={{ textAlign:"center" }}>{Number(procedure.bill?.qty) * Number(procedure.bill?.procedure_cost) * (procedure.bill.mwst ? mwst : 1)}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
       <hr/>
@@ -137,51 +176,27 @@ export const ComponentToPrint = forwardRef(({inv, onInvoiceUpdate}, ref) => {
               <table>
                 <tr>
                   <td>{'MWST (19%)'}</td>
-                  <td style={{ width:"80px" }}>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
+                  <td style={{ width:"80px" }}>
+                    { 
+                      procedures.reduce((sumMwst, procedure) => sumMwst + (procedure.bill.mwst ? (procedure.bill.qty * procedure.bill.procedure_cost) * 0.19 : 0), 0).toFixed(2)
+                    } &#8364;
+                  </td>
                 </tr>
                 <tr>
                   <td><b>{'Rechnungsbetrag'}</b></td>
-                  <td style={{ width:"80px" }}><b>{(invoice.qty * invoice.cost * 1).toFixed(2)} &#8364;</b></td>
+                  <td style={{ width:"80px" }}>
+                    <b>
+                      {
+                        procedures.reduce((sumMwst, procedure) => sumMwst + (procedure.bill.qty * procedure.bill.procedure_cost * (procedure.bill.mwst ? 1.19 : 1)), 0).toFixed(2)
+                      } &#8364;
+                    </b>
+                  </td>
                 </tr>
               </table>
             </div>
           </td>
         </tr>
-      </table>
-
-      {/* <table style={{width:"240px", margin:"0 0 0 auto"}}>
-        <tbody>
-          <tr>
-            <td>{'Nettobetrag'}</td>
-            <td>{(invoice.qty * invoice.cost).toFixed(2)} &#8364;</td>
-          </tr>
-          { invoice.medind &&
-            <tr>
-              <td>{'MWST 19%'}</td>
-              <td>{(invoice.qty * invoice.cost * 0.19).toFixed(2)} &#8364;</td>
-            </tr>
-          }
-          { invoice.medind &&
-            <tr><td colSpan={2}><hr/></td></tr>
-          }
-          { invoice.medind &&
-            <tr style={{ fontWeight:"bold" }}>
-              <td>{'Rechnungsbetrag'}</td>
-              <td>{(invoice.qty * invoice.cost * 1.19).toFixed(2)} &#8364;</td>
-            </tr>
-          }
-          { !invoice.medind &&
-            <tr><td colSpan={2}><hr/></td></tr>
-          }
-          { !invoice.medind &&
-            <tr style={{ fontWeight:"bold" }}>
-              <td>{'Rechnungsbetrag'}</td>
-              <td>{(invoice.qty * invoice.cost * 1).toFixed(2)} &#8364;</td>
-            </tr>
-          }
-        </tbody>
-      </table> */}
-      
+      </table>      
     </div>
   );
 });

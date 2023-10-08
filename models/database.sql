@@ -103,6 +103,14 @@ create TABLE notes(
   "ts" TIMESTAMPTZ
 );
 
+create TABLE invoices(
+  "id" SERIAL4 PRIMARY KEY,
+  "number" INT8, 
+  "perform_procedure_id" INT4[],
+  "title" JSONB,
+  "ts" TIMESTAMPTZ
+);
+
 create TABLE messages(
   "id" SERIAL4 PRIMARY KEY,
   "ticket" TEXT, 

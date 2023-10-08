@@ -37,7 +37,7 @@ export default function Login() {
           password:   data.get('password'),
           remember:   data.get('remember'),
         })
-        auth.login(res.token, res.user.id)
+        auth.login(res.token, res.user.id, res.user.usertype_id);
         Redirect(res.user.usertype_id)
       } catch (e) {
         console.log('error:', e)

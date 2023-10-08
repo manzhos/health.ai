@@ -61,7 +61,7 @@ export default function LoginPartner() {
           setPassRestore(true);
           break;
         default:
-          auth.login(res.token, res.user.id)
+          auth.login(res.token, res.user.id, res.user.usertype_id)
           navigate('/partner')
       }
     } catch (e) {

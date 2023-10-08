@@ -12,7 +12,7 @@ import './css/style.css';
 // import { BaseOptionChartStyle } from './components/chart/BaseOptionChart';
 import {Loader} from './components/Loader'
 
-import BetaButton from './components/BetaButton';
+// import BetaButton from './components/BetaButton';
 
 // const theme = createMuiTheme({
 //   typography: {
@@ -25,7 +25,7 @@ import BetaButton from './components/BetaButton';
 // ----------------------------------------------------------------------
 
 export default function App() {
-  const {token, login, logout, userId, ready} = useAuth();
+  const {token, login, logout, userId, userTypeId, ready} = useAuth();
   const isAuthenticated = !!token;
   const routes = useMyRoutes(isAuthenticated);
 
@@ -36,7 +36,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthContext.Provider value={{
-        token, login, logout, userId, isAuthenticated
+        token, login, logout, userId, userTypeId, isAuthenticated
       }}>
         {/* <ScrollToTop /> */}
         {/* <BaseOptionChartStyle /> */}

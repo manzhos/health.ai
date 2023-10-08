@@ -400,7 +400,7 @@ export default function Client() {
                         aria-checked={isItemSelected}
                       >
                         <TableCell padding="checkbox">
-                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, firstname)} />
+                          <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, id)} />
                         </TableCell>
                         <TableCell component="th" scope="row" padding="none" onClick={(event) => getUser(event, id)}>
                           <Stack direction="row" alignItems="center" spacing={2}>

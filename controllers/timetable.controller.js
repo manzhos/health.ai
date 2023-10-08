@@ -78,7 +78,11 @@ class TimeTableController {
 
   }
   async deleteRecord(req, res){
-    console.log('delete Record by ID')
+    const bookingId = req.params.id;
+    // console.log('bookingId:', bookingId);
+    const response = await DB.query('DELETE FROM timetable WHERE id = $1 RETURNING *', [bookingId]);
+    // console.log('deleted:', response);
+    res.send({'message':'booking successfull deleted'})
   }
 
   async getRecordsByDoctor(req, res){

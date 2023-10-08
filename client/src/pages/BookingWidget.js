@@ -31,9 +31,10 @@ export default function BookingFree(){
   const {request} = useHttp()
   const navigate  = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams();
+
   const source = searchParams.get("source");
   const procedureTypeIdDefault = searchParams.get("procedureTypeIdDefault") || 4;
-  const procedureIdDefault = searchParams.get("procedureId") || 1;
+  const procedureIdDefault = searchParams.get("procedureId") || 2;
   const windowWidth = searchParams.get("windowWidth") || 640;
   // const windowHeight  = searchParams.get("windowHeight");
 
@@ -80,57 +81,18 @@ export default function BookingFree(){
   }, [request])
   useEffect(() => {getDoctors()}, [getDoctors]); 
 
-  let s = [], t = [],  busy = [];
-
   // get the data about doctors procedure
   const getRecordsByDoctor = async () => {
-    console.log('getRecordsByDoctor:', doctor);
+    // console.log('getRecordsByDoctor:', doctor);
     if(!doctor) return;
     try {
       const res = await request(`${API_URL}api/tt_bydoctor/${doctor}`, 'GET', null, {})
-      console.log('tt_bydoctor:', res);
+      // console.log('tt_bydoctor:', res);
       setRecordList(res);
-      busy.length = 0;
+      // busy.length = 0;
     } catch(error) { console.log('error:', error) }
   }
   useEffect(() => {getRecordsByDoctor()}, [doctor])   
-
-  const filterRecordsByDate = () => {
-    // console.log('currentDate:', currentDate);
-    recordList.map(item => {
-      // console.log('item:', item);
-      const rd = new Date(item.date);
-      // console.log('r:', rd, currentDate);
-      // console.log('r:', rd.getDate(), currentDate.getDate());
-      if(rd.getFullYear() === currentDate.getFullYear() && rd.getMonth() === currentDate.getMonth() && rd.getDate() === currentDate.getDate()) {
-        busy.push({
-          'from'  : item.time,
-          'total' : item.duration
-        })
-      }
-    })
-    // console.log('final busy:', busy);
-    busy.forEach((item)=>{
-      item.fromMin = Number(item.from.slice(0, 2))*60 + Number(item.from.slice(3));
-      for(let i=item.fromMin; i<=(item.fromMin + item.total); i+=30) t.push(i);
-      // console.log('busy time:', t);
-    })
-    s.length=0;
-    // slots = [{'time':'10:00'}, {'time':'11:00'}, {'time':'12:00'}, {'time':'13:00'}, {'time':'14:00'}, {'time':'15:00'}]
-    // working hours 10:00 - 17:00 (time interval 30 minutes)
-    for(let i = 10*60; i < 21*60; i+=30){
-      if(t.includes(i)) continue;
-      let h = Math.trunc(i/60);
-      let m = '00';
-      if(i%60 !== 0) m = i-(Math.trunc(i/60)*60);
-      // console.log('time:', (h + ':' + m));
-      s[i] = {'time':(h + ':' + m)};
-      // console.log(`s[${i}]=`, s[i]);
-    }
-    setSlots(s);
-    // console.log('slots:', slots, 'for doctor:', doctor);
-  }
-  useEffect(()=>{filterRecordsByDate()}, [recordList]);
 
   const getReceptions = async () => {
     // console.log('try to take receptions');
@@ -144,46 +106,71 @@ export default function BookingFree(){
   useEffect(()=>{getReceptions()}, [doctor])
 
   const getSlots = () => {
-    const s = {};
+    // working hours
+    const timeStartDay = 8, // hour of the starting
+          timeEndDay   = 21, // hour of the ending
+          timeInterval = 15; // time interval - 15 minutes
+    let freeSlotDay = {}, tmpSlot = [], busy = [], busyTimeInMinutes = [], freeSlot = {};
+
     days.map((day) => {
-      let tmpSlots = [];
-      receptionList.map((el) => {
-        let recDate = getOnlyDate(el.date);
-        let dayDate = getOnlyDate(day);
-        // console.log('recDate:', recDate);
-        // console.log('dayDate:', dayDate);
-        if(recDate === dayDate) {
-          for (let t in el.time) {
-            console.log(`el.time[${t}]:`, el.time[t]);
-            if(el.time[t]) {
-              tmpSlots.push({'time' : (t + ':00')});
+      // let tmpSlot = [];
+      const dayDate = getOnlyDate(day);
+      // console.log('receptionList:', receptionList);
+      // console.log('recordList:', recordList);
+      tmpSlot.length = 0;
+      receptionList.map(item => {
+        const receptDate = getOnlyDate(new Date(item.date));
+        if(receptDate === dayDate) {
+          for (let t in item.time) {
+            // console.log(`item.time[${t}]:`, item.time[t]);
+            if(item.time[t]) {
+              tmpSlot.push(Number(t)*60);
             }
           }
         }
-      });
-      // console.log('tmpSlots:', tmpSlots);
-      s[day] = tmpSlots//.length ? tmpSlots : [{}];
-    });
+      })
+      // console.log(`tmpSlot ${dayDate}:`, tmpSlot);
 
-    // console.log('pre   S:', s);
-    
-    recordList.map((record) => {
-      const recordDate = getOnlyDate(record.date);
-      // console.log('REC:', record);
-      for(let day in s) {
-        // console.log(day);
-        const sDate = getOnlyDate(Number(day));
-        // console.log(sDate, recordDate)
-        if (sDate === recordDate){
-          // console.log(s[day])
-          s[day] = s[day].filter(el => el.time !== record.time)
+      busy.length = 0;
+      recordList.map(item => {
+        const recordDate = getOnlyDate(new Date(item.date));
+        if(recordDate === dayDate) {
+          busy.push({
+            'from'  : item.time,
+            'total' : item.duration
+          })
+        }
+      })
+      // console.log(`busy ${dayDate}:`, busy);
+
+      busyTimeInMinutes.length = 0;
+      busy.forEach((item)=>{
+        item.fromMin = Number(item.from.slice(0, 2))*60 + Number(item.from.slice(3));
+        for(let i=item.fromMin; i<(item.fromMin + item.total); i+=timeInterval) busyTimeInMinutes.push(i);
+        // console.log('busy time:', t);
+      })
+      // console.log(`busyTimeInMinutes ${dayDate}:`, busyTimeInMinutes);
+
+      Object.keys(freeSlotDay).forEach(key => delete freeSlotDay[key]);
+      for(let i = timeStartDay*60; i < timeEndDay*60; i+=timeInterval){
+        // console.log('Create slot:', i, busyTimeInMinutes.includes(i))
+        if(tmpSlot.includes(i) || tmpSlot.includes(i - timeInterval) || tmpSlot.includes(i - timeInterval*2) || tmpSlot.includes(i - timeInterval*3)){
+          if(busyTimeInMinutes.includes(i)) continue;
+          // console.log('Create slot:', i, i - timeInterval, i - timeInterval*2, i - timeInterval*3)
+            let h = Math.trunc(i/60);
+            let m = '00';
+            if(i%60 !== 0) m = i-(Math.trunc(i/60)*60);
+            freeSlotDay[i] = {'time':(h + ':' + m)};
+            // console.log('time:', (h + ':' + m));
+            // console.log(`s[${i}]=`, s[i]);
+          // }
         }
       }
+      freeSlot[day] = { ...freeSlotDay };
     })
-    // console.log('after S:', s);
 
-    setSlots(s);
-    // console.log('SP slots:', slots);        
+    setSlots(freeSlot);
+    // console.log('SP slots:', freeSlot);
   }
   useEffect(() => {getSlots()}, [receptionList]);
 
@@ -279,7 +266,7 @@ export default function BookingFree(){
     //   setDoctorSelected(arr)
     // }
   }
-  useEffect(() => {console.log('new doctor:', doctor)}, [doctor]);
+  // useEffect(() => {console.log('new doctor:', doctor)}, [doctor]);
 
   const handleClickDoctor = () => {
     const index = doctorList.findIndex((el) => el.id === doctor)
@@ -295,13 +282,13 @@ export default function BookingFree(){
   const setPeriod = () => {
     let period = Math.floor(windowWidth/100);
     let newDays = []
-    console.log('setPeriod:', period);
+    // console.log('setPeriod:', period);
     for(let i=0; i<period; i++){
       newDays[i] = new Date(currentDate);
       newDays[i] = newDays[i].setDate(newDays[i].getDate() + i);
     }
     setDays(newDays);
-    console.log('setPeriod >>> days:', newDays);
+    // console.log('setPeriod >>> days:', newDays);
   }
   useEffect(()=>{setPeriod()},[currentDate])
 
