@@ -31,6 +31,9 @@ router.get('/user/:id', userController.getUser)
 router.post('/user/:id', userController.updateUser)
 router.get('/deluser/:id', userController.deleteUser)
 
+router.get('/checkuser_byemail/:email', userController.checkUserByEmail)
+router.get('/checkuser_byphone/:phone', userController.checkUserByPhone)
+
 router.get('/partners', userController.getPartners)
 router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)

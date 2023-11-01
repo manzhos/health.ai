@@ -44,24 +44,27 @@ class MailController {
   }
 
   async createMail(req, res){
-    let {subject, body, type, date, time, adressee} = req.body;
+    let {subject, body, type, send_date, date, time, adressee} = req.body;
     const mailList = adressee.split(',');
-    // console.log('adressee:', typeof(mailList), mailList);
+    console.log('adressee:', typeof(mailList), mailList);
     const ts = new Date();
-    if(!date) return;
-    let sd = date.split(' ');
-    console.log('sd', sd);
-    sd[4] = (time ? time : '00') + ':00';
-    // console.log('date, time:', ts.join(' '));
-    const sendDate = new Date(sd.join(' '));
-    // console.log('sendDate:', sendDate);
+    if(!date && !send_date) return;
+    let sd;
+    if(!send_date){
+      sd = date.split(' ');
+      console.log('sd', sd);
+      sd[4] = (time ? time : '00') + ':00';
+      // console.log('date, time:', ts.join(' '));
+    }
+    const sendDate = send_date || new Date(sd.join(' '));
+    console.log('sendDate:', sendDate);
     const sql = `
       INSERT INTO mails 
       (subject, body, type, senddate, adressee, ts) 
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *`;
     const newMail = await DB.query(sql, [subject, body, type, sendDate, mailList, ts]);
-    // console.log('NEW MAIL:', newMail);
+    console.log('NEW MAIL:', newMail);
     res.send(newMail.rows[0]);
   }
 

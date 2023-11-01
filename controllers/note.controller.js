@@ -118,17 +118,19 @@ class NoteController {
   
   async createDoc(req, res){
     // save to DB
-    let {note, client_id, doctor_id, procedure_id, services, cost, medind, diagnosis} = req.body;
+    let {note, timetable_id, client_id, doctor_id, procedure_id, services, botox_what, cost, medind, diagnosis} = req.body;
     const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts, doc_type, invoice) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *';
     let ts = new Date();
-    services.push({
-      'cost'      : cost,
-      'medind'    : medind,
-      'diagnosis' : diagnosis
-    });
-    console.log('createDoc:', 'invoice', note, client_id, doctor_id, procedure_id, JSON.stringify(services), ts);
-    const newDoc = await DB.query(sql,['invoice', note, client_id, doctor_id, procedure_id, ts, 1, JSON.stringify(services)]);
-    // console.log('newDoc:', newDoc.rows);
+    let details = {
+      'timetable_id': timetable_id,
+      'cost'        : cost,
+      'medind'      : medind,
+      'diagnosis'   : diagnosis,
+      'botox_what'  : botox_what
+    };
+    console.log('createDoc:', 'invoice', note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}), ts);
+    const newDoc = await DB.query(sql,['invoice_' + timetable_id, note, client_id, doctor_id, procedure_id, ts, 1, JSON.stringify({'details': details, 'services': services})]);
+    console.log('newDoc:', newDoc.rows);
     res.send(newDoc.rows[0]);
   }
 
@@ -278,8 +280,9 @@ class NoteController {
 
     let inv_number,
         lastNumber = await DB.query('SELECT number FROM invoices ORDER BY number DESC LIMIT 1');
-    lastNumber = lastNumber.rows[0].number;
-    // console.log('lastNumber:', lastNumber);
+    if(lastNumber.rows[0]?.number) lastNumber = lastNumber.rows[0].number;
+    else lastNumber = '000001';
+    console.log('lastNumber:', lastNumber);
     
     const year = Number(String(lastNumber).slice(0, 4));
     const currentYear = new Date().getFullYear();
@@ -342,20 +345,33 @@ class NoteController {
   }
 
   async updateDoc(req, res){
-    const id = req.params.id
-    const {title, note, client_id, doctor_id, procedure_id} = req.body
-    // console.log(id, title, note, client_id, doctor_id, procedure_id);
-    const sql =`
-    UPDATE notes SET
-    title        = $2,
-    note         = $3,
-    client_id    = $4,
-    doctor_id    = $5,
-    procedure_id = $6
-    WHERE id = $1;`
-    await DB.query(sql, [id, title, note, client_id, doctor_id, procedure_id])
-    // console.log(`note #${id} was updates`)
-    res.send(true) 
+    const id = req.params.id;
+    let {note, timetable_id, client_id, doctor_id, procedure_id, services, botox_what, cost, medind, diagnosis} = req.body;
+    const sql = `
+      UPDATE notes SET
+        note         = $2, 
+        client_id    = $3, 
+        doctor_id    = $4, 
+        procedure_id = $5, 
+        invoice      = $6
+      WHERE id = $1
+    `;
+    const details = {
+      'timetable_id': timetable_id,
+      'cost'        : cost,
+      'medind'      : medind,
+      'diagnosis'   : diagnosis,
+      'botox_what'  : botox_what
+    };
+    console.log('updateDoc:', id, note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}));
+    try {
+      const updatedDoc = await DB.query(sql, [id, note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services})]);
+      console.log('updatedDoc:', updatedDoc.rows);
+      res.send(true);
+    } catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
   }
   
   async deleteDoc(req, res){
@@ -393,9 +409,25 @@ class NoteController {
       WHERE doc_type = 1
       AND client_id = $1
     ;`
-    const note = await DB.query(sql,[client_id])
+    const note = await DB.query(sql, [client_id])
     // console.log(`note for ${client_id}:`, note.rows)
     res.send(note.rows)
+  }
+
+  async getProcedureDataFromInvoice(req, res){
+    const title = 'invoice_' + req.params.id;
+    console.log('getProcedureDataFromInvoice FOR:', title);
+    const sql = `
+      SELECT * FROM notes WHERE title = $1
+    ;`
+    try{
+      const invoice = await DB.query(sql, [title]);
+      console.log('invoice.rows[0]:', invoice.rows[0]);
+      res.send(invoice.rows[0]);
+    } catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
   }
 
 }

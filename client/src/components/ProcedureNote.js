@@ -30,7 +30,6 @@ import { useHttp } from '../hooks/http.hook'
 import Confirm from "./Confirm";
 
 export default function ProcedureNote({ procedure, onSave }){
-  console.log('procedure:', procedure);
   const {request} = useHttp();
   const {token, userId, userTypeId}   = useContext(AuthContext);
 
@@ -62,11 +61,38 @@ export default function ProcedureNote({ procedure, onSave }){
   const [doctorList, setDoctorList] = useState([]);
   const [procedureList, setProcedureList] = useState([]);
 
+  const [noteId, setNoteId] = useState();
   const [clientId, setClientId] = useState(procedure.client_id);
   const [doctorId, setDoctorId] = useState(procedure.doctor_id);
   const [procedureFinal, setProcedureFinal] = useState(procedure.procedure_id);
 
   const [confirmData, setConfirmData] = useState({});
+
+  useEffect(()=>{
+    console.log('popup popuped:', procedure.is_invoiced);
+    if(procedure.is_invoiced) getProcedureDataFromInvoice();
+  }, []);
+  const getProcedureDataFromInvoice = async () => {
+    console.log('getProcedureDataFromInvoice')
+    try{
+      const procedureData = await request(`${API_URL}api/getproceduredata_frominvoice/${procedure.timetable_id}`, 'GET', null, {
+        Authorization: `Bearer ${token}`
+      })
+      console.log('procedureData:', procedureData);
+
+      setNoteId(procedureData.id);
+      setNote(procedureData.note);
+      setProcedureFinal(procedureData.procedure_id);
+      setClientId(procedureData.client_id);
+      setDoctorId(procedureData.doctor_id);
+      setMedind(procedureData.invoice.details.medind);
+      setDiagnosis(procedureData.invoice.details.diagnosis); 
+      setCheckoutList(procedureData.invoice.services); 
+      setTotal(procedureData.invoice.details.cost);
+      setBotoxWhat(procedureData.invoice.details.botox_what);
+
+    } catch (e) { console.log('error:', e)}
+  }
 
   const getClients = useCallback(async () => {
     try {
@@ -145,21 +171,54 @@ export default function ProcedureNote({ procedure, onSave }){
   },[checkoutList]);
 
   const saveNote = async () => {
-    // note, client_id, doctor_id, procedure_id, services, cost
-    try {
-      const res = await request(`${API_URL}`+'api/doc', 'POST', {
-        procedure_id  : procedureFinal, 
-        client_id     : clientId, 
-        doctor_id     : doctorId, 
-        note          : note, 
-        medind        : medind, 
-        diagnosis     : diagnosis, 
-        services      : checkoutList,
-        cost          : total
-      })
-      // auth.login(data.token, data.userId)
-      onSave();
-    } catch (e) {console.log('error:', e)} 
+    let success = {'save':false, 'update':false};
+    // console.log('procedure.timetable_id, note, client_id, doctor_id, procedure_id, services, cost:::::\n', procedure.timetable_id, note, clientId, doctorId, procedureFinal, checkoutList, total)
+    if(procedure.is_invoiced){
+      try {
+        const res = await request(`${API_URL}api/doc/${noteId}`, 'POST', {
+          timetable_id  : procedure.timetable_id,
+          procedure_id  : procedureFinal, 
+          client_id     : clientId, 
+          doctor_id     : doctorId, 
+          note          : note, 
+          medind        : medind, 
+          diagnosis     : diagnosis, 
+          botox_what    : botoxWhat,
+          services      : checkoutList,
+          cost          : total
+        })
+        onSave();
+      } catch (e) {console.log('error:', e)} 
+    }
+    else{      
+      try {
+        const res = await request(`${API_URL}`+'api/doc', 'POST', {
+          timetable_id  : procedure.timetable_id,
+          procedure_id  : procedureFinal, 
+          client_id     : clientId, 
+          doctor_id     : doctorId, 
+          note          : note, 
+          medind        : medind, 
+          diagnosis     : diagnosis, 
+          botox_what    : botoxWhat,
+          services      : checkoutList,
+          cost          : total
+        })
+        // auth.login(data.token, data.userId)
+        success.save = true;
+      } catch (e) {console.log('error:', e)} 
+
+      try {
+        const res = await request(`${API_URL}api/setprocedure_invoiced/${procedure.timetable_id}`, 'PATCH', null, {
+          Authorization: `Bearer ${token}`
+        })
+        success.update = true;
+      } catch (e) {console.log('error:', e)} 
+  
+      if(success.save && success.update) onSave();
+      else alert('DB error -- nothing saved');
+    }
+
   }
 
   const delRecord = (bookingId) => {
@@ -193,7 +252,7 @@ export default function ProcedureNote({ procedure, onSave }){
         {/* <Scrollbar> */}
           <Grid container>
             <Grid item xs={12} sm={4}>
-              <FormControl sx={{ width:'90%' }}>
+              <FormControl sx={{ width:'90%', mb:3 }}>
                 <InputLabel id="procedure-select">Procedure</InputLabel>
                 <Select
                   labelId="procedure-select"
@@ -268,16 +327,16 @@ export default function ProcedureNote({ procedure, onSave }){
               {/* Note regarding Botox */}
               {procedure.title === 'BTX-A treatment' && 
                 <Grid container spacing={2}>
-                  <Grid item xs={4} sm={4}>
+                  <Grid item xs={12} sm={4}>
                     <img src="/static/face_scheme.svg" />
                   </Grid>
-                  <Grid item xs={1} sm={1}>&nbsp;</Grid>
-                  <Grid item xs={7} sm={7}>
+                  <Grid item xs={0} sm={1}>&nbsp;</Grid>
+                  <Grid item xs={12} sm={7}>
                     <Grid container>
                       <Grid item xs={12} sm={12}>
                         <FormControl sx={{ mt: 3 }}>
-                          <FormLabel id="botox-what">What drug was used for the procedure?</FormLabel>  
-                          <RadioGroup row aria-labelledby="botox-what" name="botox-what" defaultValue="0">
+                          <FormLabel id="botoxWhat">What drug was used for the procedure?</FormLabel>  
+                          <RadioGroup row aria-labelledby="botoxWhat" name="botoxWhat" value={botoxWhat}>
                             <FormControlLabel value="0" control={<Radio size="small" />}  label="Allergan BTX"  onChange={(e)=>{setBotoxWhat(e.target.value)}} />
                             <FormControlLabel value="1" control={<Radio size="small" />}  label="Azzalure"      onChange={(e)=>{setBotoxWhat(e.target.value)}} sx={{ml:2}}/>
                             <FormControlLabel value="2" control={<Radio size="small" />}  label="Bocoutur"      onChange={(e)=>{setBotoxWhat(e.target.value)}} sx={{ml:2}}/>

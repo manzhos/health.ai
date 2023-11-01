@@ -24,4 +24,6 @@ router.post('/bill', noteController.updateInvoices)
 router.get('/invoicesetpaid/:id', noteController.setInvoicePaid)
 router.post('/get_perf_procedures', noteController.getPerfProcedures)
 
+router.get('/getproceduredata_frominvoice/:id', noteController.getProcedureDataFromInvoice)
+
 module.exports = router 

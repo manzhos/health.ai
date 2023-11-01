@@ -28,7 +28,7 @@ class ProcedureController {
     `
     // console.log('SQL:', sql);
     const procedures = await DB.query(sql)
-    console.log('Procedures:', procedures.rows)
+    // console.log('Procedures:', procedures.rows)
     res.send(procedures.rows)
   }
 
@@ -231,12 +231,13 @@ class ProcedureController {
       SELECT 
         tt.id,
         tt.procedure_id AS procedure_id,
-        tt.user_id    AS client_id,
-        uc.firstname  AS client_firstname,
-        uc.lastname   AS client_lastname,
-        tt.doctor_id  AS doctor_id,
-        ud.firstname  AS doctor_firstname,
-        ud.lastname   AS doctor_lastname,
+        tt.is_invoiced  AS is_invoiced,
+        tt.user_id      AS client_id,
+        uc.firstname    AS client_firstname,
+        uc.lastname     AS client_lastname,
+        tt.doctor_id    AS doctor_id,
+        ud.firstname    AS doctor_firstname,
+        ud.lastname     AS doctor_lastname,
         p.procedure,
         tt.duration,
         date,
@@ -253,6 +254,24 @@ class ProcedureController {
     const procedures = await DB.query(sql)
     // console.log('procedures:', procedures.rows)
     res.send(procedures.rows)    
+  }
+
+  async updateTimeTableProceduresById(req, res){
+    const id = req.params.id
+    // save to DB
+    // console.log('set invoiced procedure:', id);
+    const sql =`
+      UPDATE timetable SET
+        is_invoiced = true
+      WHERE id = $1;`
+    try{
+      await DB.query(sql, [id]);
+      console.log(`procudure #${id} was updates`)
+      res.send(true) 
+    } catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
   }
 
 }

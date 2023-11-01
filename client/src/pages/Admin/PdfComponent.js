@@ -32,7 +32,7 @@ const PdfComponent = ({open, perfProcedureIds, onClose}) => {
       const procedures = await request(`${API_URL}api/get_perf_procedures`, 'POST', {
         'ids': perfProcedureIds
       }, { Authorization: `Bearer ${token}` });
-      // console.log('procedures', procedures);
+      console.log('procedures', procedures);
       const checkInvoice = procedures.find(p => p.bill);
       // console.log('checkInvoice', checkInvoice);
       if(checkInvoice) setIsBill(true);
@@ -102,7 +102,7 @@ const PdfComponent = ({open, perfProcedureIds, onClose}) => {
     globalPerfProcedures = [...perfProcedures];
     globalPerfProcedures.map((procedure)=>{
       procedure.cost = procedure.procedure_cost;
-      procedure.services.map((service)=>{
+      procedure.services.services.map((service)=>{
         if(typeof service.cost      !== "undefined") procedure.cost       = service.cost
         if(typeof service.medind    !== "undefined") procedure.medind     = service.medind
         if(typeof service.diagnosis !== "undefined") procedure.diagnosis  = service.diagnosis
@@ -130,10 +130,10 @@ const PdfComponent = ({open, perfProcedureIds, onClose}) => {
           'procedure'         : procedure.procedure,
           'procedure_cost'    : procedure.procedure_cost,
           'procedure_id'      : procedure.procedure_id,
-          'services'          : procedure.services,
+          'services'          : procedure.services.services,
           'date'              : (d.getDate() > 9 ? d.getDate() : '0' + d.getDate()) + '.' + (d.getMonth() + 1 > 9 ? d.getMonth() + 1 : '0' + (d.getMonth() + 1)) + '.' + d.getFullYear(),
-          'qty'               : procedure.services[0].qty,
-          'cost'              : procedure.services[0].cost,
+          'qty'               : procedure.services.details.qty,
+          'cost'              : procedure.services.details.cost,
           'medind'            : procedure.medind,
           'diagnosis'         : procedure.diagnosis,
         }

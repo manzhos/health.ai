@@ -77,7 +77,8 @@ window.onload = function(){
       transform: translate(-50%, 0); 
       overflow: hidden;
       box-shadow: 0 3px 20px 1px rgba(0, 0, 0, .3); 
-      background: #FCFBFD url(http://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
+      background: antiquewhite;
+      // background: #FCFBFD url(https://health.sy-way.com/static/elegance_bg.jpg) center center no-repeat;
       background-size: cover;
     `;
   };

@@ -76,6 +76,7 @@ export default function TimeTable(){
           'doctor_firstname': el.doctor_firstname,
           'doctor_lastname' : el.doctor_lastname,
           'procedure_id'    : el.procedure_id,
+          'is_invoiced'     : el.is_invoiced,
           'start'           : start,
           'end'             : end,
         }
@@ -142,9 +143,11 @@ export default function TimeTable(){
   // }
 
   const handleSelectProcedure = (event) => {
-    // console.log(event)
+    console.log('handleSelectProcedure:', event);
     setProcedure({
       'id'              : event.id,
+      'timetable_id'    : event.id,
+      'is_invoiced'     : event.is_invoiced,
       'title'           : event.title, 
       'client_id'       : event.client_id,
       'client_firstname': event.client_firstname,

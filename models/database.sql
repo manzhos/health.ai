@@ -63,6 +63,7 @@ create TABLE timetable(
   "time" TEXT, 
   "duration" INT2,
   "consultation" BOOLEAN DEFAULT false,   
+  "is_invoiced" BOOLEAN DEFAULT false,   
   "final_cost" INT2,
   "points" INT2,
   "ts" TIMESTAMPTZ

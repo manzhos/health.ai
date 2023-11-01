@@ -1,10 +1,37 @@
 import React, {useState, forwardRef, useEffect} from "react";
 
 export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdate, onProcedureUpdate}, ref) => {
-  // console.log('ComponentToPrint >>> inv:', inv);
+  console.log('ComponentToPrint >>> inv:', inv);
   // console.log('ComponentToPrint >>> perfProcedures:', perfProcedures);
   const [invoice, setInvoice] = useState(inv);
   const [procedures, setProcedures] = useState(perfProcedures);
+
+  const getOnlyDate = (d) => {
+    if(!d) return ' '
+    d = new Date(d);
+    return d.getDate() + '.' + (Number(d.getMonth()) + 1) + '.' + d.getFullYear()
+  }
+
+  if(!invoice.title.date || invoice.title.date === '') {
+    let title = {... invoice.title};
+    title.date = getOnlyDate(new Date());
+    if(!title.payDate || title.payDate === '') title.payDate = title.date;
+    if(!title.leistungsdatum || title.leistungsdatum === '') title.leistungsdatum = title.date;
+    setInvoice(prevState => ({...prevState, ['title']:title}))
+  }
+  if(!invoice.title.payDate || invoice.title.payDate === '') {
+    let title = {... invoice.title};
+    title.payDate = getOnlyDate(new Date());
+    if(!title.leistungsdatum || title.leistungsdatum === '') title.leistungsdatum = title.payDate;
+    setInvoice(prevState => ({...prevState, ['title']:title}))
+  }
+  if(!invoice.title.leistungsdatum || invoice.title.leistungsdatum === '') {
+    let title = {... invoice.title};
+    title.leistungsdatum = getOnlyDate(new Date());
+    setInvoice(prevState => ({...prevState, ['title']:title}))
+  }
+
+  // useEffect(()=>{console.log('invoice:', invoice)},[invoice]);
 
   const handleChangeProcedures = async(event, id) => {
     const {name, value} = event.target;
@@ -22,7 +49,7 @@ export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdat
 
   const handleChangeInvoice = (event) => {
     const { name, value } = event.target;
-    // console.log('Event >> name, value:', name, value);
+    console.log('Event >> name, value:', name, value);
     let title = invoice.title;
     title[name] = value;
     setInvoice(prevState => ({...prevState, ['title']:title}))
@@ -94,7 +121,7 @@ export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdat
                 <tr>
                   <td style={{ background:"lightgray", border:"1px solid lightgray", padding:"7px 40px 7px 20px" }}>Fälligkeitsdatum</td>
                   <td style={{ border:"1px solid lightgray", width:"140px", paddingLeft:"20px" }}>
-                    <input className='input-blank' id="date" name="date" onChange={(event)=>{handleChangeInvoice(event)}} value={invoice.title?.payDate}/>
+                    <input className='input-blank' id="date" name="payDate" onChange={(event)=>{console.log(event); handleChangeInvoice(event)}} value={invoice.title?.payDate}/>
                   </td>
                 </tr>
               </table>
@@ -108,32 +135,35 @@ export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdat
       <table style={{ width:"100%", borderCollapse:"collapse" }}>
         <thead style={{ background:"lightgray" }}>
           <tr style={{height:"44px"}}>
-            <th style={{ width:"24px", textAlign:"center" }}>#</th>
+            <th style={{ width:"44px", textAlign:"center" }}>#</th>
             {/* <th style={{width:"30px"}}>Id</th> */}
-            <th style={{width:"300px"}}>{'Beschreibung'}</th>
-            <th style={{ textAlign:"center" }}>{'Anzahl'}</th>
-            <th style={{ textAlign:"center" }}>{'Einzelpreis'}</th>
-            <th style={{ textAlign:"center" }}>{'MWST (19%)' }</th>
-            <th style={{ textAlign:"center" }}>{'Gesamtpreis'}</th>
+            <th style={{ width:"350px" }}>{'Beschreibung'}</th>
+            <th style={{ width:"100px" }}>{'Leistungsdatum'}</th>
+            <th style={{ textAlign:"center", width:"80px" }}>{'Anzahl'}</th>
+            <th style={{ textAlign:"center", width:"100px" }}>{'Einzelpreis'}</th>
+            <th style={{ textAlign:"center", width:"100px" }}>{'MWST (19%)' }</th>
+            <th style={{ textAlign:"center", width:"100px" }}>{'Gesamtpreis'}</th>
           </tr>
         </thead>
         <tbody>
-          {procedures.map((procedure)=>{
+          {procedures.map((procedure, index)=>{
             procedure.bill.mwst = procedure.bill.mwst ? procedure.bill.mwst : false;
             procedure.bill.qty  = procedure.bill.qty   ? procedure.bill.qty : 1;
             const mwst = 1.19;
             return(
               <tr style={{height:"44px"}}>
-                <td style={{ width:"24px", textAlign:"center" }}>1</td>
+                <td style={{ width:"44px", textAlign:"center" }}>{index + 1}</td>
                 {/* <td>{procedure.procedure_id}</td> */}
                 <td>{procedure.bill?.procedure}</td>
-                <td><input className='input-blank' style={{ textAlign:"center" }} id={"qty_procedure_" + procedure.bill?.id}  name="qty"  onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.qty} /></td>
-                <td><input className='input-blank' style={{ textAlign:"center" }} id={"cost_procedure_" + procedure.bill?.id} name="cost" onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.procedure_cost} /></td>
+                {/* <td>{procedure.bill?.leistungsdatum}</td> */}
+                <td><input className='input-blank' style={{ textAlign:"center" }} id={"qty_leistungsdatum_" + procedure.bill?.id} name="leistungsdatum" onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.leistungsdatum} /></td>
+                <td><input className='input-blank' style={{ textAlign:"center" }} id={"qty_procedure_"      + procedure.bill?.id} name="qty"            onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.qty} /></td>
+                <td><input className='input-blank' style={{ textAlign:"center" }} id={"cost_procedure_"     + procedure.bill?.id} name="procedure_cost" onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} value={procedure.bill?.procedure_cost} /></td>
                 <td style={{ textAlign:"center" }}>
                   <input type="checkbox" id={"MWST19_procedure_" + procedure.bill?.id} name="mwst" checked={procedure.bill?.mwst} onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} />
                   {/* <Checkbox checked={procedure.bill.mwst} value={procedure.bill.mwst} onChange={(event)=>{handleChangeProcedures(event, procedure.bill.id)}} /> */}
                 </td>
-                <td style={{ textAlign:"center" }}>{Number(procedure.bill?.qty) * Number(procedure.bill?.procedure_cost) * (procedure.bill.mwst ? mwst : 1)}</td>
+                <td style={{ textAlign:"center" }}>{(Number(procedure.bill?.qty) * Number(procedure.bill?.procedure_cost) * (procedure.bill.mwst ? mwst : 1)).toFixed(2)}</td>
               </tr>
             )
           })}
@@ -146,21 +176,7 @@ export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdat
           <td>
             <div style={{ paddingRight:"30px"}}>
               <p>
-                Liebe Patientin, lieber Patient,
-              </p>
-              <p>
-                bitte überweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt auf folgendes Konto:
-              </p>
-              <p>&nbsp;</p>
-              <p>
-                Kontoinhaber: <b>Kamil Akhundov</b> <br/>
-                Kreditinstitut: <b>Berliner Sparkasse</b> <br/>
-                IBAN: <b>DE46 1005 0000 0190 9438 23</b> <br/>
-                BIC: <b>BELADEBEXXX</b>
-              </p>
-              <p>&nbsp;</p>
-              <p>
-                bitte uberweisen Sie den Betrag innerhalb von 14 Tagen nach Rechnungserhalt auf folgendes Konto:
+                Liebe Kunde das Zahlungsdatum entspricht<br/>dem auf der Rechnung´s Fälligkeitsdatum.<br/>Rechnungserhalt auf folgendes Konto:
               </p>
               <p>&nbsp;</p>
               <p>
@@ -180,6 +196,16 @@ export const ComponentToPrint = forwardRef(({inv, perfProcedures, onInvoiceUpdat
                     { 
                       procedures.reduce((sumMwst, procedure) => sumMwst + (procedure.bill.mwst ? (procedure.bill.qty * procedure.bill.procedure_cost) * 0.19 : 0), 0).toFixed(2)
                     } &#8364;
+                  </td>
+                </tr>
+                <tr>
+                  <td><b>{'Netto'}</b></td>
+                  <td style={{ width:"80px" }}>
+                    <b>
+                      {
+                        procedures.reduce((sumMwst, procedure) => sumMwst + (procedure.bill.qty * procedure.bill.procedure_cost), 0).toFixed(2)
+                      } &#8364;
+                    </b>
                   </td>
                 </tr>
                 <tr>
