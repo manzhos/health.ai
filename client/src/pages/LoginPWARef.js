@@ -48,7 +48,7 @@ export default function LoginPWARef() {
         ref_id:   refId
       })
       // console.log('res:', res)
-      auth.login(res.token, res.user.id)
+      auth.login(res.token, res.user.id, res.user.usertype_id)
       navigate('/consult')
     } catch (e) {
       console.log('error:', e)
@@ -80,15 +80,9 @@ export default function LoginPWARef() {
           setPassRestore(true);
           break;
         default:
-          auth.login(res.token, res.user.id)
+          auth.login(res.token, res.user.id, res.user.usertype_id)
           navigate('/dashboard')
       }
-      // if(res.status === 'newuser'){
-      //   setNewUser(true);
-      // } else {
-      //   auth.login(res.token, res.user.id)
-      //   navigate('/dashboard')
-      // }
     } catch (e) {
       console.log('error:', e.errors)
       alert('Please check your login and password details.')

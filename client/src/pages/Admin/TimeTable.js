@@ -44,25 +44,15 @@ const localizer = dateFnsLocalizer({
 
 export default function TimeTable(){
   const {request} = useHttp()
-  const {token}   = useContext(AuthContext)
+  const {token, userId, userTypeId}   = useContext(AuthContext)
 
-  function parseJwt (token) {
-    if(token && token !== ''){
-      var base64Url = token.split('.')[1]
-      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      }).join(''))
-      return JSON.parse(jsonPayload)
-    }
-  };
-  const pJWT = parseJwt(token)
-  const userId = pJWT ? pJWT.userId : null
-  // console.log('UserId:', userId)
+  // console.log('token:', token)
+  // console.log('userId:', userId)
+  // console.log('userTypeId:', userTypeId)
 
   const [procedureList, setProcedureList] = useState([])
   const [procedure, setProcedure] = useState({})
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date())
 
   const getProcedures = useCallback(async () => {
     if(!token || !userId) return;
@@ -86,6 +76,7 @@ export default function TimeTable(){
           'doctor_firstname': el.doctor_firstname,
           'doctor_lastname' : el.doctor_lastname,
           'procedure_id'    : el.procedure_id,
+          'is_invoiced'     : el.is_invoiced,
           'start'           : start,
           'end'             : end,
         }
@@ -104,7 +95,10 @@ export default function TimeTable(){
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState(0);
   // const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    getProcedures();
+  }
 
 
   // SCEDULER =====================================
@@ -149,9 +143,11 @@ export default function TimeTable(){
   // }
 
   const handleSelectProcedure = (event) => {
-    console.log(event)
+    console.log('handleSelectProcedure:', event);
     setProcedure({
       'id'              : event.id,
+      'timetable_id'    : event.id,
+      'is_invoiced'     : event.is_invoiced,
       'title'           : event.title, 
       'client_id'       : event.client_id,
       'client_firstname': event.client_firstname,
@@ -163,7 +159,7 @@ export default function TimeTable(){
       'start'           : event.start,
       'end'             : event.end,
     })
-    // console.log('popup procedure:', procedure)
+    console.log('popup procedure:', procedure)
     setOpen(true)
   }
 

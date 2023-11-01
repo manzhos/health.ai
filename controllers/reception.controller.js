@@ -10,7 +10,7 @@ class ReceptionController {
     // save to DB
     const {doctor_id, time, repeat} = req.body;
     let date = new Date(req.body.date);
-    console.log(doctor_id, date, time, repeat);
+    // console.log(doctor_id, date, time, repeat);
     // console.log('reception', reception.rows[0]);
     const ts = new Date();
     const arrDate = [];
@@ -29,14 +29,14 @@ class ReceptionController {
           while (date.getFullYear() <= ts.getFullYear()){
             const insDate = Object.assign(date.setDate(date.getDate() + 14));
             // console.log('added date:', date);
-            arrDate.push(Object.assign(insDate));
+            arrDate.push(new Date(insDate));
           }
           break;
           case 'month':
           while (date.getFullYear() <= ts.getFullYear()){
             const insDate = Object.assign(date.setMonth(date.getMonth() + 1));
             // console.log('added date:', date);
-            arrDate.push(Object.assign(insDate));
+            arrDate.push(new Date(insDate));
           }
           break;
       }
@@ -47,7 +47,7 @@ class ReceptionController {
     const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *';
 
     for(const d of arrDate){
-      // console.log('Date:', d)
+      console.log('Date:', d)
       const reception = await DB.query(`SELECT * FROM reception_hours WHERE date = $1`, [d]);
       // console.log('RECEPTION', reception.rows[0]);
       if (reception.rows && reception.rows.length) {

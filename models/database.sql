@@ -63,6 +63,7 @@ create TABLE timetable(
   "time" TEXT, 
   "duration" INT2,
   "consultation" BOOLEAN DEFAULT false,   
+  "is_invoiced" BOOLEAN DEFAULT false,   
   "final_cost" INT2,
   "points" INT2,
   "ts" TIMESTAMPTZ
@@ -100,6 +101,14 @@ create TABLE notes(
   "bills" JSONB,  
   "paid" BOOLEAN DEFAULT false,
   "paid_to_partner" BOOLEAN DEFAULT false,
+  "ts" TIMESTAMPTZ
+);
+
+create TABLE invoices(
+  "id" SERIAL4 PRIMARY KEY,
+  "number" INT8, 
+  "perform_procedure_id" INT4[],
+  "title" JSONB,
   "ts" TIMESTAMPTZ
 );
 

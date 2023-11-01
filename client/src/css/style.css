@@ -63,10 +63,34 @@ body {
   border-radius: 20px;
   margin: 30px;
   max-height: 95vh;
-  overflow: scroll;
+  overflow-y: scroll;
   -webkit-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
   -moz-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
   box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
+}
+
+.comfirm-modal {
+  width: 300px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: aliceblue;
+  padding: 20px;
+  border: 0 solid white;
+  border-radius: 20px;
+  margin: 30px;
+  overflow: hidden;
+  -webkit-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
+  -moz-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
+  box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-apple {
@@ -88,13 +112,15 @@ body {
   position: absolute;
   left: 0;
   margin: 5vw auto;
-  width: 50vw;
+  width: 90vw;
   min-width: 300px;
+  max-height: 95vh;
   left:50%;
   transform: translateX(-50%);
   -webkit-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
   -moz-box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
   box-shadow: 0px 15px 38px 0px rgba(0, 0, 0, 0.49);
+  overflow: scroll;
 }
 
 .modal-tt-doctor {
@@ -221,6 +247,10 @@ body {
 #passwordConf {text-align: center;}
 
 #email {text-align: center;}
+#phone {text-align: center;}
+#lastname {text-align: center;}
+#firstname {text-align: center;}
+.inp-center{text-align: center;}
 
 .social-reg {
   width: 140px;
@@ -378,7 +408,7 @@ body {
 }
 
 .MuiButton-root {
-  border-radius: 0 !important;
+  /* border-radius: 0 !important; */
 }
 
 
@@ -407,4 +437,27 @@ body {
 .chkbx {
   /* background: #fff; */
   background: url(http://health.sy-way.com/static/check_bg.png) center center no-repeat
+}
+
+
+/* scroll for time */ 
+.timeslots { 
+  max-height: 250px;
+  overflow-Y: scroll;
+  overflow-x: hidden;
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.timeslots::-webkit-scrollbar {
+  width: 4px;               /* ширина всей полосы прокрутки */
+}
+
+.timeslots::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0);        /* цвет зоны отслеживания */
+}
+
+.timeslots::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);    /* цвет бегунка */
+  border-radius: 20px;       /* округлось бегунка */
+  border: 0px solid rgba(0, 0, 0, 0);  /* отступ вокруг бегунка */
 }

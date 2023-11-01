@@ -75,6 +75,12 @@ const checkMail = cron.schedule(`${min} ${hour} ${dayMonth} ${month} ${dayWeek}`
   scheduled: true,
 });
 
+
+/* TWILLIO */
+app.use('/api', require('./routes/twilio.routes'))
+
+
+
 // start server
 async function start() {
   app.listen(PORT, () => console.log(`App has been started on port ${PORT}...`))

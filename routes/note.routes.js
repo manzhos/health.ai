@@ -17,7 +17,13 @@ router.patch('/doc/:id', noteController.deleteDoc)
 router.get('/doc_client/:id', noteController.getDocClient)
 
 router.get('/invoices', noteController.getInvoices)
+router.post('/invoice', noteController.createInvoice)
+router.patch('/invoice/:id', noteController.updateInvoice)
+router.get('/invoice/:number', noteController.getInvoice)
 router.post('/bill', noteController.updateInvoices)
 router.get('/invoicesetpaid/:id', noteController.setInvoicePaid)
+router.post('/get_perf_procedures', noteController.getPerfProcedures)
+
+router.get('/getproceduredata_frominvoice/:id', noteController.getProcedureDataFromInvoice)
 
 module.exports = router 

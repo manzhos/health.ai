@@ -29,30 +29,15 @@ import { useHttp } from '../hooks/http.hook'
 export default function ScheduleNewProcedure({openNewProcedure, currDate, onClose}){
   const {request} = useHttp()
   const navigate  = useNavigate()
-  const {token}   = useContext(AuthContext)
-
-  function parseJwt (token) {
-    if(token && token !== ''){
-      var base64Url = token.split('.')[1]
-      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      }).join(''))
-      return JSON.parse(jsonPayload)
-    }
-  };
-  const pJWT = parseJwt(token)
-  const userId = pJWT ? pJWT.userId : null
-  // console.log('userId:', userId);
+  const {token, userId, userTypeId}   = useContext(AuthContext)
   
   // console.log('currDate:', currDate)
-  // const [date, setDate] = useState(currDate)
   const [time, setTime] = useState('__:__')
   const [doctorList, setDoctorList] = useState([])
   const [doctorSelected, setDoctorSelected] = useState([])
   const [procedureTypeId, setProcedureTypeId] = useState(4)
   const [procedureId, setProcedureId] = useState(0)
-  const [doctor, setDoctor] = useState('')
+  const [doctor, setDoctor] = useState(userTypeId ? userId : '')
   const [procedure, setProcedure] = useState('')
   const [recordList, setRecordList] = useState([])
   const [slots, setSlots] = useState([]);
@@ -68,16 +53,14 @@ export default function ScheduleNewProcedure({openNewProcedure, currDate, onClos
   const getDoctors = useCallback(async () => {
     try {
       const res = await request(`${API_URL}`+'api/doctors', 'GET', null, {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       })
       setDoctorList(res)
       setDoctorSelected(res)
     } catch (e) { console.log('error:', e) }
   }, [request])
   useEffect(() => {getDoctors()}, [getDoctors]); 
-
-  let s = [], t = [],  busy = [];
-
+  
   // get the data about doctors procedure
   const getRecordsByDoctor = async () => {
     // console.log('getRecordsByDoctor:', doctor);
@@ -87,12 +70,18 @@ export default function ScheduleNewProcedure({openNewProcedure, currDate, onClos
       })
       // console.log('recordList:', res);
       setRecordList(res);
-      busy.length=0;
+      // busy.length=0;
     } catch (e) { console.log('error:', e) }
   }
   useEffect(() => {getRecordsByDoctor()}, [currDate, doctor])   
   
   const filterRecordsByDate = () => {
+    let freeSlot = [], busyTimeInMinutes = [],  busy = [];
+    // working hours
+    const timeStartDay = 8, // hour of the starting
+          timeEndDay   = 21, // hour of the ending
+          timeInterval = 15; // time interval - 15 minutes
+
     recordList.map(item => {
       const rd = new Date(item.date);
       if(rd.getFullYear() === currDate.getFullYear() && rd.getMonth() === currDate.getMonth() && rd.getDate() === currDate.getDate()) {
@@ -102,25 +91,24 @@ export default function ScheduleNewProcedure({openNewProcedure, currDate, onClos
         })
       }
     })
+    // console.log('final busy:', busy);
     busy.forEach((item)=>{
       item.fromMin = Number(item.from.slice(0, 2))*60 + Number(item.from.slice(3));
-      for(let i=item.fromMin; i<=(item.fromMin + item.total); i+=30) t.push(i);
+      for(let i=item.fromMin; i<(item.fromMin + item.total); i+=timeInterval) busyTimeInMinutes.push(i);
       // console.log('busy time:', t);
     })
-    // console.log('final busy:', busy);
-    s.length=0;
-    // slots = [{'time':'10:00'}, {'time':'11:00'}, {'time':'12:00'}, {'time':'13:00'}, {'time':'14:00'}, {'time':'15:00'}]
-    // working hours 10:00 - 21:00 (time interval 60 minutes)
-    for(let i = 10*60; i < 21*60; i+=60){
-      if(t.includes(i)) continue;
+    // console.log('busyTimeInMinutes:', busyTimeInMinutes);
+    freeSlot.length=0;
+    for(let i = timeStartDay*60; i < timeEndDay*60; i+=timeInterval){
+      if(busyTimeInMinutes.includes(i)) continue;
       let h = Math.trunc(i/60);
       let m = '00';
       if(i%60 !== 0) m = i-(Math.trunc(i/60)*60);
       // console.log('time:', (h + ':' + m));
-      s[i] = {'time':(h + ':' + m)};
+      freeSlot[i] = {'time':(h + ':' + m)};
       // console.log(`s[${i}]=`, s[i]);
     }
-    setSlots(s);
+    setSlots(freeSlot);
     // console.log('slots:', slots, 'for doctor:', doctor);
   }
   useEffect(()=>{filterRecordsByDate()}, [recordList]);

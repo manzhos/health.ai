@@ -11,6 +11,7 @@ const {check, validationResult} = require('express-validator');
 
 class UserController {  
   async createUser(req, res){
+    console.log('try to create user');
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
 		  return res.status(400).json({
@@ -37,7 +38,7 @@ class UserController {
     // save to DB
     const {firstname, lastname, email, password, promo, usertype_id, phone} = req.body
     const avatar = req.files ? req.files.avatar.name : null
-    // console.log(firstname, lastname, email, password, promo, usertype_id, phone);
+    console.log(firstname, lastname, email, password, promo, usertype_id, phone);
     const newuser = await DB.query(`SELECT * FROM users WHERE email = $1`, [email])
     if (newuser.rows && newuser.rows.length) return res.status(400).json({ message: 'User already exist' })
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -734,6 +735,58 @@ ORDER BY c.firstname, c.lastname;`
     // console.log('roles:', roles.rows)
     res.send(roles.rows)
   }
+
+  async checkUserByEmail(req, res){
+    const email = req.params.email
+    console.log('get user by Email:', email)
+    try{
+      const sql = `
+        SELECT 
+            id, 
+            firstname, 
+            lastname, 
+            email, 
+            phone, 
+            usertype_id
+        FROM users
+        WHERE email = $1
+        LIMIT 1;`
+      // console.log(`sql:\n ${sql}:`)
+      const user = await DB.query(sql, [email])
+      console.log(`user by ${email}:`, user.rows[0])
+      res.send(user.rows[0])
+    }catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+  }
+
+  async checkUserByPhone(req, res){
+    const phone = req.params.phone
+    console.log('get user by Phone:', phone)
+    try{
+      const sql = `
+        SELECT 
+            id, 
+            firstname, 
+            lastname, 
+            email, 
+            phone, 
+            usertype_id
+        FROM users
+        WHERE phone = $1
+        LIMIT 1;`
+      // console.log(`sql:\n ${sql}:`)
+      const user = await DB.query(sql, [phone])
+      console.log(`user by ${phone}:`, user.rows[0])
+      res.send(user.rows[0])
+    }catch(e){
+      console.log(`Error: ${e}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+
+  }
+
 }
 
 module.exports = new UserController()

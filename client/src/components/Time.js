@@ -27,7 +27,7 @@ export default function Time({onTimeChange, slots, day}) {
     // <Container>
         <div style={{textAlign:"center"}}>
           {/* <Typography variant="h5" gutterBottom>Time</Typography> */}
-          <div>
+          <div className="timeslots">
             {slot.map((item, key) => {
               return(
                 <Button 

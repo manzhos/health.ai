@@ -36,8 +36,7 @@ export default function LoginPWA() {
         password: appleUser.password
       })
       // console.log('res:', res)
-      auth.login(res.token, res.user.id)
-      navigate('/consult')
+      auth.login(res.token, res.user.id, res.user.usertype_id)
     } catch (e) {
       console.log('error:', e)
       alert('Please check your login and password details or you may need to register.')
@@ -56,7 +55,7 @@ export default function LoginPWA() {
         email:    emailClient,
         password: passwordClient,
       })
-      auth.login(res.token, res.user.id)
+      auth.login(res.token, res.user.id, res.user.usertype_id)
       navigate('/consult')
     } catch (e) {
       console.log('error:', e)
