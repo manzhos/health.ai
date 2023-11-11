@@ -556,9 +556,9 @@ export default function BookingFree(){
                     />
                   </Grid>
                   {
-                    email && !emailConfirm &&
+                    email && //!emailConfirm &&
                     <Grid item xs={12} sm={12}>
-                      <Button onClick={()=>{sendEmailCode()}}>Send code to Email</Button>
+                      {/* <Button onClick={()=>{sendEmailCode()}}>Send code to Email</Button>
                       <TextField
                         id="email_code"
                         label="Input Verification Code"
@@ -568,11 +568,11 @@ export default function BookingFree(){
                         onChange={(e)=>{setCheckEmailCode(e.target.value)}}
 
                       />
-                      <Button onClick={()=>{checkingEmailCode()}}>Check Email</Button>
+                      <Button onClick={()=>{checkingEmailCode()}}>Check Email</Button> */}
                       <Grid item xs={12} sm={12}>
                         <Button 
                           variant="contained"
-                          sx={{ mt: 2, mb: 2, ml: 8, mr:8, pl: 4, pr: 4}} 
+                          sx={{ mb: 2, ml: 8, mr:8, pl: 4, pr: 4}} 
                           onClick={()=>{checkUserByEmail()}}
                           size="small"
                         >
@@ -599,7 +599,7 @@ export default function BookingFree(){
                   {
                     phone && !phoneConfirm &&
                     <Grid item xs={12} sm={12}>
-                      <Button onClick={()=>{sendPhoneCode()}}>Send code to Phone</Button>
+                      <Button onClick={()=>{sendPhoneCode()}}>{'Send code >> '}</Button>
                       <TextField
                         id="phone_code"
                         label="Input Verification Code"
@@ -608,7 +608,7 @@ export default function BookingFree(){
                         sx={{ ml:5, mr:5, textAlign:'center' }}
                         onChange={(e)=>{setCheckPhoneCode(e.target.value)}}
                       />
-                      <Button onClick={()=>{checkingPhoneCode()}}>Check Phone</Button>
+                      <Button onClick={()=>{checkingPhoneCode()}}>{' >> Check Phone'}</Button>
                       <Grid item xs={12} sm={12}>
                         <Button 
                           variant="contained"
