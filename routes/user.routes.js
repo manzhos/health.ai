@@ -37,6 +37,7 @@ router.get('/checkuser_byphone/:phone', userController.checkUserByPhone)
 router.get('/partners', userController.getPartners)
 router.get('/clients', userController.getClients)
 router.get('/doctors', userController.getDoctors)
+router.get('/staff', userController.getStaff)
 router.get('/roles', userController.getRoles)
 
 router.get('/partnerclients/:id', userController.getPartnerClients)

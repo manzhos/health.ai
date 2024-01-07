@@ -27,7 +27,7 @@ export default function LoginPWARef() {
   const refId = params.id || null;
   const partnerId = searchParams.get("partner_id") || null;
   // console.log('refId:', refId);
-  console.log('partnerId:', partnerId);
+  // console.log('partnerId:', partnerId);
 
   const {request} = useHttp()
   const navigate  = useNavigate()
