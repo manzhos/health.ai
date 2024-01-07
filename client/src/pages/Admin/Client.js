@@ -35,9 +35,11 @@ import Iconify from '../../components/Iconify';
 import SearchNotFound from '../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../sections/@dashboard/user';
 import { Loader } from '../../components/Loader';
-import { useHttp } from '../../hooks/http.hook'
-import { AuthContext } from '../../context/AuthContext'
-import {API_URL} from '../../config'
+import { useHttp } from '../../hooks/http.hook';
+import { AuthContext } from '../../context/AuthContext';
+import {API_URL} from '../../config';
+
+import ClientCard from './ClientCard';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -93,10 +95,12 @@ export default function Client() {
   const [filterUserRole, setFilterUserRole] = useState()
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [userList, setUserList] = useState([])
+  const [pickedUser, setPickedUser] = useState({})
   const [roleList, setRoleList] = useState([])
   const [role, setRole] = useState(3)
   const [newAvatar, setNewAvatar] = useState()
   const [avatarURL, setAvatarURL] = useState()
+  const [openClientCard, setOpenClientCard] = useState(false)
   // const [update, setUpdate] = useState(false)
   const {loading, request} = useHttp()
   const navigate  = useNavigate()
@@ -240,8 +244,9 @@ export default function Client() {
 
   const getUser = (event, id) => {
     event.preventDefault()
-    console.log('get User:', id)
-    // navigate(`/admin/client/docs/${id}`)
+    // console.log(`get User ${id}:`, userList.find(user => user.id===id))
+    setPickedUser(userList.find(user => user.id===id))
+    setOpenClientCard(true)
   }
 
   if (loading) return <Loader/>
@@ -398,6 +403,7 @@ export default function Client() {
                         role="checkbox"
                         selected={isItemSelected}
                         aria-checked={isItemSelected}
+                        style={{ cursor:"pointer" }}
                       >
                         <TableCell padding="checkbox">
                           <Checkbox checked={isItemSelected} onChange={(event) => handleClick(event, id)} />
@@ -449,6 +455,7 @@ export default function Client() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </Card>
+          <ClientCard openClientCard={openClientCard} user={pickedUser} closeClientCard={()=>{setOpenClientCard(false)}} />
         </Container>
       </Page>
     )

@@ -156,15 +156,24 @@ class ProcedureController {
       SELECT 
         tt.id,
         p.procedure,
+        tt.procedure_id,
         tt.duration,
         date,
         time,
-        cost
+        cost,
+        tt.doctor_id,
+        u.firstname AS doctor_fname,
+        u.lastname  AS doctor_lname,
+        is_invoiced,
+        n.invoice,
+        n.paid AS is_paid
       FROM timetable tt
       JOIN procedures p ON p.id = tt.procedure_id
       JOIN procedure_types pt ON pt.id = p.proceduretype_id
+      JOIN users u ON u.id = tt.doctor_id
+      FULL JOIN notes n ON tt.id = cast(n.invoice->'details'->'timetable_id' as int4)
       WHERE tt.user_id = $1
-      ;`
+    ;`
     const proceduretypes = await DB.query(sql, [user_id])
     // console.log('procedures:', proceduretypes.rows)
     res.send(proceduretypes.rows)    

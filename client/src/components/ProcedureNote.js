@@ -1,10 +1,11 @@
 import React, {useState, useEffect, useCallback, useContext} from "react";
 import { AuthContext } from "../context/AuthContext";
 import { sentenceCase } from "change-case";
-import humanDate from "./HumanDate";
 import {
   Box,
+  Paper,
   Grid,
+  Card,
   Button,
   Typography,
   TextField,
@@ -24,12 +25,17 @@ import {
   TableRow,
   TableCell,
 } from '@mui/material';
-import {API_URL} from '../config';
+import Carousel from 'react-material-ui-carousel'
+
+import {API_URL, URL, MONTH} from '../config';
 import { useHttp } from '../hooks/http.hook'
 // import Scrollbar from "./Scrollbar";
+import humanDate from "./HumanDate";
 import Confirm from "./Confirm";
+import AddFile from "./AddFile";
 
 export default function ProcedureNote({ procedure, onSave }){
+  // console.log('procedure >>>', procedure)
   const {request} = useHttp();
   const {token, userId, userTypeId}   = useContext(AuthContext);
 
@@ -50,7 +56,8 @@ export default function ProcedureNote({ procedure, onSave }){
   const [nameTech, setNameTech] = useState('');
   const [product, setProduct] = useState(0);
   const [numberUnits, setNumberUnits] = useState(0);
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState([]);
+  const [noteNew, setNoteNew] = useState('');
   const [medind, setMedind] = useState(false);
   const [diagnosis, setDiagnosis] = useState('');
   const [checkoutList, setCheckoutList] = useState([]);
@@ -59,29 +66,43 @@ export default function ProcedureNote({ procedure, onSave }){
 
   const [clientList, setClientList] = useState([]);
   const [doctorList, setDoctorList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
   const [procedureList, setProcedureList] = useState([]);
+  const [docList, setDocList] = useState([]);
 
   const [noteId, setNoteId] = useState();
+  const [editNoteMode, setEditNoteMode] = useState({});
+  const [editNote, setEditNote] = useState('');
   const [clientId, setClientId] = useState(procedure.client_id);
   const [doctorId, setDoctorId] = useState(procedure.doctor_id);
   const [procedureFinal, setProcedureFinal] = useState(procedure.procedure_id);
 
-  const [confirmData, setConfirmData] = useState({});
+  const [photoList, setPhotoList] = useState([])
+  const [photoBefore, setPhotoBefore] = useState([])
+  const [photoAfter, setPhotoAfter] = useState([])
+  const [fileUrl, setFileUrl] = useState([])
 
-  useEffect(()=>{
-    console.log('popup popuped:', procedure.is_invoiced);
-    if(procedure.is_invoiced) getProcedureDataFromInvoice();
-  }, []);
+  const [confirmData, setConfirmData] = useState({ open: false });
+
+  const [files, setFiles] = useState()
+
   const getProcedureDataFromInvoice = async () => {
-    console.log('getProcedureDataFromInvoice')
     try{
       const procedureData = await request(`${API_URL}api/getproceduredata_frominvoice/${procedure.timetable_id}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
-      console.log('procedureData:', procedureData);
-
+      const staff = await request(`${API_URL}api/staff`, 'GET', null, {
+        Authorization: `Bearer ${token}`
+      })
+      // console.log('procedureData:', procedureData);
+      const notes = [];
+      for (let key in procedureData.note){
+        notes.push(procedureData.note[key]);
+        const author = staff.find((s) => s.id === notes[notes.length-1].user_id);
+        notes[notes.length-1].author = author.firstname + ' ' + author.lastname;
+      }
+      setNote(notes);
       setNoteId(procedureData.id);
-      setNote(procedureData.note);
       setProcedureFinal(procedureData.procedure_id);
       setClientId(procedureData.client_id);
       setDoctorId(procedureData.doctor_id);
@@ -92,7 +113,10 @@ export default function ProcedureNote({ procedure, onSave }){
       setBotoxWhat(procedureData.invoice.details.botox_what);
 
     } catch (e) { console.log('error:', e)}
-  }
+  }  
+  useEffect(()=>{
+    if(procedure.is_invoiced) getProcedureDataFromInvoice();
+  }, []);
 
   const getClients = useCallback(async () => {
     try {
@@ -114,6 +138,17 @@ export default function ProcedureNote({ procedure, onSave }){
   }, [token, request])
   useEffect(() => {getDoctors()}, [getDoctors])
 
+  const getStaff = useCallback(async () => {
+    try {
+      const staff = await request(`${API_URL}api/staff`, 'GET', null, {
+        Authorization: `Bearer ${token}`
+      })
+      // console.log('staff:', staff);
+      setStaffList(staff);
+    } catch (e) { console.log('error:', e)}
+  }, [token, request])
+  useEffect(() => {getStaff()}, [getStaff])
+
   const getProcedures = useCallback(async () => {
     try {
       const procedures = await request(`${API_URL}api/procedures`, 'GET', null, {
@@ -124,6 +159,15 @@ export default function ProcedureNote({ procedure, onSave }){
   }, [token, request])
   useEffect(() => {getProcedures()}, [getProcedures])
 
+  const getDocs = useCallback(async () => {
+    try {
+      const docs = await request(`${API_URL}api/files/${procedure.timetable_id}`, 'GET', null, {
+        Authorization: `Bearer ${token}`
+      })
+      setDocList(docs)
+    } catch (e) { console.log('error:', e)}
+  }, [token, request])
+  useEffect(() => {getDocs()}, [getDocs])
 
   const addToCheckoutList = () => {
     // console.log('add to checkoutList:', zone, fillerZone, numberUnits);
@@ -172,7 +216,7 @@ export default function ProcedureNote({ procedure, onSave }){
 
   const saveNote = async () => {
     let success = {'save':false, 'update':false};
-    // console.log('procedure.timetable_id, note, client_id, doctor_id, procedure_id, services, cost:::::\n', procedure.timetable_id, note, clientId, doctorId, procedureFinal, checkoutList, total)
+    // console.log('>>> procedure.timetable_id, note, client_id, doctor_id, procedure_id, services, cost:::::\n', procedure.timetable_id, note, clientId, doctorId, procedureFinal, checkoutList, total)
     if(procedure.is_invoiced){
       try {
         const res = await request(`${API_URL}api/doc/${noteId}`, 'POST', {
@@ -180,13 +224,30 @@ export default function ProcedureNote({ procedure, onSave }){
           procedure_id  : procedureFinal, 
           client_id     : clientId, 
           doctor_id     : doctorId, 
-          note          : note, 
+          note          : {...note}, 
           medind        : medind, 
           diagnosis     : diagnosis, 
           botox_what    : botoxWhat,
           services      : checkoutList,
           cost          : total
         })
+        // upload/delete files
+        if(files){
+          console.log('userId, clientId, files:', userId, clientId, files)
+          const formData = new FormData();
+          files.map((item)=>{ formData.append('file', item) });
+          formData.append('user_id', userId);
+          formData.append('client_id', clientId);
+          formData.append('doc_id', procedure.timetable_id);
+          try {
+            const f = await fetch(`${API_URL}api/file/${procedure.timetable_id}`, {
+              method: 'POST', 
+              body: formData,
+            });
+            // console.log('f:', f);
+            success.files = true;
+          } catch (e) {console.log('error:', e)} 
+        }
         onSave();
       } catch (e) {console.log('error:', e)} 
     }
@@ -197,7 +258,7 @@ export default function ProcedureNote({ procedure, onSave }){
           procedure_id  : procedureFinal, 
           client_id     : clientId, 
           doctor_id     : doctorId, 
-          note          : note, 
+          note          : {...note}, 
           medind        : medind, 
           diagnosis     : diagnosis, 
           botox_what    : botoxWhat,
@@ -214,8 +275,26 @@ export default function ProcedureNote({ procedure, onSave }){
         })
         success.update = true;
       } catch (e) {console.log('error:', e)} 
+
+      // upload/delete files
+      if(files){
+        console.log('>>> userId, clientId, files:', userId, clientId, files)
+        const formData = new FormData();
+        files.map((item)=>{ formData.append('file', item) });
+        formData.append('user_id', userId);
+        formData.append('client_id', clientId);
+        formData.append('doc_id', procedure.timetable_id);
+        try {
+          const f = await fetch(`${API_URL}api/file/${procedure.timetable_id}`, {
+            method: 'POST', 
+            body: formData,
+          });
+          // console.log('f:', f);
+          success.files = true;
+        } catch (e) {console.log('error:', e)} 
+      }
   
-      if(success.save && success.update) onSave();
+      if(success.save && success.update && ((files && success.files) || !files)) onSave();
       else alert('DB error -- nothing saved');
     }
 
@@ -230,18 +309,134 @@ export default function ProcedureNote({ procedure, onSave }){
   }
 
   const _delRecord = async (response) => {
-    // console.log('response:', response);
-    // console.log('confirmData.bookingId:', confirmData.bookingId);
-    if(response){
+    console.log('response:', response);
+    console.log('confirmData:', confirmData);
+    if(response && confirmData.bookingId){
       try {
         const res = await request(`${API_URL}api/timetable/${confirmData.bookingId}`, 'DELETE', null, {
           Authorization: `Bearer ${token}`
         })
       } catch (e) {console.log('error:', e)}    
+      onSave(); 
     }
-    setConfirmData({ open:false });   
-    onSave(); 
+    if(response && (confirmData.noteId || confirmData.noteId === 0)){
+      const notes = note;
+      notes.splice(confirmData.noteId, 1);
+      console.log('notes:', notes);
+      setNote(notes);
+    }
+    setConfirmData({ open:false }); 
   }
+
+  const addNote = async () => {
+    console.log('note:', note);
+    const notes = note;
+    const author = staffList.find((s) => s.id === userId);
+    const date = new Date(); 
+    notes.push({
+      "date": date,
+      "user_id": userId,
+      "author": author.firstname + ' ' + author.lastname,
+      "note": noteNew,
+    });
+    console.log('notes:', notes)
+    setNote(notes);
+    setNoteNew('');
+  }
+
+  const delNote = (key, date) => {
+    const d = new Date(date)
+    const hDate = d.getDate() + ' ' + MONTH[Number(d.getMonth())] + ' ' + d.getFullYear() + ' / ' + d.getHours() + ':' + (d.getMinutes() === 0 ? '00' : (String(d.getMinutes()).length === 1 ? '0' + d.getMinutes() : d.getMinutes() + ''))
+    setConfirmData({
+      open:    true,
+      message: `Confirm delete note for ${hDate} `,
+      noteId:  key
+    });
+  }
+
+  const saveEditNote = (key) => {
+    const notes = note;
+    notes[key].note = editNote;
+    setNote(notes);
+    setEditNote('');
+    setEditNoteMode({ mode: false })
+  }
+
+  const handlerFileChange = (files) => {
+    setFiles(files);
+  }
+
+  const getPhotoByProcedure = useCallback(async () => {
+    try {
+      const res = await request(`${API_URL}api/files/${procedure.timetable_id}`, 'GET', null, {
+        Authorization: `Bearer ${token}`
+      })
+      const photo = res.filter(d=>(d.type === 'jpg' || d.type === 'jpeg' || d.type === 'png' || d.type === 'gif'))
+      console.log('Photo >>>', photo)
+      setPhotoList(photo)
+    } catch (e) {console.log('error:', e)}   
+  }, [token, request])
+  useEffect(()=>{ getPhotoByProcedure() }, [])
+
+  const getUrl = async () => {
+    const fUrl = [];
+    for(let p in photoList){
+      const path = URL + 'files/docs/' + photoList[p].doc_id + '/' + photoList[p].filename
+      const blob = await fetchImage(path);
+      const f = new File([blob], photoList[p].filename)
+      const url  = global.URL.createObjectURL(f);
+      fUrl.push({'id':photoList[p].id, 'name':photoList[p].filename, 'type':photoList[p].type, 'path':url, 'ts':photoList[p].ts});
+    }
+    // setFileUrl(fUrl)
+    if(!fUrl.length) return
+    setPhotoBefore([...fUrl])
+    const el = fUrl[fUrl.length-1]
+    fUrl.pop()
+    fUrl.unshift(el)
+    setPhotoAfter([...fUrl])    
+  }
+  useEffect(()=>{ getUrl() }, [photoList])
+
+  async function fetchImage(url){
+    const data = await fetch(url);
+    const buffer = await data.arrayBuffer();
+    const blob = new Blob([buffer], { type: "image/png" });
+    return blob;
+  }
+
+  const PhotoItem = ({item}) => {
+    return (
+        <Paper sx={{ textAlign:"center"}}>
+            <img src={item.path} width={'100%'} height={'auto'} />
+            <Typography variant="body2"> { item.ts ? humanDate(item.ts) : '' } </Typography>
+        </Paper>
+    )
+  }
+
+  const Gallery = () => {
+    return (
+      <Grid container>
+        <Card sx={{ mt: 2, mb: 3, width: "100%", padding: "20px"}}>
+          <Typography variant="h5">Results</Typography>
+          <Grid container spacing={6}>
+            <Grid item sm={6} sx={{ textAlign: 'center' }} >
+              <Typography variant="body2">BEFORE</Typography>
+                <Carousel autoPlay={false}>
+                  { photoBefore.map( (item, i) => <PhotoItem key={i} item={item} /> ) }
+                </Carousel>
+            </Grid>
+            <Grid item sm={6} sx={{ textAlign: 'center' }} >
+              <Typography variant="body2">AFTER</Typography>
+              <Carousel autoPlay={false}>
+                { photoAfter.map( (item, i) => <PhotoItem key={i} item={item} /> ) }
+              </Carousel>
+            </Grid>
+          </Grid>
+        </Card>
+      </Grid>      
+    )
+  }
+ 
 
   return(
     <div className="modal-tt-doctor">
@@ -403,7 +598,7 @@ export default function ProcedureNote({ procedure, onSave }){
                       <Grid container>
                         <Grid item xs={8} sm={8}>
                           <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
-                            <Box sx={{ mt:2 }}>Total cost: <strong>{total}</strong> EUR</Box>
+                            {/* <Box sx={{ mt:2 }}>Total cost: <strong>{total}</strong> EUR</Box> */}
                           </Box>
                         </Grid>
                       </Grid>
@@ -512,7 +707,7 @@ export default function ProcedureNote({ procedure, onSave }){
                       <Grid container>
                         <Grid item xs={8} sm={8}>
                           <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
-                            <Box sx={{ mt:2 }}>Total cost: <strong>{total}</strong> EUR</Box>
+                            {/* <Box sx={{ mt:2 }}>Total cost: <strong>{total}</strong> EUR</Box> */}
                           </Box>
                         </Grid>
                       </Grid>
@@ -615,15 +810,7 @@ export default function ProcedureNote({ procedure, onSave }){
               }
 
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" sx={{ mt:1 }}>
-                    {'Note about procedure'}
-                  </Typography>
-                  <Grid item xs={12} sm={12} sx={{ mt: 3 }}>
-                    <TextField name="note" fullWidth multiline rows={4} id="note" value={note} onChange={(e)=>{setNote(e.target.value)}} label="Note" className='cons-input' />
-                  </Grid>
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={12}>
                   <FormControlLabel
                     control={<Checkbox name="medind" value="medind" onChange={()=>{setMedind(!medind)}} color="primary" />}
                     label="Medical indication"
@@ -641,7 +828,94 @@ export default function ProcedureNote({ procedure, onSave }){
                     </Grid>
                   }
                 </Grid>
+                <Grid item xs={12} sm={12}>
+                  <Typography variant="body2" sx={{ mt:1 }}>
+                    {'Note about procedure'}
+                  </Typography>
+                  <Grid item xs={12} sm={12}>
+                    <TableContainer sx={{ minWidth: 800 }}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>
+                              Date
+                            </TableCell>
+                            <TableCell>
+                              Author
+                            </TableCell>
+                            <TableCell>
+                              Note
+                            </TableCell>
+                            <TableCell>
+                              &nbsp;
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          { note.map((n, key)=>{
+                              return(
+                                <TableRow id={'NoteRow_'+key}>
+                                  <TableCell>{humanDate(n.date)}</TableCell>
+                                  <TableCell>{n.author}</TableCell>
+                                  <TableCell>
+                                    {editNoteMode.id !== key && n.note}
+                                    {editNoteMode.mode && editNoteMode.id === key && <TextField name="note" fullWidth multiline rows={4} id="note" value={editNote} onChange={(e)=>{setEditNote(e.target.value)}} label="Note" className='cons-input' />}
+                                    {editNoteMode.mode && editNoteMode.id === key && <Button size="small" variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={()=>{saveEditNote(key)}}>Save</Button>}
+                                    {editNoteMode.mode && editNoteMode.id === key && <Button size="small" variant="outlined" sx={{ mt: 1, ml: 2 }} onClick={()=>{ setEditNoteMode({ mode: false }) }}>Cancel</Button>}
+                                  </TableCell>
+                                  <TableCell>
+                                    {userId === Number(n.user_id) && 
+                                      <Button size="small" color="secondary" 
+                                        onClick={() => { 
+                                          setEditNote(n.note)
+                                          setEditNoteMode({ mode: true, id: key }) 
+                                        }}
+                                      >
+                                        Edit
+                                      </Button>
+                                    }
+                                    {userId === Number(n.user_id) && <Button size="small" color="error" onClick={() => {delNote(key, n.date)}} >Delete</Button>}
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })
+                          }
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <Grid container>
+                      <Grid item sm={10}>
+                        <Typography variant="body2" sx={{ mt:2, mb:1 }}>
+                          {'Add a new note'}
+                        </Typography>
+                        <TextField name="note" fullWidth multiline rows={4} id="note" value={noteNew} onChange={(e)=>{setNoteNew(e.target.value)}} label="Note" className='cons-input' />
+                      </Grid>
+                      <Grid item sm={2} sx={{ mt:17, display:"flex", justifyContent:"center"}}>
+                        <div>
+                          <Button size="small" variant="outlined" onClick={()=>{addNote()}}>Add</Button>
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
               </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 5 }}>&nbsp;</Box>
+              </Grid>
+              <Grid container>
+                <Card sx={{ mt: 2, mb: 3, width: "100%", padding: "20px"}}>
+                  <Grid item sx={{ display:"flex", flexDirection:"column", justifyContent:"center" }}>
+                    {/* <Box sx={{ minHeight: "150px" }}>&nbsp;</Box> */}
+                    <Box sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', mt: 1, mb: 1, padding:"20px" }}>
+                      <AddFile docList = {docList} onFileChange = {handlerFileChange}/>
+                    </Box>
+                    {/* <Button variant="outlined" sx={{  }} onClick={saveNote}>Add files</Button> */}
+                  </Grid>
+                </Card>
+              </Grid>
+              { photoBefore?.length > 0 && 
+                <Gallery />
+              }
               <Button variant="contained" sx={{ mt: 3 }} onClick={saveNote}>Save</Button>
             </Grid>
           </Grid>

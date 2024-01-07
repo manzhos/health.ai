@@ -210,6 +210,7 @@ class UserController {
           u.firstname AS firstname,
           u.lastname AS lastname,
           u.email AS email,
+          u.phone AS phone,
   --        u.ts,
           u.usertype_id AS usertype_id,
           ut.usertype AS usertype,
@@ -279,6 +280,7 @@ class UserController {
             u.firstname AS firstname, 
             u.lastname AS lastname, 
             u.email AS email, 
+            u.phone AS phone, 
             u.usertype_id AS usertype_id, 
             u.avatar AS avatar,
             u.bank_acc AS bank_acc,
@@ -378,6 +380,25 @@ class UserController {
     res.send(doctors.rows)    
   }
 
+  async getStaff(req, res){
+    const sql = `
+      SELECT 
+        u.id AS id,
+        u.firstname AS firstname,
+        u.lastname AS lastname,
+        u.email AS email,
+--        u.ts,
+        ut.usertype AS usertype,
+        u.avatar AS avatar
+      FROM users u 
+      JOIN user_types ut ON ut.id = u.usertype_id
+      WHERE ut.id = 2 OR ut.id = 1
+      AND NOT u.archive;`
+    const staff = await DB.query(sql)
+    // console.log('staff.rows', staff.rows)
+    res.send(staff.rows)    
+  }
+
   async getClientsByDoctor(req, res){
     const id = req.params.id
     // console.log(`filter clients for doctor ${id}`)
@@ -441,6 +462,7 @@ class UserController {
         u.firstname AS firstname,
         u.lastname AS lastname,
         u.email AS email,
+        u.phone AS phone,
 --        u.ts,
         ut.usertype AS usertype,
         u.avatar AS avatar

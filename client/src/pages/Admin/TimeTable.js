@@ -101,31 +101,6 @@ export default function TimeTable(){
   }
 
 
-  // SCEDULER =====================================
-  // const [newProcedure, setNewProcedure] = useState({ title: "", start: "", end: "" })
-  // const [allEvents, setAllEvents] = useState(events)
-
-  // function handleAddEvent() {
-  //   for (let i=0; i<allEvents.length; i++){
-  //     const d1 = new Date (allEvents[i].start);
-  //     const d2 = new Date(newEvent.start);
-  //     const d3 = new Date(allEvents[i].end);
-  //     const d4 = new Date(newEvent.end);
-  //     /*
-  //     console.log(d1 <= d2);
-  //     console.log(d2 <= d3);
-  //     console.log(d1 <= d4);
-  //     console.log(d4 <= d3);
-  //     */
-  //     if (( (d1  <= d2) && (d2 <= d3) ) || ( (d1  <= d4) && (d4 <= d3) )) {   
-  //       alert("CLASH"); 
-  //       break;
-  //     }
-  //   }
-    
-  //   setAllEvents([...allEvents, newEvent]);
-  // }
-
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
       // const title = window.prompt('New Procedure')
@@ -143,7 +118,7 @@ export default function TimeTable(){
   // }
 
   const handleSelectProcedure = (event) => {
-    console.log('handleSelectProcedure:', event);
+    // console.log('handleSelectProcedure:', event);
     setProcedure({
       'id'              : event.id,
       'timetable_id'    : event.id,
@@ -159,17 +134,9 @@ export default function TimeTable(){
       'start'           : event.start,
       'end'             : event.end,
     })
-    console.log('popup procedure:', procedure)
+    // console.log('popup procedure:', procedure)
     setOpen(true)
   }
-
-  // const handleSelectProcedure = useCallback(
-  //   (event) => {
-  //     console.log(event)
-  //     window.alert(event.title)
-  //   },
-  //   []
-  // )
 
   const { defaultDate, scrollToTime } = useMemo(
     () => ({

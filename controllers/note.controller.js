@@ -8,6 +8,10 @@ class NoteController {
   async createNote(req, res){
     // save to DB
     const { title, note, client_id, doctor_id, procedure_id, doc_type, invoice } = req.body;
+    // note {json} structure for procedure
+    // user_id: int
+    // date: date
+    // note: text
     const sql = 'INSERT INTO notes (title, note, client_id, doctor_id, procedure_id, ts, doc_type, invoice) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *'
     let ts = new Date(),
         services = [invoice];
@@ -22,17 +26,17 @@ class NoteController {
     try{
       const sql = `
         SELECT 
-          n.id AS id,
-          n.title AS title,
-          n.note  AS note,
-          n.client_id  AS client_id,
-          uc.firstname AS client_firstname,
-          uc.lastname  AS client_lastname,
-          n.doctor_id  AS doctor_id,
-          ud.firstname AS doctor_firstname,
-          ud.lastname  AS doctor_lastname,
-          n.procedure_id AS procedure_id,
-          p.procedure    AS procedure
+          n.id            AS id,
+          n.title         AS title,
+          n.note          AS note,
+          n.client_id     AS client_id,
+          uc.firstname    AS client_firstname,
+          uc.lastname     AS client_lastname,
+          n.doctor_id     AS doctor_id,
+          ud.firstname    AS doctor_firstname,
+          ud.lastname     AS doctor_lastname,
+          n.procedure_id  AS procedure_id,
+          p.procedure     AS procedure
         FROM notes n
         JOIN users uc ON (uc.id = n.client_id)
         JOIN users ud ON (ud.id = n.doctor_id)
@@ -87,8 +91,8 @@ class NoteController {
   
   async updateNote(req, res){
     const id = req.params.id
-    const {title, note, client_id, doctor_id, procedure_id, bill} = req.body;
-    console.log(id, title, note, client_id, doctor_id, procedure_id, bill);
+    const {title, note, client_id, doctor_id, procedure_id, bill, timetable_id} = req.body;
+    console.log(id, title, note, client_id, doctor_id, procedure_id, bill, timetable_id);
     const sql =`
       UPDATE notes SET
       title        = $2,
@@ -98,7 +102,7 @@ class NoteController {
       procedure_id = $6,
       bill         = $7
       WHERE id = $1;`
-    await DB.query(sql, [id, title, note, client_id, doctor_id, procedure_id, bill])
+    await DB.query(sql, [id, title, note, client_id, doctor_id, procedure_id, bill, timetable_id])
     console.log(`note #${id} was updates`)
     res.send(true) 
   }
@@ -128,7 +132,7 @@ class NoteController {
       'diagnosis'   : diagnosis,
       'botox_what'  : botox_what
     };
-    console.log('createDoc:', 'invoice', note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}), ts);
+    console.log('createDoc:', 'invoice', JSON.stringify(note), client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}), ts);
     const newDoc = await DB.query(sql,['invoice_' + timetable_id, note, client_id, doctor_id, procedure_id, ts, 1, JSON.stringify({'details': details, 'services': services})]);
     console.log('newDoc:', newDoc.rows);
     res.send(newDoc.rows[0]);
@@ -363,9 +367,9 @@ class NoteController {
       'diagnosis'   : diagnosis,
       'botox_what'  : botox_what
     };
-    console.log('updateDoc:', id, note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}));
+    console.log('updateDoc:', id, JSON.stringify(note), client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services}));
     try {
-      const updatedDoc = await DB.query(sql, [id, note, client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services})]);
+      const updatedDoc = await DB.query(sql, [id, JSON.stringify(note), client_id, doctor_id, procedure_id, JSON.stringify({'details': details, 'services': services})]);
       console.log('updatedDoc:', updatedDoc.rows);
       res.send(true);
     } catch(e){
@@ -416,13 +420,13 @@ class NoteController {
 
   async getProcedureDataFromInvoice(req, res){
     const title = 'invoice_' + req.params.id;
-    console.log('getProcedureDataFromInvoice FOR:', title);
+    // console.log('getProcedureDataFromInvoice FOR:', title);
     const sql = `
       SELECT * FROM notes WHERE title = $1
     ;`
     try{
       const invoice = await DB.query(sql, [title]);
-      console.log('invoice.rows[0]:', invoice.rows[0]);
+      // console.log('invoice.rows[0]:', invoice.rows[0]);
       res.send(invoice.rows[0]);
     } catch(e){
       console.log(`Error: ${e}`)  

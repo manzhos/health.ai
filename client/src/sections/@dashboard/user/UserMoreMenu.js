@@ -230,20 +230,20 @@ export default function UserMoreMenu({id, user, roleList, onChange}) {
         </MenuItem>
 
         { role === 3 &&
-          <>
             <MenuItem sx={{ color: 'text.secondary' }} onClick={handleLoyaltyOpen}>
               <ListItemIcon>
                 <Iconify icon="material-symbols:loyalty" width={24} height={24} />
               </ListItemIcon>
               <ListItemText primary="Loyalty" primaryTypographyProps={{ variant: 'body2' }} />
             </MenuItem>
+        }
+        { role === 3 &&
             <MenuItem sx={{ color: 'text.secondary' }} onClick={()=>{setInvoiceOpen(true)}}>
               <ListItemIcon>
                 <Iconify icon="fa6-solid:file-invoice" width={24} height={24} />
               </ListItemIcon>
               <ListItemText primary="Invoice" primaryTypographyProps={{ variant: 'body2' }} />
             </MenuItem>
-          </>
         }
 
         <MenuItem sx={{ color: 'text.secondary' }} onClick={handleDelete}>

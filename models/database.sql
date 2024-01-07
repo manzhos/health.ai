@@ -91,7 +91,7 @@ create TABLE files(
 create TABLE notes(
   "id" SERIAL4 PRIMARY KEY,
   "title" TEXT, 
-  "note" TEXT NOT NULL, 
+  "note" JSONB, 
   "client_id" INT4, 
   "doctor_id" INT4, 
   "procedure_id" INT4, 
@@ -146,3 +146,5 @@ create TABLE mails(
   "ts" TIMESTAMPTZ,
   "archive" BOOLEAN DEFAULT false
 );
+
+
