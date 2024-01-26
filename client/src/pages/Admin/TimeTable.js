@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
+import { sentenceCase } from 'change-case';
 // material 
 import {
   Card,
-  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Grid,
   Stack,
-  // Avatar,
-  Button,
+  Select,
   Modal,
   Container,
   Typography,
+  Button
 } from '@mui/material'
 // components
 import { useHttp } from '../../hooks/http.hook'
@@ -53,11 +56,19 @@ export default function TimeTable(){
   const [procedureList, setProcedureList] = useState([])
   const [procedure, setProcedure] = useState({})
   const [date, setDate] = useState(new Date())
+  const [doctor, setDoctor] = useState('')
+  const [doctorList, setDoctorList] = useState([])  
 
-  const getProcedures = useCallback(async () => {
+  const getProcedures = useCallback(async (doctorId=null) => {
     if(!token || !userId) return;
+    let filterById = userId;
+    console.log('doctor:', doctorId);
+    console.log('userId:', userId);
+    console.log('userTypeId:', userTypeId);
+    if(doctorId && userTypeId === 1) filterById = doctorId;
+    console.log('filterById:', filterById);
     try {
-      const res = await request(`${API_URL}api/tt_procedures/${userId}`, 'GET', null, {
+      const res = await request(`${API_URL}api/tt_procedures/${filterById}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
       // console.log('procedures:', res)
@@ -148,6 +159,26 @@ export default function TimeTable(){
 
   const [openNewProcedure, setOpenNewProcedure] = useState(false);
 
+  const getDoctors = useCallback(async () => {
+    try {
+      const res = await request(`${API_URL}`+'api/doctors', 'GET', null, {
+        // Authorization: `Bearer ${token}`
+      })
+      setDoctorList(res)
+    } catch (e) { console.log('error:', e) }
+  }, [request])
+  useEffect(() => {getDoctors()}, [getDoctors]); 
+
+  const handleChangeDoctor = (event) => {
+    console.log('setDoctor:', event.target.value);
+    event.preventDefault();
+    setDoctor(event.target.value);
+  }
+
+  useEffect(()=>{
+    console.log('doctor Id:', doctor);
+    getProcedures(doctor);
+  }, [doctor]);
 
   return(
     <Container>
@@ -170,6 +201,29 @@ export default function TimeTable(){
         </Container>
       </Modal>
 
+      <Grid container>
+        <Grid item xs={12} sm={12}>
+          <FormControl sx={{ width: "90%" }}>
+            <InputLabel id="doctor-select">Doctor</InputLabel>
+            <Select
+              labelId="doctor-select"
+              id="doctor-select"
+              name="doctor_id"
+              value={doctor}
+              label="Doctor"
+              onChange={handleChangeDoctor} 
+              className='cons-input'
+            >
+              {doctorList.map((item)=>{
+                return(
+                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+          {userTypeId === 1 && <Button onClick={()=>{setDoctor(0)}}>Show All</Button>}
+        </Grid>
+      </Grid>
       {/* ========= SCEDULER ========= */}
       <Card>
         {/* <div> */}

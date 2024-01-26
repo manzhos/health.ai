@@ -233,9 +233,10 @@ class ProcedureController {
 
   async getTimeTableProceduresById(req, res){
     const id = req.params.id
-    // console.log('get Procedures for timetable for', id);
+    console.log('get Procedures for timetable for', id);
     const checkDoctor = await DB.query(`SELECT usertype_id FROM users WHERE id = ${id} LIMIT 1`);
     const isDoc = checkDoctor.rows[0].usertype_id;
+    console.log('isDoc:', isDoc);
     const sql = `
       SELECT 
         tt.id,
