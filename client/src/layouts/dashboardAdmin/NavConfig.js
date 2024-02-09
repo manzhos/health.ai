@@ -22,6 +22,11 @@ const navConfig = [
     icon: getIcon('eva:people-fill'),
   },
   {
+    title: 'leads funnel',
+    path: '/admin/lead_funnel',
+    icon: getIcon('eva:funnel-fill'),
+  },
+  {
     title: 'clients',
     path: '/admin/client',
     icon: getIcon('eva:people-fill'),

@@ -32,7 +32,10 @@
     "recharts": "^2.4.3",
     "simplebar-react": "^2.4.3",
     "uuid": "^9.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "react-beautiful-dnd": "^13.1.0",
+    "react-feather": "^2.0.10",
+    "use-local-storage": "^2.3.6"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -35,6 +35,7 @@ import CommunicationClient from './pages/Admin/CommunicationClient';
 import LoyaltyClient from './pages/Admin/LoyaltyClient';
 import Staff from './pages/Admin/Staff';
 import Lead from './pages/Admin/Lead';
+import Kanban from './pages/Admin/Kanban';
 import Client from './pages/Admin/Client';
 // import User from './pages/Admin/User';
 import Partner from './pages/Admin/Partner';
@@ -82,6 +83,7 @@ export const useMyRoutes = isAuthenticated => {
           <Route path="partner" element={<Partner />}/>
           <Route path="staff" element={<Staff />}/>
           <Route path="lead" element={<Lead />}/>
+          <Route path="lead_funnel" element={<Kanban />}/>
           <Route path="client" element={<Client />}/>
           <Route path="client/docs/:id" element={<UserDocs />}/>
           <Route path="procedure" element={<Procedure />}/>

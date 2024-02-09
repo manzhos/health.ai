@@ -12,6 +12,7 @@ import {
 
 import Booking from "../../components/Booking"
 import Gallery from "../../components/Gallery"
+import Invoices from "./Invoices"
 
 export default function ClientCard({openClientCard, user, closeClientCard}){
   // console.log('user >>>', user)
@@ -104,7 +105,8 @@ export default function ClientCard({openClientCard, user, closeClientCard}){
                 <Booking clientId={user?.id} client={user} mode={true} />
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
-                {'Data in Payments tabs coming soon...'}
+                {/*'Data in Payments tabs coming soon...'*/}
+                <Invoices/>
               </TabPanel>
             </Box>
           </Grid>

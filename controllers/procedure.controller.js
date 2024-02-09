@@ -267,15 +267,19 @@ class ProcedureController {
   }
 
   async updateTimeTableProceduresById(req, res){
-    const id = req.params.id
+    const id = req.params.id;
+    const {date, time, duration} = req.body;
     // save to DB
     // console.log('set invoiced procedure:', id);
     const sql =`
       UPDATE timetable SET
+        ${date      ? `date     = $2`:''}
+        ${time      ? `time     = $3`:''}
+        ${duration  ? `duration = $4`:''}
         is_invoiced = true
       WHERE id = $1;`
     try{
-      await DB.query(sql, [id]);
+      await DB.query(sql, [id, date, time, duration]);
       console.log(`procudure #${id} was updates`)
       res.send(true) 
     } catch(e){
