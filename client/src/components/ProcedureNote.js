@@ -33,6 +33,8 @@ import { useHttp } from '../hooks/http.hook'
 import humanDate from "./HumanDate";
 import Confirm from "./Confirm";
 import AddFile from "./AddFile";
+import CalendarOutside from "./CalendarOutside";
+import Time from "./Time";
 
 export default function ProcedureNote({ procedure, onSave }){
   // console.log('procedure >>>', procedure)
@@ -76,15 +78,32 @@ export default function ProcedureNote({ procedure, onSave }){
   const [clientId, setClientId] = useState(procedure.client_id);
   const [doctorId, setDoctorId] = useState(procedure.doctor_id);
   const [procedureFinal, setProcedureFinal] = useState(procedure.procedure_id);
-
+  
+  const [currentDate, setCurrentDate] = useState(procedure.start);
+  const [visitDate, setVisitDate] = useState(new Date());
+  const [time, setTime] = useState();
+  const [timeEnd, setTimeEnd] = useState();
+  const [duration, setDuration] = useState();
+  const [slots, setSlots] = useState([]);
+  const [receptionList, setReceptionList] = useState([])
+  const [recordList, setRecordList] = useState([])
+  
   const [photoList, setPhotoList] = useState([])
   const [photoBefore, setPhotoBefore] = useState([])
   const [photoAfter, setPhotoAfter] = useState([])
   const [fileUrl, setFileUrl] = useState([])
-
+  
   const [confirmData, setConfirmData] = useState({ open: false });
-
+  
   const [files, setFiles] = useState()
+  
+  useEffect(()=>{
+    console.log('Doctor ID:', procedure.doctor_id); 
+    setDoctorId(procedure.doctor_id)
+    setTime(getOnlyTime(procedure.start));
+    setTimeEnd(getOnlyTime(procedure.start + procedure.duration*60*1000));
+  }, []);
+
 
   const getProcedureDataFromInvoice = async () => {
     try{
@@ -158,6 +177,31 @@ export default function ProcedureNote({ procedure, onSave }){
     } catch (e) { console.log('error:', e)}
   }, [token, request])
   useEffect(() => {getProcedures()}, [getProcedures])
+
+  const getReceptions = async () => {
+    console.log('try to take receptions by doctor ID:', doctorId);
+    try {
+      const reception = await request(`${API_URL}api/reception_bydoctor/${doctorId}`, 'GET', null, {
+        // Authorization: `Bearer ${token}`
+      })
+      console.log('reception_bydoctor:', reception);
+      setReceptionList(reception);
+    } catch (e) { console.log('error:', e)}
+  }
+  useEffect(()=>{getReceptions()}, [doctorId])
+
+  // get the data about doctors procedure
+  const getRecordsByDoctor = async () => {
+    console.log('getRecordsByDoctor:', doctorId);
+    if(!doctorId) return;
+    try {
+      const res = await request(`${API_URL}api/tt_bydoctor/${doctorId}`, 'GET', null, {})
+      console.log('tt_bydoctor:', res);
+      setRecordList(res);
+      // busy.length = 0;
+    } catch(error) { console.log('error:', error) }
+  }
+  useEffect(() => {getRecordsByDoctor()}, [doctorId]) 
 
   const getDocs = useCallback(async () => {
     try {
@@ -300,6 +344,18 @@ export default function ProcedureNote({ procedure, onSave }){
 
   }
 
+  const updateProcedureInTimetable = async () => {
+    try {
+      const tt_procedure = await request(`${API_URL}api/updateTimeTableProceduresById/${procedureFinal}`, 'PATCH', {
+        'time'    : time,
+        'date'    : currentDate,
+        'duration': duration,
+      });
+      console.log('Procedure in timetable is updated:', tt_procedure);
+    } catch (e) {console.log('error:', e)} 
+  }
+  // useEffect(()=>{updateProcedureInTimetable()}, [currentDate, time, duration]);
+
   const delRecord = (bookingId) => {
     setConfirmData({
       open:       true,
@@ -436,6 +492,109 @@ export default function ProcedureNote({ procedure, onSave }){
       </Grid>      
     )
   }
+
+  const getOnlyDate = (d) => {
+    if(!d) return ' '
+    d = new Date(d);
+    return d.getDate() + ' ' + d.getMonth() + ' ' + d.getFullYear()
+  }
+
+  const getOnlyTime = (d) => {
+    if(!d) return ' '
+    d = new Date(d);
+    return d.toTimeString('HH:mm');
+  }
+
+  const getSlots = () => {
+    // // working hours
+    const timeStartDay = 8, // hour of the starting
+          timeEndDay   = 21, // hour of the ending
+          timeInterval = 15; // time interval - 15 minutes
+    let freeSlotDay = [], tmpSlot = [], busy = [], busyTimeInMinutes = [], freeSlot = {};
+
+    // const receptions = getReceptions(doctorId);
+    // const records    = getRecordsByDoctor(doctorId);
+    console.log('receptionList:', receptionList);
+    console.log('recordList:', recordList);
+    const dayDate = getOnlyDate(currentDate);
+    tmpSlot.length = 0;
+    receptionList.map(item => {
+      const receptDate = getOnlyDate(new Date(item.date));
+      if(receptDate === dayDate) {
+        for (let t in item.time) {
+          // console.log(`item.time[${t}]:`, item.time[t]);
+          if(item.time[t]) {
+            tmpSlot.push(Number(t)*60);
+          }
+        }
+      }
+    })
+    console.log(`tmpSlot:`, tmpSlot);
+
+    busy.length = 0;
+    recordList.map(item => {
+      const recordDate = getOnlyDate(new Date(item.date));
+      if(recordDate === dayDate) {
+        busy.push({
+          'from'  : item.time,
+          'total' : item.duration
+        })
+      }
+    })
+    console.log(`busy:`, busy);
+
+    busyTimeInMinutes.length = 0;
+    busy.forEach((item)=>{
+      item.fromMin = Number(item.from.slice(0, 2))*60 + Number(item.from.slice(3));
+      for(let i=item.fromMin; i<(item.fromMin + item.total); i+=timeInterval) busyTimeInMinutes.push(i);
+    })
+    console.log(`busyTimeInMinutes:`, busyTimeInMinutes);
+
+    // Object.keys(freeSlotDay).forEach(key => delete freeSlotDay[key]);
+    for(let i = timeStartDay*60; i < timeEndDay*60; i+=timeInterval){
+      console.log('Create slot:', i, busyTimeInMinutes.includes(i))
+      if(tmpSlot.includes(i) || tmpSlot.includes(i - timeInterval) || tmpSlot.includes(i - timeInterval*2) || tmpSlot.includes(i - timeInterval*3)){
+        if(busyTimeInMinutes.includes(i)) continue;
+        console.log('Create slot:', i, i - timeInterval, i - timeInterval*2, i - timeInterval*3)
+        let h = Math.trunc(i/60);
+        let m = '00';
+        if(i%60 !== 0) m = i-(Math.trunc(i/60)*60);
+        console.log('time:', (h + ':' + m));
+        freeSlotDay.push(h + ':' + m);
+      }
+    }
+
+    setSlots(freeSlotDay);
+    // console.log('SP slots:', freeSlot);
+  }
+  useEffect(() => {getSlots()}, [doctorId, receptionList, recordList]);  
+  // useEffect(() => {getSlots()}, [receptionList, days]);  
+
+  const handleDateChange = (dateValue) => {
+    console.log('handleDateChange >>> dateValue:', dateValue);
+    const now = new Date();
+    if(dateValue < now) {
+      alert("You can\'t book in the past")
+      return;
+    }
+    setCurrentDate(dateValue);
+  }
+
+  const handleTimeChange = (timeValue) => {
+    console.log('handleTimeChange', timeValue);
+    setTime(timeValue)
+  }
+  const timeToMin = (time) => {
+    if(!time) return
+    const timeArr = time.split(':');
+    return timeArr[0]*60 + timeArr[1];
+  }
+  const handleTimeEndChange = (timeValue) => {
+    console.log('handleTimeChange', timeValue);
+    setTimeEnd(timeValue);
+    setDuration(timeToMin(time) - timeToMin(timeValue));
+  }
+  useEffect(()=>{handleTimeEndChange()}, [time]);
  
 
   return(
@@ -446,7 +605,7 @@ export default function ProcedureNote({ procedure, onSave }){
 
         {/* <Scrollbar> */}
           <Grid container>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={3}>
               <FormControl sx={{ width:'90%', mb:3 }}>
                 <InputLabel id="procedure-select">Procedure</InputLabel>
                 <Select
@@ -504,11 +663,59 @@ export default function ProcedureNote({ procedure, onSave }){
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={9} sm={3}>
-              Start:<br /><strong>{humanDate(procedure.start)}</strong> <br /> 
-              {/* <CalendarOutside onDateChange={handleDateChange} dValue={startDate}/> */}
-
-              End:<br /><strong>{humanDate(procedure.end)}</strong>
+            <Grid item xs={9} sm={4}>
+              <Grid container>
+                <Grid item xs={12} sm={2}>Start: </Grid>
+                <Grid item xs={12} sm={6}>
+                  <CalendarOutside onDateChange={ (newDate) => handleDateChange(newDate) } dValue={currentDate} />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl sx={{width:1}}>
+                    <InputLabel id="doctor-select">Time</InputLabel>
+                    <Select
+                      labelId="time"
+                      id="time"
+                      name="time"
+                      value={time}
+                      label="Time"
+                      onChange={(event)=>{handleTimeChange(event.target.value)}} 
+                    >
+                      {slots.map((item, key)=>{
+                        return(
+                          <MenuItem key={key} value={item}>{item}</MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+              <p>&nbsp;</p>
+              <Grid container>
+                <Grid item xs={12} sm={2}>End: </Grid>
+                <Grid item xs={12} sm={6}>
+                  <CalendarOutside onDateChange={ (newDate) => handleDateChange(newDate) } dValue={currentDate} />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <FormControl sx={{width:1}}>
+                    <InputLabel id="time-end">Time</InputLabel>
+                    <Select
+                      labelId="time-end"
+                      id="time-end"
+                      name="time-end"
+                      value={timeEnd}
+                      label="Time"
+                      onChange={(event)=>{handleTimeEndChange(event.target.value)}} 
+                    >
+                      {slots.map((item, key)=>{
+                        return(
+                          <MenuItem key={key} value={item}>{item}</MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+              {/* End:<br /><strong>{humanDate(procedure.end)}</strong> */}
             </Grid>
             <Grid item xs={3} sm={1} sx={{ textAlign: "right" }}>
               <Button onClick={() => {delRecord(procedure.id)}} size="small" variant="outlined" color="error">Delete</Button>

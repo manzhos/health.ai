@@ -46,8 +46,8 @@ export default function BookingFree(){
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [visitDate, setVisitDate] = useState(new Date());
-  const [days, setDays] = useState([]);
   const [time, setTime] = useState('__:__');
+  const [days, setDays] = useState([]);
   const [doctorList, setDoctorList] = useState([]);
   const [doctorSelected, setDoctorSelected] = useState([]);
   const [procedureTypeId, setProcedureTypeId] = useState(procedureTypeIdDefault);

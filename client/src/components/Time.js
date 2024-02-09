@@ -3,12 +3,12 @@ import { Container, Button, Typography } from '@mui/material'
 import { SubscriptionsOutlined } from "@mui/icons-material"
 
 export default function Time({onTimeChange, slots, day}) {
-  // console.log('Slots in time:', slots);
+  console.log('Slots in time:', slots);
   const [variant, setVariant] = useState([])
   let st = [],
   slot = [];
   for(let s in slots) slot.push(slots[s]);
-  // console.log('SlotTT TT TT:', slot);
+  console.log('SlotTT TT TT:', slot);
 
   useEffect(()=>{
     for(let i=0; i<slot.length; i++) st.push('outlined')
