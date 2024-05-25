@@ -776,7 +776,7 @@ ORDER BY c.firstname, c.lastname;`
       // console.log(`sql:\n ${sql}:`)
       const user = await DB.query(sql, [email])
       console.log(`user by ${email}:`, user.rows[0])
-      res.send(user.rows[0])
+      res.send(user.rows[0] ? user.rows[0] : {})
     }catch(e){
       console.log(`Error: ${e}`)  
       return res.status(500).json({message: "The connection with DB was lost."})
@@ -801,7 +801,7 @@ ORDER BY c.firstname, c.lastname;`
       // console.log(`sql:\n ${sql}:`)
       const user = await DB.query(sql, [phone])
       console.log(`user by ${phone}:`, user.rows[0])
-      res.send(user.rows[0])
+      res.send(user.rows[0] ? user.rows[0] : {})
     }catch(e){
       console.log(`Error: ${e}`)  
       return res.status(500).json({message: "The connection with DB was lost."})
