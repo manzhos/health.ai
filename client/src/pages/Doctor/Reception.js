@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
+// import { Calendar, momentLocalizer } from "react-big-calendar"
+// import moment from "moment";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+
 // material 
 import {
   Card,
@@ -26,6 +30,10 @@ import parse from 'date-fns/parse'
 import startOfWeek from 'date-fns/startOfWeek'
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
+
+// const localizer = momentLocalizer(moment);
+const DnDCalendar = withDragAndDrop(Calendar);
 // import DatePicker from 'react-datepicker'
 // import 'react-datepicker/dist/react-datepicker.css'
 // ----------------------------------------------------------------------
@@ -59,7 +67,7 @@ export default function Reception(){
   };
   const pJWT = parseJwt(token);
   const userId = pJWT ? pJWT.userId : null;
-  // console.log('UserId:', userId);
+  console.log('UserId:', userId);
 
   const workHour = [],
         recTime = {};
@@ -84,16 +92,24 @@ export default function Reception(){
   const getReceptions = useCallback(async () => {
     // console.log('try to take receptions');
     try {
-      const reception = await request(`${API_URL}api/reception_bydoctor/${userId}`, 'GET', null, {
+      let receptList = []
+      const receptions = await request(`${API_URL}api/reception_bydoctor/${userId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
-      // console.log('receptions:', reception);
-      reception.map((r) => {
-        const d = new Date(r.date);
-        r.start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        r.end   = new Date(Date.parse(r.start) + 10 * 60000);
+      // console.log('receptions:', receptions);
+      receptions.map((r) => {
+        for(const key in r.time){
+          const d = new Date(r.date)
+          receptList.push(
+            {
+              'start' : new Date((d.getMonth()+1) + '-' + d.getDate() + '-' + d.getFullYear() + ' ' + Math.floor(r.time[key].start / 60) + ':' + r.time[key].start % 60),
+              'end'   : new Date((d.getMonth()+1) + '-' + d.getDate() + '-' + d.getFullYear() + ' ' + Math.floor(r.time[key].end / 60)   + ':' + r.time[key].end % 60),
+            }
+          )
+        }
       });
-      setReceptionList(reception);
+      // console.log('receptList:', receptList)
+      setReceptionList(receptList);
     } catch (e) { console.log('error:', e)}
   }, [token, request])
   useEffect(() => {getReceptions()}, [getReceptions]);
@@ -106,8 +122,8 @@ export default function Reception(){
 
   const handleSelectSlot = useCallback(
     (event) => {
-      // console.log(typeof(event.start), event.start);
-      // console.log(receptionList);
+      console.log('handleSelectSlot', event, '\n', typeof(event.start), event.start);
+      console.log(receptionList);
       
       receptionList.map(el => {
         if(String(new Date(el.date)) === String(event.start)) setTime(el.time);
@@ -144,15 +160,6 @@ export default function Reception(){
     } catch (e) {console.log('error:', e)}
   }
 
-  const handleChangeRecTime = (e) => {
-    const { target } = e;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    let { name } = target;
-    name = name.replace('checkHour', '');
-    setTime( t => ({ ...t, [name]: value }));
-    // console.log('Time:', time);
-  }
-
   const { defaultDate, scrollToTime } = useMemo(
     () => ({
       defaultDate: new Date(),
@@ -160,6 +167,49 @@ export default function Reception(){
     }),
     []
   )
+
+  const onEventDrop = useCallback((data) => {
+    console.log('event drop', data);
+  })
+
+  const onEventResize = useCallback((data) => {
+    // console.log('event resize:', data);
+    // data.start
+    const rList = [...receptionList];
+    rList.map((r) => {
+      if(r.start.toDateString() === data.start.toDateString() && r.start >= data.start && r.end <= data.end){
+        r.start = data.start
+        r.end = data.end
+      }
+    })
+    const recToday = rList.filter(r => r.start.toDateString() === data.start.toDateString()).sort((a, b) => {
+      if (a.start < b.start) return -1;
+      if (a.start > b.start) return 1;
+      return 0;
+    });
+
+    let i = 1
+    while(i < recToday.length){
+      if(recToday[i].start <= recToday[i-1].end){
+        recToday[i-1].end = recToday[i].end
+        recToday.splice(i, 1);
+        i = 1
+      } else i++
+    }
+    const recAnotherDay = rList.filter((r) => r.start.toDateString() !== data.start.toDateString());
+
+    setReceptionList([...new Set([...recToday, ...recAnotherDay])])
+  })
+  // useEffect(()=>{console.log('the changes in receptionList >>> ', receptionList)}, [receptionList])
+
+  const handleSelectReception = useCallback((data) => {
+    console.log('handleSelectReception:', data);
+    setOpen(true);
+  })
+
+  const view = "week"
+  const step = 15
+  const timeslots = 4
 
   return(
     <Container>
@@ -169,150 +219,26 @@ export default function Reception(){
         </Typography>
       </Stack>
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Container component="main" maxWidth="md" disableGutters style={{ maxHeight:"85vh", maxWidth:"480px" }}>
-          <div className="login-modal">
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <Typography component="h1" variant="h5">
-                Edit Reception Hours
-              </Typography>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: 1 }} style={{ textAlign:'center'}}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12}>
-                    <Box style={{ maxWidth:"160px", margin:"0 auto" }}>
-                      <h3>{dayOfWeek[date.getDay()]}, {date.getDate()}&nbsp;{month[date.getMonth()]}</h3>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Typography sx={{mb:3, width:1}}>Check the boxes if you ready for visits in:</Typography>
-                    <Box sx={{mt:3}}>
-                      <Grid container>
-                        <Grid item xs={12} sm={6}>
-                          {workHour.map((val, key)=>{
-                            if(key < workHour.length/2) return(
-                              <FormControlLabel
-                                key={'checkHourId' + key}
-                                control={
-                                  <Checkbox 
-                                    name={'checkHour' + val} 
-                                    checked={time[val]} 
-                                    color="primary" 
-                                    onChange={handleChangeRecTime} 
-                                  />
-                                }
-                                label={val + ':00 - '+ (val + 1) +':00'}
-                                style={{width:'100%', paddingLeft:"30px"}}
-                              />
-                            )
-                          })}
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          {workHour.map((val, key)=>{
-                            if(key >= workHour.length/2) return(
-                              <FormControlLabel
-                                key={'checkHourId' + key}
-                                control={
-                                  <Checkbox 
-                                    name={'checkHour' + val} 
-                                    checked={time[val]} 
-                                    color="primary" 
-                                    onChange={handleChangeRecTime} 
-                                  />
-                                }
-                                label={val + ':00 - '+ (val + 1) +':00'}
-                                style={{width:'100%', paddingLeft:"30px"}}
-                              />
-                            )
-                          })}
-                        </Grid>
-
-                      </Grid>
-                    </Box>
-                  </Grid>
-                  
-                  <Box sx={{ width: '100%', fontWeight:'600', padding:'10px 0 0', borderTop: 1, borderColor: 'divider', mt: 2, mb: 1, marginLeft: '15px' }}>Repeat settings</Box>
-
-                  <Grid>
-                    <FormControlLabel
-                      key={'checkEveryWeek'}
-                      control={
-                        <Checkbox 
-                          name={'setEveryWeek'} 
-                          checked={repeat.week} 
-                          color="primary" 
-                          onChange={() => {setRepeat({...repeat, 'week': !repeat.week, 'twoWeek': false, 'month': false})}} 
-                        />
-                      }
-                      label='Every week'
-                      style={{width:'50%', paddingLeft:"30px"}}
-                    />
-                    <FormControlLabel
-                      key={'checkEveryTwoWeek'}
-                      control={
-                        <Checkbox 
-                          name={'setEveryTwoWeek'} 
-                          checked={repeat.twoWeek} 
-                          color="primary" 
-                          onChange={() => {setRepeat({...repeat, 'week':false, 'twoWeek': !repeat.twoWeek, 'month': false})}} 
-                        />
-                      }
-                      label='Every two week'
-                      style={{width:'47%', paddingLeft:"30px"}}
-                    />
-                    <FormControlLabel
-                      key={'checkEveryMonth'}
-                      control={
-                        <Checkbox 
-                          name={'setEveryMonth'} 
-                          checked={repeat.month} 
-                          color="primary" 
-                          onChange={() => {setRepeat({...repeat,  'week':false, 'twoWeek':false, 'month': !repeat.month})}} 
-                        />
-                      }
-                      label='Every Month'
-                      style={{width:'100%', paddingLeft:"30px"}}
-                    />
-                  </Grid>
-                </Grid>
-                <Button
-                  type="submit"
-                  // fullWidth
-                  variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
-                >
-                  Save
-                </Button>
-              </Box>
-            </Box>
-          </div>
-        </Container>
-      </Modal>
-
       {/* ========= SCEDULER ========= */}
       <Card>
-        <Calendar 
+        <DnDCalendar 
           localizer={localizer} 
           events={receptionList} 
           startAccessor="start" 
           endAccessor="end" 
           defaultDate={defaultDate}
-          // defaultView={Views.WEEK}
-          // onSelectEvent={handleSelectReception}
-          onSelectSlot={handleSelectSlot}
+          defaultView={view}
+          step={step}
+          timeslots={timeslots}
+          min={new Date(2024, 1, 1, 8, 0, 0)}  // Начало расписания в 8 утра
+          max={new Date(2024, 1, 1, 20, 0, 0)} // Конец расписания в 20 вечера
+          onSelectEvent={handleSelectReception}
+          resizable
           selectable
-          scrollToTime={scrollToTime}
+          onSelectSlot={handleSelectSlot}
+          onEventDrop={onEventDrop}
+          onEventResize={onEventResize}
+          // scrollToTime={scrollToTime}
           style={{ height: "70vh", margin: "20px" }} 
         />
       </Card>

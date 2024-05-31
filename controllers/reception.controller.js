@@ -105,6 +105,52 @@ class ReceptionController {
     }
   }
   
+  async updReception(req, res){
+    console.log(`try to update reception`);
+    // save to DB
+    const {doctor_id, date, time} = req.body;
+    console.log(doctor_id, date, time);
+    if(!doctor_id || !date || !time) return  res.status(400).json({message: "Not full data."})
+
+    // find exists record
+    let rec
+    try{
+      const sql =`SELECT * FROM reception_hours WHERE date = $1;`;
+      rec = await DB.query(sql, [date]);
+      console.log(`found #${rec}`)
+    } catch (err) {
+      console.log(`Error: ${err}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+
+    if(rec){
+      // update
+      const sql =`UPDATE reception_hours SET time = $1 WHERE date = $2;`;
+      try{
+        await DB.query(sql, [time, date]);
+        console.log(`reception #${id} was updates`)
+        return res.send(true);
+      } catch (err) {
+        console.log(`Error: ${err}`)  
+        return res.status(500).json({message: "The connection with DB was lost."})
+      }
+    } else {
+      // insert
+      const ts  = new Date();
+      const sql =`INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *`;
+      try{
+        const newRec = await DB.query(sql, [doctor_id, date, time, ts]);
+        console.log(`reception ${newRec} was inserted`)
+        return res.send(true);
+      } catch (err) {
+        console.log(`Error: ${err}`)  
+        return res.status(500).json({message: "The connection with DB was lost."})
+      }
+
+    }
+
+  }
+  
   async deleteReception(req, res){
     const id = req.params.id
     // console.log('delete reception by ID:', id)
