@@ -69,25 +69,18 @@ export default function Reception(){
   const userId = pJWT ? pJWT.userId : null;
   console.log('UserId:', userId);
 
-  const workHour = [],
-        recTime = {};
-  for(let i=8; i<21; i++){
-    workHour[workHour.length] = i;
-    recTime[i] = false;
-  }
-
   const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  // const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const [receptionList, setReceptionList] = useState([])
-  const [date, setCurrDate] = useState(new Date());
-  const [mDate, setMDate] = useState(new Date());
-  const [time, setTime] = useState(recTime);
+  const [currentReception, setCurrentReception] = useState({});
   const [repeat, setRepeat] = useState({
+    day     : false,
     week    : false,
     twoWeek : false,
     month   : false,
   });
+
 
   const getReceptions = useCallback(async () => {
     // console.log('try to take receptions');
@@ -97,67 +90,162 @@ export default function Reception(){
         Authorization: `Bearer ${token}`
       })
       // console.log('receptions:', receptions);
+      let id = 0
       receptions.map((r) => {
         for(const key in r.time){
           const d = new Date(r.date)
           receptList.push(
             {
+              'id'    : id,
               'start' : new Date((d.getMonth()+1) + '-' + d.getDate() + '-' + d.getFullYear() + ' ' + Math.floor(r.time[key].start / 60) + ':' + r.time[key].start % 60),
               'end'   : new Date((d.getMonth()+1) + '-' + d.getDate() + '-' + d.getFullYear() + ' ' + Math.floor(r.time[key].end / 60)   + ':' + r.time[key].end % 60),
             }
           )
+          id++
         }
       });
-      // console.log('receptList:', receptList)
+      console.log('receptList:', receptList)
       setReceptionList(receptList);
     } catch (e) { console.log('error:', e)}
   }, [token, request])
   useEffect(() => {getReceptions()}, [getReceptions]);
 
+  const saveReceptions = async () => {
+    console.log('save:', receptionList,  '\nfor: ',  userId)
+    if(!userId || !receptionList) return
+    try {
+      const reception = await request(`${API_URL}api/reception`, 'POST', {
+        doctor_id     : userId,
+        receptionList : receptionList,
+      })
+      console.log('saved reception list:', reception);
+    } catch (e) {console.log('error:', e)}    
+  }
+  // useEffect(() => {saveReceptions()}, [receptionList])
+
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState(0);
+  const [pickReception, setPickReception] = useState('');
+
   // const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setCurrentReception({})
+    setOpen(false)
+  };
 
 
   const handleSelectSlot = useCallback(
     (event) => {
       console.log('handleSelectSlot', event, '\n', typeof(event.start), event.start);
-      console.log(receptionList);
+      // console.log(receptionList);
       
-      receptionList.map(el => {
-        if(String(new Date(el.date)) === String(event.start)) setTime(el.time);
-      });
+      // receptionList.map(el => {
+      //   if(String(new Date(el.date)) === String(event.start)) setTime(el.time);
+      // });
 
-      // timezone magic
-      let magicDate = event.start;
-      // console.log(magicDate)
-      // console.log(magicDate.getHours())
-      // console.log(magicDate.getTimezoneOffset() / 60)
-      // console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
-      magicDate.setHours(magicDate.getHours() - magicDate.getTimezoneOffset() / 60);
-      setMDate(magicDate)
+      // // timezone magic
+      // let magicDate = event.start;
+      // // console.log(magicDate)
+      // // console.log(magicDate.getHours())
+      // // console.log(magicDate.getTimezoneOffset() / 60)
+      // // console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
+      // magicDate.setHours(magicDate.getHours() - magicDate.getTimezoneOffset() / 60);
+      // setMDate(magicDate)
 
-      setCurrDate(event.start);
+      // setCurrDate(event.start);
       setOpen(true);
     }
   )
 
+  const getLastDayOfYear = () => {
+    const date = new Date();
+    date.setMonth(11); // December
+    date.setDate(31);
+    return date;
+  }
+
   const handleSubmit = async () => {
-    // console.log(userId, date, time);
-    // console.log('repeat:', repeat);
     let whenRepeat;
     for(let r in repeat) if(repeat[r]) whenRepeat = r;
     // console.log('whenRepeat:', whenRepeat);
-    try {
-      const reception = await request(`${API_URL}api/reception`, 'POST', {
-        doctor_id : userId,
-        date      : mDate,
-        time      : time,
-        repeat    : whenRepeat
-      })
-      setReceptionList(reception);
-    } catch (e) {console.log('error:', e)}
+
+    const lastDayOfYear = getLastDayOfYear();
+    // console.log('lastDayOfYear:', lastDayOfYear)
+
+    const recList = [...receptionList];
+    // console.log('recList:', recList)
+
+    let id = Math.max(...recList.map(r => r.id)) + 1
+    // console.log('ID:', id)
+
+    switch(whenRepeat){
+      case 'day':
+        // console.log('Repeat every day');
+        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 1)){
+          // console.log('D:', d)
+          const dEnd = new Date(currentReception.end)
+          dEnd.setDate(d.getDate())
+
+          recList.push({
+            'id'    : id,
+            'start' : new Date(d),
+            'end'   : dEnd
+          })
+
+          id++
+        }
+        // console.log('receptionList', recList)
+        break
+      case 'week':
+        // console.log('Repeat every week');
+        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 7)){
+          // console.log('D:', d)
+          const dEnd = new Date(currentReception.end)
+          dEnd.setDate(d.getDate())
+
+          recList.push({
+            'id'    : id,
+            'start' : new Date(d),
+            'end'   : dEnd
+          })
+
+          id++        }
+        break
+      case 'twoWeek':
+        // console.log('Repeat every two week');
+        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 14)){
+          // console.log('D:', d)
+          const dEnd = new Date(currentReception.end)
+          dEnd.setDate(d.getDate())
+
+          recList.push({
+            'id'    : id,
+            'start' : new Date(d),
+            'end'   : dEnd
+          })
+
+          id++        }
+        break
+      case 'month':
+        // console.log('Repeat every month');
+        for(let d = currentReception.start; d <= lastDayOfYear; d.setMonth(d.getMonth() + 1)){
+          // console.log('D:', d)
+          const dEnd = new Date(currentReception.end)
+          dEnd.setDate(d.getDate())
+
+          recList.push({
+            'id'    : id,
+            'start' : new Date(d),
+            'end'   : dEnd
+          })
+
+          id++        }
+        break
+      default: console.log('do nothing')
+    }
+
+    setReceptionList(recList)
+    saveReceptions()
+    handleClose()
   }
 
   const { defaultDate, scrollToTime } = useMemo(
@@ -173,11 +261,11 @@ export default function Reception(){
   })
 
   const onEventResize = useCallback((data) => {
-    // console.log('event resize:', data);
-    // data.start
+    console.log('event resize:', data);
+
     const rList = [...receptionList];
     rList.map((r) => {
-      if(r.start.toDateString() === data.start.toDateString() && r.start >= data.start && r.end <= data.end){
+      if(r.start.toDateString() === data.start.toDateString() && r.id === data.event.id){
         r.start = data.start
         r.end = data.end
       }
@@ -203,9 +291,25 @@ export default function Reception(){
   // useEffect(()=>{console.log('the changes in receptionList >>> ', receptionList)}, [receptionList])
 
   const handleSelectReception = useCallback((data) => {
-    console.log('handleSelectReception:', data);
+    // console.log('handleSelectReception:', data);
+    const startMinutes = data.start.getMinutes() < 10 ? '0' + data.start.getMinutes() : data.start.getMinutes()
+    const endMinutes   = data.end.getMinutes()   < 10 ? '0' + data.end.getMinutes()   : data.end.getMinutes()
+    const recString = dayOfWeek[data.start.getDay()] 
+                    + ', from ' + data.start.getHours() + ':' + startMinutes + ' till '  + data.end.getHours()   + ':' + endMinutes
+
+    setPickReception(recString)
+    setCurrentReception(data)
+
+    saveReceptions()
     setOpen(true);
   })
+
+  const handleDelete = () => {
+    const newRecList = receptionList.filter((r) => r.id !== currentReception.id)
+    setReceptionList(newRecList)
+    saveReceptions()
+    handleClose()
+  }
 
   const view = "week"
   const step = 15
@@ -218,6 +322,118 @@ export default function Reception(){
           Reception Hours
         </Typography>
       </Stack>
+
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Container component="main" maxWidth="md" disableGutters style={{ maxHeight:"85vh", maxWidth:"480px" }}>
+          <div className="login-modal">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Typography component="h1" variant="h5">
+                Reception Hours
+              </Typography>
+              <Box sx={{ mt: 3, width: 1 }} style={{ textAlign:'center'}}>
+                {currentReception.id && 
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={12}>
+                      <Box style={{ maxWidth:"160px", margin:"0 auto" }}>
+                        <h3>{pickReception}</h3>
+                      </Box>
+                    </Grid>
+
+                    <Button
+                      // fullWidth
+                      variant="outlined"
+                      sx={{ mt: 3, mb: 2 }}
+                      style = {{ margin:"0 auto"}}
+                      onClick={() => {handleDelete()}}
+                    >
+                      Delete
+                    </Button>
+                  
+                    <Box sx={{ width: '100%', fontWeight:'600', padding:'10px 0 0', borderTop: 1, borderColor: 'divider', mt: 2, mb: 1, marginLeft: '15px' }}>Repeat these Reception Hours</Box>
+
+                    <Grid>
+                      <FormControlLabel
+                        key={'checkEveryDay'}
+                        control={
+                          <Checkbox 
+                            name={'setEveryDay'} 
+                            checked={repeat.day} 
+                            color="primary" 
+                            onChange={() => {setRepeat({...repeat, 'day': !repeat.day, 'week': false, 'twoWeek': false, 'month': false})}} 
+                          />
+                        }
+                        label='Every day'
+                        style={{width:'50%', paddingLeft:"30px"}}
+                      />
+                      <FormControlLabel
+                        key={'checkEveryWeek'}
+                        control={
+                          <Checkbox 
+                            name={'setEveryWeek'} 
+                            checked={repeat.week} 
+                            color="primary" 
+                            onChange={() => {setRepeat({...repeat, 'day': false, 'week': !repeat.week, 'twoWeek': false, 'month': false})}} 
+                          />
+                        }
+                        label='Every week'
+                        style={{width:'47%', paddingLeft:"30px"}}
+                      />
+                      <FormControlLabel
+                        key={'checkEveryTwoWeek'}
+                        control={
+                          <Checkbox 
+                            name={'setEveryTwoWeek'} 
+                            checked={repeat.twoWeek} 
+                            color="primary" 
+                            onChange={() => {setRepeat({...repeat, 'day': false, 'week':false, 'twoWeek': !repeat.twoWeek, 'month': false})}} 
+                          />
+                        }
+                        label='Every two week'
+                        style={{width:'50%', paddingLeft:"30px"}}
+                      />
+                      <FormControlLabel
+                        key={'checkEveryMonth'}
+                        control={
+                          <Checkbox 
+                            name={'setEveryMonth'} 
+                            checked={repeat.month} 
+                            color="primary" 
+                            onChange={() => {setRepeat({...repeat,  'day': false, 'week':false, 'twoWeek':false, 'month': !repeat.month})}} 
+                          />
+                        }
+                        label='Every Month'
+                        style={{width:'47%', paddingLeft:"30px"}}
+                      />
+                    </Grid>
+                  </Grid>
+                }
+                <Button
+                  type="submit"
+                  // fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={() => {handleSubmit()}}
+                >
+                  {currentReception.id ? 'Repeat' : 'Create'}
+                </Button>
+              </Box>
+            </Box>
+          </div>
+        </Container>
+      </Modal>
+
 
       {/* ========= SCEDULER ========= */}
       <Card>
