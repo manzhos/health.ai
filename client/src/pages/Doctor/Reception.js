@@ -19,6 +19,7 @@ import {
 } from '@mui/material'
 
 // components
+import Iconify from '../../components/Iconify';
 import { useHttp } from '../../hooks/http.hook'
 import { AuthContext } from '../../context/AuthContext'
 import {API_URL} from '../../config'
@@ -81,6 +82,8 @@ export default function Reception(){
     month   : false,
   });
 
+  const [open, setOpen] = useState(false);
+  const [pickReception, setPickReception] = useState('');
 
   const getReceptions = useCallback(async () => {
     // console.log('try to take receptions');
@@ -89,11 +92,12 @@ export default function Reception(){
       const receptions = await request(`${API_URL}api/reception_bydoctor/${userId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
-      // console.log('receptions:', receptions);
+      console.log('receptions:', receptions);
       let id = 0
+      // const timezoneOffset = new Date().getTimezoneOffset() // offset in minutes
       receptions.map((r) => {
         for(const key in r.time){
-          const d = new Date(r.date)
+          const d = new Date((new Date(r.date).getTime()) + 24 * 60 * 60 * 1000) 
           receptList.push(
             {
               'id'    : id,
@@ -110,51 +114,68 @@ export default function Reception(){
   }, [token, request])
   useEffect(() => {getReceptions()}, [getReceptions]);
 
+  // const createReceptions = async () => {
+  //   console.log('save:', receptionList,  '\nfor: ',  userId)
+  //   // if(!userId || !receptionList) return
+  //   try {
+  //     const reception = await request(`${API_URL}api/reception`, 'POST', {
+  //       // doctor_id     : userId,
+  //       // receptionList : receptionList,
+  //     })
+  //     // console.log('saved reception list:', reception);
+  //   } catch (e) {console.log('error:', e)}    
+  // }
+  // useEffect(() => {saveReceptions()}, [receptionList])
+
   const saveReceptions = async () => {
     console.log('save:', receptionList,  '\nfor: ',  userId)
     if(!userId || !receptionList) return
+
+    const recDates = receptionList.map((rec) => {
+      // console.log('rec:', new Date(rec.start).toDateString())
+      return new Date(rec.start).toDateString()
+    })
+    const uniqueRecDates = [...new Set(recDates)]
+    // console.log('recDates:', recDates)
+    // console.log('uniqueRecDates:', uniqueRecDates)
+
+    const newRecList = {}
+    for(let d in uniqueRecDates){
+      newRecList[uniqueRecDates[d]] = {}
+
+      receptionList.map((rec) => {
+        if(new Date(rec.start).toDateString() === uniqueRecDates[d]){
+          const id = Object.keys(newRecList[uniqueRecDates[d]]).length,
+                dateStart = new Date(rec.start),
+                dateEnd   = new Date(rec.end),
+                start = dateStart.getHours() * 60 + dateStart.getMinutes(),
+                end   = dateEnd.getHours()   * 60 + dateEnd.getMinutes()
+
+          newRecList[uniqueRecDates[d]][id] = {
+            'start': start,
+            'end': end
+          }
+
+        }
+      })
+    }
+    // console.log('newRecList:', newRecList)
+
     try {
-      const reception = await request(`${API_URL}api/reception`, 'POST', {
+      const reception = await request(`${API_URL}api/savereception`, 'POST', {
         doctor_id     : userId,
-        receptionList : receptionList,
+        receptionList : newRecList,
       })
       console.log('saved reception list:', reception);
     } catch (e) {console.log('error:', e)}    
   }
   // useEffect(() => {saveReceptions()}, [receptionList])
 
-  const [open, setOpen] = useState(false);
-  const [pickReception, setPickReception] = useState('');
-
   // const handleOpen = () => setOpen(true)
   const handleClose = () => {
     setCurrentReception({})
     setOpen(false)
   };
-
-
-  const handleSelectSlot = useCallback(
-    (event) => {
-      console.log('handleSelectSlot', event, '\n', typeof(event.start), event.start);
-      // console.log(receptionList);
-      
-      // receptionList.map(el => {
-      //   if(String(new Date(el.date)) === String(event.start)) setTime(el.time);
-      // });
-
-      // // timezone magic
-      // let magicDate = event.start;
-      // // console.log(magicDate)
-      // // console.log(magicDate.getHours())
-      // // console.log(magicDate.getTimezoneOffset() / 60)
-      // // console.log(magicDate.getHours() - magicDate.getTimezoneOffset() / 60)
-      // magicDate.setHours(magicDate.getHours() - magicDate.getTimezoneOffset() / 60);
-      // setMDate(magicDate)
-
-      // setCurrDate(event.start);
-      setOpen(true);
-    }
-  )
 
   const getLastDayOfYear = () => {
     const date = new Date();
@@ -171,90 +192,102 @@ export default function Reception(){
     const lastDayOfYear = getLastDayOfYear();
     // console.log('lastDayOfYear:', lastDayOfYear)
 
-    const recList = [...receptionList];
+    let recList = [...receptionList];
     // console.log('recList:', recList)
 
     let id = Math.max(...recList.map(r => r.id)) + 1
-    // console.log('ID:', id)
+    console.log('ID:', id)
 
-    switch(whenRepeat){
-      case 'day':
-        // console.log('Repeat every day');
-        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 1)){
-          // console.log('D:', d)
-          const dEnd = new Date(currentReception.end)
-          dEnd.setDate(d.getDate())
+    const getNextDay = (d) => {
+      switch(whenRepeat){
+        case 'day':
+          return d.getDate() + 1
+          break
+        case 'week':
+          return d.getDate() + 7
+          break
+        case 'twoWeek':
+          return d.getDate() + 14
+          break
+        case 'month':
+          return d.getMonth() + 1
+        default: console.log('looks like error')
+      }
+    }
 
-          recList.push({
-            'id'    : id,
-            'start' : new Date(d),
-            'end'   : dEnd
-          })
+    for(let d = new Date(currentReception.start); d <= lastDayOfYear; d.setDate(getNextDay(d))){
+      console.log('D:', d)
+      let rStart = new Date(d);
+      // get End time from the current reception
+      const hours         = currentReception.end.getHours(),
+            minutes       = currentReception.end.getMinutes(),
+            seconds       = currentReception.end.getSeconds(),
+            milliseconds  = currentReception.end.getMilliseconds();
+      // get date from setting day
+      const date  = d.getDate(),
+            month = d.getMonth(),
+            year  = d.getFullYear();
+      // new End - new day, but currentRecption time
+      let rEnd = new Date(year, month, date, hours, minutes, seconds, milliseconds);
+      console.log('rStart:', rStart, '\n>>> rEnd:', rEnd)
 
-          id++
-        }
-        // console.log('receptionList', recList)
-        break
-      case 'week':
-        // console.log('Repeat every week');
-        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 7)){
-          // console.log('D:', d)
-          const dEnd = new Date(currentReception.end)
-          dEnd.setDate(d.getDate())
+      const event = {
+        id:     id,
+        start:  rStart,
+        end:    rEnd
+      }
 
-          recList.push({
-            'id'    : id,
-            'start' : new Date(d),
-            'end'   : dEnd
-          })
-
-          id++        }
-        break
-      case 'twoWeek':
-        // console.log('Repeat every two week');
-        for(let d = currentReception.start; d <= lastDayOfYear; d.setDate(d.getDate() + 14)){
-          // console.log('D:', d)
-          const dEnd = new Date(currentReception.end)
-          dEnd.setDate(d.getDate())
-
-          recList.push({
-            'id'    : id,
-            'start' : new Date(d),
-            'end'   : dEnd
-          })
-
-          id++        }
-        break
-      case 'month':
-        // console.log('Repeat every month');
-        for(let d = currentReception.start; d <= lastDayOfYear; d.setMonth(d.getMonth() + 1)){
-          // console.log('D:', d)
-          const dEnd = new Date(currentReception.end)
-          dEnd.setDate(d.getDate())
-
-          recList.push({
-            'id'    : id,
-            'start' : new Date(d),
-            'end'   : dEnd
-          })
-
-          id++        }
-        break
-      default: console.log('do nothing')
+      const recToday = recList.filter(r => r.start.toDateString() === event.start.toDateString()).sort((a, b) => {
+        if (a.start < b.start) return -1;
+        if (a.start > b.start) return 1;
+        return 0;
+      });
+  
+      if(!recToday?.length) recToday.push({
+        id:     event.id,
+        start:  new Date(event.start),
+        end:    new Date(event.end)
+      }); 
+      else{
+        for(let k = 0; k < recToday.length; k++) {
+          const r = recToday[k]
+          if(event.start.toDateString() === r.start.toDateString()){
+            if(event.start <= r.start && event.end <= r.end && event.end >= r.start) {
+              r.start = event.start;
+              continue;
+            }
+            if(event.start >= r.start && event.start <= r.end && event.end >= r.end) {
+              r.end = event.end;
+              continue
+            }
+            if(event.start <= r.start && event.end >= r.end) {
+              r.start = event.start;
+              r.end = event.end;
+              continue
+            }
+            if(event.start === r.start && event.end === r.end) {
+              continue
+            }
+            if(event.end < r.start || event.start > r.end){
+              recToday.push({
+                id:     event.id,
+                start:  new Date(event.start),
+                end:    new Date(event.end)
+              })
+              continue
+            }
+          }
+        }  
+      }
+      const recAnotherDay = recList.filter((r) => r.start.toDateString() !== event.start.toDateString());
+      recList = [...new Set([...recToday, ...recAnotherDay])]
+      id++
     }
 
     setReceptionList(recList)
-    saveReceptions()
+    // saveReceptions()
     handleClose()
   }
-
-  const { defaultDate, scrollToTime } = useMemo(
-    () => ({
-      defaultDate: new Date(),
-      scrollToTime: new Date(),
-    }),
-    []
-  )
 
   const onEventDrop = useCallback((data) => {
     console.log('event drop', data);
@@ -266,8 +299,8 @@ export default function Reception(){
     const rList = [...receptionList];
     rList.map((r) => {
       if(r.start.toDateString() === data.start.toDateString() && r.id === data.event.id){
-        r.start = data.start
-        r.end = data.end
+        r.start = r.start < data.start ? r.start : data.start
+        r.end   = r.end   > data.end   ? r.end   : data.end
       }
     })
     const recToday = rList.filter(r => r.start.toDateString() === data.start.toDateString()).sort((a, b) => {
@@ -291,7 +324,7 @@ export default function Reception(){
   // useEffect(()=>{console.log('the changes in receptionList >>> ', receptionList)}, [receptionList])
 
   const handleSelectReception = useCallback((data) => {
-    // console.log('handleSelectReception:', data);
+    console.log('handleSelectReception:', data);
     const startMinutes = data.start.getMinutes() < 10 ? '0' + data.start.getMinutes() : data.start.getMinutes()
     const endMinutes   = data.end.getMinutes()   < 10 ? '0' + data.end.getMinutes()   : data.end.getMinutes()
     const recString = dayOfWeek[data.start.getDay()] 
@@ -300,9 +333,35 @@ export default function Reception(){
     setPickReception(recString)
     setCurrentReception(data)
 
-    saveReceptions()
+    // saveReceptions()
     setOpen(true);
   })
+  useEffect(() => {console.log('currentReception:', currentReception)}, [currentReception])
+
+  const handleSelectSlot = useCallback(
+    (event) => {
+      // console.log('handleSelectSlot', event, '\n', typeof(event.start), event.start);
+      // console.log(receptionList);
+
+      const recList = [...receptionList],
+            id = 1000 + recList.length*1,
+            d = new Date(event.start),
+            record = {
+              'id'    : id,
+              'start' : event.start,
+              'end'   : event.end,
+            }
+      // console.log('new record:', record)
+      setCurrentReception(record)
+      recList.push(record)
+      // console.log('receptList:', recList)
+      setReceptionList(recList);
+
+      // createReceptions();
+      
+      // setOpen(true);
+    }
+  )
 
   const handleDelete = () => {
     const newRecList = receptionList.filter((r) => r.id !== currentReception.id)
@@ -321,6 +380,9 @@ export default function Reception(){
         <Typography variant="h4" gutterBottom>
           Reception Hours
         </Typography>
+        <Button variant="contained" onClick={() => {saveReceptions()}} startIcon={<Iconify icon="eva:save-outline" />}>
+          Save
+        </Button>
       </Stack>
 
 
@@ -420,7 +482,7 @@ export default function Reception(){
                   </Grid>
                 }
                 <Button
-                  type="submit"
+                  type="button"
                   // fullWidth
                   variant="contained"
                   sx={{ mt: 3, mb: 2 }}
@@ -428,6 +490,16 @@ export default function Reception(){
                 >
                   {currentReception.id ? 'Repeat' : 'Create'}
                 </Button>
+                {/* <Button
+                  type="button"
+                  // fullWidth
+                  variant="outlined"
+                  size="small"
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={() => {setOpen(false)}}
+                >
+                  Close
+                </Button> */}
               </Box>
             </Box>
           </div>
@@ -442,7 +514,7 @@ export default function Reception(){
           events={receptionList} 
           startAccessor="start" 
           endAccessor="end" 
-          defaultDate={defaultDate}
+          defaultDate={new Date()}
           defaultView={view}
           step={step}
           timeslots={timeslots}
