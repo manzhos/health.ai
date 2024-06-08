@@ -225,6 +225,11 @@ export default function TimeTable(){
     } catch (e) { console.log('error:', e) }
   }
 
+  const handleCloseNewProcedure = () => {
+    setOpenNewProcedure(false)
+    getProcedures()
+  }
+
   // Calendar settings
   const view = "week"
   const step = 15
@@ -238,7 +243,7 @@ export default function TimeTable(){
         </Typography>
       </Stack>
       { openNewProcedure &&
-        <ScheduleNewProcedure openNewProcedure={openNewProcedure} currDate={date} onClose={()=>{setOpenNewProcedure(false)}} />
+        <ScheduleNewProcedure openNewProcedure={openNewProcedure} currDate={date} onClose={()=>{handleCloseNewProcedure()}} />
       }
 
       {/* Event window for Invoicing*/}
@@ -253,29 +258,31 @@ export default function TimeTable(){
         </Container>
       </Modal>
 
-      <Grid container>
-        <Grid item xs={12} sm={12}>
-          <FormControl sx={{ width: "90%" }}>
-            <InputLabel id="doctor-select">Doctor</InputLabel>
-            <Select
-              labelId="doctor-select"
-              id="doctor-select"
-              name="doctor_id"
-              value={doctor}
-              label="Doctor"
-              onChange={handleChangeDoctor} 
-              className='cons-input'
-            >
-              {doctorList.map((item)=>{
-                return(
-                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
-                )
-              })}
-            </Select>
-          </FormControl>
-          {userTypeId === 1 && <Button onClick={()=>{setDoctor(0)}}>Show All</Button>}
+      {userTypeId === 1 && 
+        <Grid container>
+          <Grid item xs={12} sm={12}>
+            <FormControl sx={{ width: "90%" }}>
+              <InputLabel id="doctor-select">Doctor</InputLabel>
+              <Select
+                labelId="doctor-select"
+                id="doctor-select"
+                name="doctor_id"
+                value={doctor}
+                label="Doctor"
+                onChange={handleChangeDoctor} 
+                className='cons-input'
+              >
+                {doctorList.map((item)=>{
+                  return(
+                    <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+            <Button onClick={()=>{setDoctor(0)}}>Show All</Button>
+          </Grid>
         </Grid>
-      </Grid>
+      }
       {/* ========= SCEDULER ========= */}
       <Card>
         {/* <Calendar 

@@ -187,6 +187,7 @@ export default function ScheduleNewProcedure({openNewProcedure, currDate, onClos
       })
       setProcedure(newProcedure);
       // navigate('/thanks')
+      onClose()
       alert('the procedure is booked')
     } catch (e) {console.log('error:', e)} 
   }
