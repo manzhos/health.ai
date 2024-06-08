@@ -611,7 +611,7 @@ export default function ProcedureNote({ procedure, onSave }){
                 <Select
                   labelId="procedure-select"
                   id="procedure-select"
-                  name="procedure_id"
+                  name={procedure.name + procedure.id}
                   value={procedureFinal}
                   label="Procedure"
                   onChange={(event)=>{setProcedureFinal(event.target.value)}} 

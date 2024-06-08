@@ -43,7 +43,7 @@ export default function ProcedureList({ procedureTypeId, procedureId = 0, onChan
       <Select
         labelId="procedure-select"
         id="procedure-select"
-        name="procedure_id"
+        name={'procedure_' + procedure}
         value={procedure || ""}
         label="Procedure"
         onChange={handleChangeProcedure} 

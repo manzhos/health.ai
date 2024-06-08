@@ -1,6 +1,13 @@
 const DB = require('../db')
 const bcrypt = require('bcryptjs')
 
+
+function humanTime(dateString){
+  if(!dateString) return
+  const date = new Date(dateString)
+  return date.getHours() + ':' + (Number(date.getMinutes()) > 9 ? date.getMinutes() : '0' + date.getMinutes())
+}
+
 class TimeTableController {
   async createRecord(req, res){
     // console.log('Create Procedure:', req.body)
@@ -74,9 +81,32 @@ class TimeTableController {
   
   async updateRecord(req, res){
     const id = req.params.id
-    const sql =``
+    const { procedure_id, client_id, doctor_id, start, end } = req.body
+    // console.warn('id, procedure_id, client_id, doctor_id, start, end:', id, procedure_id, client_id, doctor_id, start, end)
+    
+    const timeStart = humanTime(start),
+          timeEnd   = humanTime(end),
+          date      = new Date(start)
 
+    const sql =`
+      UPDATE timetable SET 
+        time      = $2,
+        time_end  = $3,
+        date      = $4
+      WHERE id = $1
+      RETURNING *
+    `
+
+    try{
+      const upd = DB.query(sql, [id, timeStart, timeEnd, date])
+      console.log('UPD:', upd)
+      res.send({ success:true, msg:'the procedure was updated', rec: upd })
+    } catch (e) {
+      console.log('Error:', e)
+      res.send({success: false, msg:'somthing wrong', err: e})
+    }
   }
+
   async deleteRecord(req, res){
     const bookingId = req.params.id;
     // console.log('bookingId:', bookingId);

@@ -217,6 +217,7 @@ export default function BookingFree(){
   }
   
   const checkUserByPhone = async () => {
+    if(user || Object.keys(user).length > 0) return
     const checkPhone = phone.replace('+','')
     console.log('check user by', checkPhone);
     try {
@@ -267,7 +268,7 @@ export default function BookingFree(){
   const handleDateChange = (dateValue) => {
     if(!dateValue) return
     const now = new Date();
-    if(getOnlyDate(dateValue.$d) < getOnlyDate(now)) {
+    if(new Date(getOnlyDate(dateValue.$d)) < new Date(getOnlyDate(now))) {
       alert("You can\'t book in the past")
     } else {
       setCurrentDate(dayjs(dateValue.$d))

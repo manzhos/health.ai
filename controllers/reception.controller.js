@@ -75,7 +75,7 @@ class ReceptionController {
     for(const key in receptionList){
       console.log('>>> key:', key)
       console.log('>>> key:', new Date(key).getTime())
-      values += `\n(${doctor_id}, to_timestamp(${new Date(key).getTime()} / 1000)::date, '${JSON.stringify(receptionList[key])}', to_timestamp(${ts} / 1000)),`
+      values += `\n(${doctor_id}, to_timestamp(${new Date(key).getTime() + 24 * 60 * 60 * 1000} / 1000)::date, '${JSON.stringify(receptionList[key])}', to_timestamp(${ts} / 1000)),`
     }
     console.log('\n\n', values, '\n')
     const sqlIns = `INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ${values.slice(0, -1)}`

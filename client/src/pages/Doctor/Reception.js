@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
-// import { Calendar, momentLocalizer } from "react-big-calendar"
-// import moment from "moment";
+import { sentenceCase } from 'change-case';
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 
 // material 
@@ -15,7 +14,11 @@ import {
   Typography,
   TextField,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material'
 
 // components
@@ -54,27 +57,38 @@ const localizer = dateFnsLocalizer({
 
 export default function Reception(){
   const {request} = useHttp()
-  const {token}   = useContext(AuthContext)
-
-  function parseJwt (token) {
-    if(token && token !== ''){
-      var base64Url = token.split('.')[1]
-      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      }).join(''))
-      return JSON.parse(jsonPayload)
-    }
-  };
-  const pJWT = parseJwt(token);
-  const userId = pJWT ? pJWT.userId : null;
-  console.log('UserId:', userId);
+  const {token, userId, userTypeId}   = useContext(AuthContext)
 
   const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   // const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+  const [doctorId, setDoctorId] = useState(userTypeId === 2 ? userId : '')
+  const [doctorList, setDoctorList] = useState([]) 
+  // useEffect(() => {console.log('New DoctorId:', doctorId)}, [doctorId])
+
+  const getDoctors = useCallback(async () => {
+    try {
+      const doctors = await request(`${API_URL}`+'api/doctors', 'GET', null, {
+        // Authorization: `Bearer ${token}`
+      })
+      console.log('doctors:', doctors);
+      setDoctorList(doctors)
+      setDoctorId(doctors[0].id)
+    } catch (e) { console.log('error:', e) }
+  }, [request])
+  useEffect(() => {
+    if(userTypeId === 1) getDoctors()
+  }, [getDoctors]); 
+
+  const handleChangeDoctor = (e) => {
+    console.log('setDoctorId:', e);
+    // event.preventDefault();
+    setDoctorId(e.value);
+  }
+
+
   const [receptionList, setReceptionList] = useState([])
-  const [currentReception, setCurrentReception] = useState({});
+  const [currentReception, setCurrentReception] = useState({})
   const [repeat, setRepeat] = useState({
     day     : false,
     week    : false,
@@ -82,22 +96,23 @@ export default function Reception(){
     month   : false,
   });
 
-  const [open, setOpen] = useState(false);
-  const [pickReception, setPickReception] = useState('');
+  const [open, setOpen] = useState(false)
+  const [pickReception, setPickReception] = useState('')
 
   const getReceptions = useCallback(async () => {
-    // console.log('try to take receptions');
+    console.log('try to take receptions for doctor ID:', doctorId);
+    if(!doctorId || doctorId === '') return
     try {
       let receptList = []
-      const receptions = await request(`${API_URL}api/reception_bydoctor/${userId}`, 'GET', null, {
+      const receptions = await request(`${API_URL}api/reception_bydoctor/${doctorId}`, 'GET', null, {
         Authorization: `Bearer ${token}`
       })
-      console.log('receptions:', receptions);
+      console.log('receptions:', receptions)
       let id = 0
       // const timezoneOffset = new Date().getTimezoneOffset() // offset in minutes
       receptions.map((r) => {
         for(const key in r.time){
-          const d = new Date((new Date(r.date).getTime()) + 24 * 60 * 60 * 1000) 
+          const d = new Date(r.date)// new Date((new Date(r.date).getTime()) + 24 * 60 * 60 * 1000) 
           receptList.push(
             {
               'id'    : id,
@@ -111,8 +126,8 @@ export default function Reception(){
       console.log('receptList:', receptList)
       setReceptionList(receptList);
     } catch (e) { console.log('error:', e)}
-  }, [token, request])
-  useEffect(() => {getReceptions()}, [getReceptions]);
+  }, [token, request, doctorId])
+  useEffect(() => {getReceptions()}, [getReceptions, doctorId]);
 
   // const createReceptions = async () => {
   //   console.log('save:', receptionList,  '\nfor: ',  userId)
@@ -128,8 +143,8 @@ export default function Reception(){
   // useEffect(() => {saveReceptions()}, [receptionList])
 
   const saveReceptions = async () => {
-    console.log('save:', receptionList,  '\nfor: ',  userId)
-    if(!userId || !receptionList) return
+    console.log('save:', receptionList,  '\nfor: ',  doctorId)
+    if(!doctorId || !receptionList) return
 
     const recDates = receptionList.map((rec) => {
       // console.log('rec:', new Date(rec.start).toDateString())
@@ -163,7 +178,7 @@ export default function Reception(){
 
     try {
       const reception = await request(`${API_URL}api/savereception`, 'POST', {
-        doctor_id     : userId,
+        doctor_id     : doctorId,
         receptionList : newRecList,
       })
       console.log('saved reception list:', reception);
@@ -293,16 +308,17 @@ export default function Reception(){
     console.log('event drop', data);
   })
 
-  const onEventResize = useCallback((data) => {
+  const onEventResize = (data) => {
     console.log('event resize:', data);
 
     const rList = [...receptionList];
-    rList.map((r) => {
-      if(r.start.toDateString() === data.start.toDateString() && r.id === data.event.id){
-        r.start = r.start < data.start ? r.start : data.start
-        r.end   = r.end   > data.end   ? r.end   : data.end
-      }
-    })
+
+    const booking = rList.find(r => r.id === data.event.id)
+    if(booking){
+      booking.start = data.start
+      booking.end   = data.end
+    }
+    
     const recToday = rList.filter(r => r.start.toDateString() === data.start.toDateString()).sort((a, b) => {
       if (a.start < b.start) return -1;
       if (a.start > b.start) return 1;
@@ -320,10 +336,10 @@ export default function Reception(){
     const recAnotherDay = rList.filter((r) => r.start.toDateString() !== data.start.toDateString());
 
     setReceptionList([...new Set([...recToday, ...recAnotherDay])])
-  })
+  }
   // useEffect(()=>{console.log('the changes in receptionList >>> ', receptionList)}, [receptionList])
 
-  const handleSelectReception = useCallback((data) => {
+  const handleSelectReception = (data) => {
     console.log('handleSelectReception:', data);
     const startMinutes = data.start.getMinutes() < 10 ? '0' + data.start.getMinutes() : data.start.getMinutes()
     const endMinutes   = data.end.getMinutes()   < 10 ? '0' + data.end.getMinutes()   : data.end.getMinutes()
@@ -335,7 +351,7 @@ export default function Reception(){
 
     // saveReceptions()
     setOpen(true);
-  })
+  }
   useEffect(() => {console.log('currentReception:', currentReception)}, [currentReception])
 
   const handleSelectSlot = useCallback(
@@ -370,6 +386,7 @@ export default function Reception(){
     handleClose()
   }
 
+  // Calendar settings
   const view = "week"
   const step = 15
   const timeslots = 4
@@ -384,6 +401,32 @@ export default function Reception(){
           Save
         </Button>
       </Stack>
+
+      { userTypeId === 1 &&
+        <Grid container>
+          <Grid item xs={12} sm={12}>
+            <FormControl sx={{ width: "90%" }}>
+              <InputLabel id="doctor-select">Doctor</InputLabel>
+              <Select
+                labelId="doctor-select"
+                id="doctor-select"
+                name="doctor_id"
+                value={doctorId}
+                label="Doctor"
+                onChange={(event) => {handleChangeDoctor(event.target)}} 
+                className='cons-input'
+              >
+                {doctorList.map((item)=>{
+                  return(
+                    <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+            {/* {userTypeId === 1 && <Button onClick={()=>{setDoctorId(0)}}>Show All</Button>} */}
+          </Grid>
+        </Grid>
+      }
 
 
       <Modal

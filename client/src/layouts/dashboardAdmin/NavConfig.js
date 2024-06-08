@@ -57,6 +57,11 @@ const navConfig = [
     icon: getIcon('ic:round-message'),
   },
   {
+    title: 'Reception Hours',
+    path: '/admin/reception',
+    icon: getIcon('eva:calendar-fill'),
+  },
+  {
     title: 'timetable',
     path: '/admin/timetable',
     icon: getIcon('eva:calendar-fill'),
