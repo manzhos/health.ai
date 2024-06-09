@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+		<title>Stunning You.</title>
+
+    <style>
+      .inp-field{
+        margin: 20px 0;
+      }
+      .inp {
+        width: 96%;
+        font-size: medium;
+        height: 30px;
+      }
+      .btn-submit {
+        font-size: medium;
+        padding: 10px 15px;
+        margin-top: 15px;
+      }
+    </style>
+
+	</head>
+
+	<body>
+		<div style="width:100vw; height:90vh; display: flex; align-items: center; justify-content: center;">
+      <form action='https://health.sy-way.com/api/form' method="post" style="width: 400px;  border: 1px black solid; border-radius: 10px; padding: 30px 45px;">
+        <!-- source -->
+        <input type='text' style='display: none;' name='source' maxlength='80' value="sale_03-2023" />
+        <div class="inp-field">
+          <input class="inp" type='text' id='Last_Name' name='lastname' maxlength='80' placeholder="Nachname (notwendig)" />
+        </div>
+        <div class="inp-field">
+          <input class="inp" type='text' id='Phone' name='phone' maxlength='30' placeholder="Telefonnummer" />
+        </div>
+        <div class="inp-field">
+          <input class="inp" type='text' ftype='email' id='Email' name='email' maxlength='100' placeholder="Email (notwendig)" />
+        </div>
+        <input type="submit" value="Send Request" class="btn-submit">
+      </form>
+    </div>
+	</body>
+</html>
