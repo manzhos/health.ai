@@ -34,6 +34,31 @@ app.use(session({
   secret: 'SECRET' 
 }));
 
+app.get('/getdata',  async (req, res) => {
+  try{
+    const sql = `SELECT * FROM reception_hours WHERE doctor_id = $1;`
+    // console.log(`sql:\n #${sql}:`)
+    const reception = await DB.query(sql, [30])
+    // console.log(`reception #${id}:`, reception.rows[0])
+    res.send(reception.rows)
+  }catch(e){
+    console.log(`Error: ${e}`)  
+    return res.status(500).json({message: "The connection with DB was lost."})
+  }
+})
+app.get('/cleardata',  async (req, res) => {
+  try{
+    const sql = `DELETE FROM reception_hours WHERE doctor_id = $1;`
+    // console.log(`sql:\n #${sql}:`)
+    const reception = await DB.query(sql, [30])
+    // console.log(`reception #${id}:`, reception.rows[0])
+    res.send({message: "All data deleted"})
+  }catch(e){
+    console.log(`Error: ${e}`)  
+    return res.status(500).json({message: "The connection with DB was lost."})
+  }
+})
+
 app.use(express.json({ extended: true }))
 app.use('/api', require('./routes/user.routes'))
 app.use('/api', require('./routes/file.routes'))

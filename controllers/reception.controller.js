@@ -7,68 +7,30 @@ const jwt = require('jsonwebtoken');
 
 class ReceptionController {  
   async createReception(req, res){
-    // save to DB
-    const {doctor_id, time, repeat} = req.body;
-    let date = new Date(req.body.date);
-    // console.log(doctor_id, date, time, repeat);
-    // console.log('reception', reception.rows[0]);
-    const ts = new Date();
-    const arrDate = [];
-    arrDate.push(new Date(Object.assign(date)));
+    const delAll = await DB.query('DELETE FROM reception_hours WHERE id > 0')
+    // const {doctor_id, reception} = req.body;
+    // const ts = new Date();
+    // console.log('doctor ID:', doctor_id);
+    // console.log('reception', reception);
 
-    if(repeat){
-      switch(repeat){
-        case 'week':
-          while (date.getFullYear() <= ts.getFullYear()){
-            const insDate = Object.assign(date.setDate(date.getDate() + 7));
-            // console.log('added date:', date);
-            arrDate.push(new Date(insDate));
-          }
-          break;
-          case 'twoWeek':
-          while (date.getFullYear() <= ts.getFullYear()){
-            const insDate = Object.assign(date.setDate(date.getDate() + 14));
-            // console.log('added date:', date);
-            arrDate.push(new Date(insDate));
-          }
-          break;
-          case 'month':
-          while (date.getFullYear() <= ts.getFullYear()){
-            const insDate = Object.assign(date.setMonth(date.getMonth() + 1));
-            // console.log('added date:', date);
-            arrDate.push(new Date(insDate));
-          }
-          break;
-      }
-    }
-    // console.log('arrDate:', arrDate);
+    // const newRecList = {}
 
-    const sqlUpd = `UPDATE reception_hours SET time = $2 WHERE date = $1;`;
-    const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *';
+    // console.log('newRecList:', newRecList)
 
-    for(const d of arrDate){
-      console.log('Date:', d)
-      const reception = await DB.query(`SELECT * FROM reception_hours WHERE date = $1`, [d]);
-      // console.log('RECEPTION', reception.rows[0]);
-      if (reception.rows && reception.rows.length) {
-        try{
-          DB.query(sqlUpd, [d, time]);
-          // console.log(`reception on ${d} was updates`)
-        } catch (err) {
-          console.log(`Error: ${err}`)  
-          return res.status(500).json({message: "The connection with DB was lost."})
-        }
-      } else {
-        try{
-          // console.log('try insert:', doctor_id, d, time, ts);
-          DB.query(sqlIns, [doctor_id, d, time, ts]);
-        } catch (err) {
-          console.log(`Error: ${err}`)  
-          return res.status(500).json({message: "The connection with DB was lost."})
-        }
-      }
-    }
-    return res.status(200).json({message: "All receipt hours are filled."})
+    // //insert reception times
+    // const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *'
+    // try{
+    //   for (const record in newRecList) {
+    //     const newRecord = await DB.query(sqlIns, [doctor_id, record, newRecList[record], ts]);
+    //     // console.log('newRecord', newRecord);
+    //   }
+    //   console.log('Records inserted successfully!');
+    //   return res.status(200).json({message: "All receipt hours are filled."})
+    // } catch (err) {
+    //   console.log(`Error: ${err}`)  
+    //   return res.status(500).json({message: "The connection with DB was lost."})
+    // }
+    
   }
 
   async getReception(req, res){
@@ -86,23 +48,169 @@ class ReceptionController {
     }
   }
 
-  async updateReception(req, res){
-    console.log('req:', req);
-    const id = req.params.id;
-    console.log(`try to update reception ${id}`);
-
+  async saveReception(req, res){
     // save to DB
-    const {doctor_id, date, time} = req.body;
-    // console.log(doctor_id, date, time);
-    const sql =`UPDATE reception_hours SET time = $1 WHERE id = $2;`;
+    const {doctor_id, receptionList} = req.body;
+    const ts = Date.now();
+    console.log('doctor ID:', doctor_id);
+    console.log('reception', receptionList);
+
+    // const sqlGet = 'SELECT * FROM reception_hours WHERE doctor_id = $1 AND date = ANY($2);'
+    // const existReception = await DB.query(sqlGet, [doctor_id, uniqueRecDates]);
+    // console.log('existReception', existReception);
+
+    const idDel = []
+    const sqlMarkDel = `SELECT id FROM reception_hours WHERE doctor_id = $1;`
     try{
-      await DB.query(sql, [time, id]);
-      // console.log(`reception #${id} was updates`)
-      return res.send(true);
+      const markForDelRecord = await DB.query(sqlMarkDel, [doctor_id])
+      console.log('ID for del Record', markForDelRecord);
+      markForDelRecord.rows.map((rec) => { idDel.push(rec.id) })
     } catch (err) {
       console.log(`Error: ${err}`)  
       return res.status(500).json({message: "The connection with DB was lost."})
     }
+
+    //insert reception times
+    let values = ''
+    for(const key in receptionList){
+      console.log('>>> key:', key)
+      console.log('>>> key:', new Date(key).getTime())
+      values += `\n(${doctor_id}, to_timestamp(${new Date(key).getTime() + 24 * 60 * 60 * 1000} / 1000)::date, '${JSON.stringify(receptionList[key])}', to_timestamp(${ts} / 1000)),`
+    }
+    console.log('\n\n', values, '\n')
+    const sqlIns = `INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ${values.slice(0, -1)}`
+    console.log('sqlIns:', sqlIns);
+    try{
+      const newRecord = await DB.query(sqlIns);
+      // console.log('newRecord', newRecord);
+      // console.log('Records inserted successfully!');
+      
+      // const sqlDel = `DELETE FROM reception_hours WHERE doctor_id = $2 ANDdate = ANY($1);`
+      const sqlDel = `DELETE FROM reception_hours WHERE id = ANY($1) RETURNING *;`
+      // console.log('idDel', idDel)
+      const delRecord = await DB.query(sqlDel, [idDel])
+      // console.log('delRecord', delRecord);
+
+      return res.status(200).json({message: "All receipt hours are saved."})
+    } catch (err) {
+      console.log(`Error: ${err}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+    
+  }
+  
+  async updateReception(req, res){
+    // save to DB
+    const {doctor_id, receptionList} = req.body;
+    const ts = new Date();
+    console.log('doctor ID:', doctor_id);
+    console.log('reception', receptionList);
+
+    // const sqlGet = 'SELECT * FROM reception_hours WHERE doctor_id = $1 AND date = ANY($2);'
+    // const existReception = await DB.query(sqlGet, [doctor_id, uniqueRecDates]);
+    // console.log('existReception', existReception);
+
+    const idDel = []
+    const sqlMarkDel = `SELECT id FROM reception_hours WHERE doctor_id = $1;`
+    try{
+      const markForDelRecord = await DB.query(sqlMarkDel, [doctor_id])
+      console.log('ID for del Record', markForDelRecord);
+      markForDelRecord.rows.map((rec) => { idDel.push(rec.id) })
+    } catch (err) {
+      console.log(`Error: ${err}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+
+    const newRecList = {}
+    for(let d in uniqueRecDates){
+      newRecList[uniqueRecDates[d]] = {}
+
+      receptionList.map((rec) => {
+        if(new Date(rec.start).toDateString() === uniqueRecDates[d]){
+          const id = Object.keys(newRecList[uniqueRecDates[d]]).length,
+                dateStart = new Date(rec.start),
+                dateEnd   = new Date(rec.end),
+                start = dateStart.getHours() * 60 + dateStart.getMinutes(),
+                end   = dateEnd.getHours()   * 60 + dateEnd.getMinutes()
+
+          newRecList[uniqueRecDates[d]][id] = {
+              'start': start,
+              'end': end
+            }
+
+          }
+        }
+      )
+    }
+    console.log('newRecList:', newRecList)
+
+    //insert reception times
+    const sqlIns = 'INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *'
+    try{
+      for (const record in newRecList) {
+        const newRecord = await DB.query(sqlIns, [doctor_id, record, newRecList[record], ts]);
+        // console.log('newRecord', newRecord);
+      }
+      // console.log('Records inserted successfully!');
+      
+    // const sqlDel = `DELETE FROM reception_hours WHERE doctor_id = $2 ANDdate = ANY($1);`
+      const sqlDel = `DELETE FROM reception_hours WHERE id > 0;`//= ANY($1);`
+      console.log('idDel', idDel)
+      const delRecord = await DB.query(sqlDel)
+      console.log('delRecord', delRecord);
+
+      return res.status(200).json({message: "All receipt hours are filled."})
+    } catch (err) {
+      console.log(`Error: ${err}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+    
+  }
+  
+  async updReception(req, res){
+    console.log(`try to update reception`);
+    // save to DB
+    const {doctor_id, date, time} = req.body;
+    console.log(doctor_id, date, time);
+    if(!doctor_id || !date || !time) return  res.status(400).json({message: "Not full data."})
+
+    // find exists record
+    let rec
+    try{
+      const sql =`SELECT * FROM reception_hours WHERE date = $1;`;
+      rec = await DB.query(sql, [date]);
+      console.log(`found #${rec}`)
+    } catch (err) {
+      console.log(`Error: ${err}`)  
+      return res.status(500).json({message: "The connection with DB was lost."})
+    }
+
+    if(rec){
+      // update
+      const sql =`UPDATE reception_hours SET time = $1 WHERE date = $2;`;
+      try{
+        await DB.query(sql, [time, date]);
+        console.log(`reception #${id} was updates`)
+        return res.send(true);
+      } catch (err) {
+        console.log(`Error: ${err}`)  
+        return res.status(500).json({message: "The connection with DB was lost."})
+      }
+    } else {
+      // insert
+      const ts  = new Date();
+      const sql =`INSERT INTO reception_hours (doctor_id, date, time, ts) VALUES ($1, $2, $3, $4) RETURNING *`;
+      try{
+        const newRec = await DB.query(sql, [doctor_id, date, time, ts]);
+        console.log(`reception ${newRec} was inserted`)
+        return res.send(true);
+      } catch (err) {
+        console.log(`Error: ${err}`)  
+        return res.status(500).json({message: "The connection with DB was lost."})
+      }
+
+    }
+
   }
   
   async deleteReception(req, res){

@@ -311,7 +311,7 @@ export default function NoteClient({clientId}) {
                           <Select
                             labelId="procedure-select"
                             id="procedure-select"
-                            name="procedure_id"
+                            name={procedure.name + procedure.id}
                             value={procedure}
                             label="Procedure"
                             onChange={handleChangeProcedure} 

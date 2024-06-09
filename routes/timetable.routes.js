@@ -4,8 +4,8 @@ const router = Router()
 
 router.post('/timetable',       timetableController.createRecord)
 router.get('/timetables',       timetableController.getRecords)
-router.get('/timetable/:id',    timetableController.getRecord)
-router.put('/timetable',        timetableController.updateRecord)
+// router.get('/timetable/:id',    timetableController.getRecord)
+router.put('/timetable/:id',    timetableController.updateRecord)
 router.delete('/timetable/:id', timetableController.deleteRecord)
 
 router.get('/tt_bydoctor/:id',  timetableController.getRecordsByDoctor)

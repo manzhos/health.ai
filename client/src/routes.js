@@ -89,6 +89,7 @@ export const useMyRoutes = isAuthenticated => {
           <Route path="procedure" element={<Procedure />}/>
           <Route path="mailing" element={<Mailing />} />
           <Route path="communication" element={<Communication />} />
+          <Route path="reception" element={<Reception />} />
           <Route path="timetable" element={<TimeTable />} />
           <Route path="user/communication/client/:id" element={<CommunicationClient/>} />
           <Route path="user/loyalty/:id" element={<LoyaltyClient/>} />

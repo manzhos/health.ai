@@ -220,6 +220,7 @@ class ProcedureController {
         tt.duration,
         date,
         time,
+        time_end,
         cost
       FROM timetable tt
       JOIN procedures p ON p.id = tt.procedure_id
@@ -252,6 +253,7 @@ class ProcedureController {
         tt.duration,
         date,
         time,
+        time_end,
         cost
       FROM timetable tt
       JOIN procedures p ON p.id = tt.procedure_id

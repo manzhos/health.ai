@@ -88,13 +88,13 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
       <NavSection navConfig={navConfig} />
 
       <Box sx={{ flexGrow: 1 }} />
-      <Box sx={{
+      {/* <Box sx={{
         position: "absolute",
         bottom: 50,
         left: 20
       }}>
         <Button variant="contained" onClick={()=>{setScan(true)}}>Scan QR</Button>
-      </Box>
+      </Box> */}
 
       {/* Event window */}
       <Modal

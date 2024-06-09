@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'
-import { sentenceCase } from 'change-case';
+import { sentenceCase } from 'change-case'
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+
 // material 
 import {
   Card,
@@ -20,6 +22,7 @@ import { AuthContext } from '../../context/AuthContext'
 import ProcedureNote from '../../components/ProcedureNote'
 import {API_URL, MONTH} from '../../config'
 import humanDate from '../../components/HumanDate'
+
 // scheduler
 import format from 'date-fns/format'
 import getDay from 'date-fns/getDay'
@@ -27,7 +30,10 @@ import parse from 'date-fns/parse'
 import startOfWeek from 'date-fns/startOfWeek'
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
+
 import ScheduleNewProcedure from '../../components/ScheduleNewProcedure'
+const DnDCalendar = withDragAndDrop(Calendar);
 // import DatePicker from 'react-datepicker'
 // import 'react-datepicker/dist/react-datepicker.css'
 // ----------------------------------------------------------------------
@@ -73,10 +79,11 @@ export default function TimeTable(){
       })
       // console.log('procedures:', res)
       let procedures = res.map((el) => {
-        const d = new Date(el.date),
-              t = el.time.split(':'),
-              start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), t[0], t[1]),
-              end = new Date(Date.parse(start) + el.duration * 60000)
+        const d       = new Date(el.date),
+              tStart  = el.time.split(':'),
+              start   = new Date(d.getFullYear(), d.getMonth(), d.getDate(), tStart[0], tStart[1]),
+              tEnd    = el.time_end?.split(':'),
+              end     = tEnd ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), tEnd[0], tEnd[1]) : new Date(Date.parse(start) + el.duration * 60000)   
         return {
           'id'              : el.id,
           'title'           : el.procedure, 
@@ -111,22 +118,11 @@ export default function TimeTable(){
     getProcedures();
   }
 
-
-  const handleSelectSlot = useCallback(
-    ({ start, end }) => {
-      // const title = window.prompt('New Procedure')
-      // if (title) {
-      //   setProcedureList((prev) => [...prev, { start, end, title }])
-      // }
-      // console.log('start, end', start, end);
-      setDate(start);
-      setOpenNewProcedure(true);
-    },
-    [setProcedureList]
-  )
-  // const handleSelectSlot = () => {
-  //   setOpenNewProcedure(true);
-  // }
+  const handleSelectSlot = ({ start, end }) => {
+    setDate(start);
+    setOpenNewProcedure(true);
+  }
+  // useEffect(() => {console.log('new date:', date)}, [date])
 
   const handleSelectProcedure = (event) => {
     // console.log('handleSelectProcedure:', event);
@@ -180,6 +176,65 @@ export default function TimeTable(){
     getProcedures(doctor);
   }, [doctor]);
 
+
+  // TameTable Events manipulations
+  const onEventDrop = async(data) => {
+    console.log('event drop', data);
+    await onEventResize(data)
+  }
+
+  const onEventResize = async (data) => {
+    // console.log('event resize:', data);
+
+    const rList = [...procedureList];
+
+    const booking = rList.find(r => r.id === data.event.id)
+    if(booking){
+      booking.start = data.start
+      booking.end   = data.end
+    }
+
+    const recToday = rList.filter(r => r.start.toDateString() === data.start.toDateString()).sort((a, b) => {
+      if (a.start < b.start) return -1;
+      if (a.start > b.start) return 1;
+      return 0;
+    });
+
+    let i = 1
+    while(i < recToday.length){
+      if(recToday[i].start <= recToday[i-1].end){
+        recToday[i-1].end = recToday[i].end
+        recToday.splice(i, 1);
+        i = 1
+      } else i++
+    }
+    const recAnotherDay = rList.filter((r) => r.start.toDateString() !== data.start.toDateString());
+
+    setProcedureList([...new Set([...recToday, ...recAnotherDay])])
+    await updateBooking(data)
+  }
+
+  const updateBooking = async(booking) => {
+    console.log('try update booking:', booking)
+    try {
+      const updatedBooking = await request(`${API_URL}api/timetable/${booking.event.id}`, 'PUT', booking.event, {
+        Authorization: `Bearer ${token}`
+      })
+      // Authorization: `Bearer ${token}`
+      console.log('updatedBooking:', updatedBooking)
+    } catch (e) { console.log('error:', e) }
+  }
+
+  const handleCloseNewProcedure = () => {
+    setOpenNewProcedure(false)
+    getProcedures()
+  }
+
+  // Calendar settings
+  const view = "week"
+  const step = 15
+  const timeslots = 4
+
   return(
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
@@ -187,7 +242,9 @@ export default function TimeTable(){
           Time Table
         </Typography>
       </Stack>
-      <ScheduleNewProcedure openNewProcedure={openNewProcedure} currDate={date} onClose={()=>{setOpenNewProcedure(false)}} />
+      { openNewProcedure &&
+        <ScheduleNewProcedure openNewProcedure={openNewProcedure} currDate={date} onClose={()=>{handleCloseNewProcedure()}} />
+      }
 
       {/* Event window for Invoicing*/}
       <Modal
@@ -201,38 +258,34 @@ export default function TimeTable(){
         </Container>
       </Modal>
 
-      <Grid container>
-        <Grid item xs={12} sm={12}>
-          <FormControl sx={{ width: "90%" }}>
-            <InputLabel id="doctor-select">Doctor</InputLabel>
-            <Select
-              labelId="doctor-select"
-              id="doctor-select"
-              name="doctor_id"
-              value={doctor}
-              label="Doctor"
-              onChange={handleChangeDoctor} 
-              className='cons-input'
-            >
-              {doctorList.map((item)=>{
-                return(
-                  <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
-                )
-              })}
-            </Select>
-          </FormControl>
-          {userTypeId === 1 && <Button onClick={()=>{setDoctor(0)}}>Show All</Button>}
+      {userTypeId === 1 && 
+        <Grid container>
+          <Grid item xs={12} sm={12}>
+            <FormControl sx={{ width: "90%" }}>
+              <InputLabel id="doctor-select">Doctor</InputLabel>
+              <Select
+                labelId="doctor-select"
+                id="doctor-select"
+                name="doctor_id"
+                value={doctor}
+                label="Doctor"
+                onChange={handleChangeDoctor} 
+                className='cons-input'
+              >
+                {doctorList.map((item)=>{
+                  return(
+                    <MenuItem key={item.id} value={item.id}>{sentenceCase(item.firstname)}&nbsp;{sentenceCase(item.lastname)}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+            <Button onClick={()=>{setDoctor(0)}}>Show All</Button>
+          </Grid>
         </Grid>
-      </Grid>
+      }
       {/* ========= SCEDULER ========= */}
       <Card>
-        {/* <div> */}
-            {/* <input type="text" placeholder="Add Title" style={{ width: "20%", marginRight: "10px" }} value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} /> */}
-            {/* <DatePicker placeholderText="Start Date" style={{ marginRight: "10px" }} selected={newEvent.start} onChange={(start) => setNewEvent({ ...newEvent, start })} />
-            <DatePicker placeholderText="End Date" selected={newEvent.end} onChange={(end) => setNewEvent({ ...newEvent, end })} /> */}
-            {/* <button stlye={{ marginTop: "10px" }} onClick={handleAddEvent}>Add Event</button> */}
-        {/* </div> */}
-        <Calendar 
+        {/* <Calendar 
           localizer={localizer} 
           events={procedureList} 
           startAccessor="start" 
@@ -243,6 +296,26 @@ export default function TimeTable(){
           onSelectSlot={handleSelectSlot}
           selectable
           scrollToTime={scrollToTime}
+          style={{ height: "70vh", margin: "20px" }} 
+        /> */}
+        <DnDCalendar 
+          localizer={localizer} 
+          events={procedureList} 
+          startAccessor="start" 
+          endAccessor="end" 
+          defaultDate={new Date()}
+          defaultView={view}
+          step={step}
+          timeslots={timeslots}
+          min={new Date(2024, 1, 1, 8, 0, 0)}  // Начало расписания в 8 утра
+          max={new Date(2024, 1, 1, 20, 0, 0)} // Конец расписания в 20 вечера
+          onSelectEvent={handleSelectProcedure}
+          resizable
+          selectable
+          onSelectSlot={handleSelectSlot}
+          onEventDrop={onEventDrop}
+          onEventResize={onEventResize}
+          // scrollToTime={scrollToTime}
           style={{ height: "70vh", margin: "20px" }} 
         />
       </Card>
