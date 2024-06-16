@@ -305,6 +305,11 @@ export default function BookingFree(){
     return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() 
   }
 
+  const eraseSlot = () => {
+    setTime('__:__')
+  }
+  useEffect(()=>{eraseSlot()}, [doctor, currentDate, procedureId])
+
   // const [emailCode, setEmailCode] = useState('');
   // const [checkEmailCode, setCheckEmailCode] = useState('man');
   // const [emailConfirm, setEmailConfirm] = useState(false);
